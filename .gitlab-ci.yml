@@ -1,0 +1,2 @@
+before_script:
+  script/erlang_env_prep.sh
