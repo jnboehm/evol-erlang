@@ -1,2 +1,8 @@
 before_script:
   script/erlang_env_prep.sh
+
+evol-erlang:
+  script:
+    - pwd
+    - cd src/
+    - make
