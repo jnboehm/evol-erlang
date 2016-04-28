@@ -1,0 +1,198 @@
+\documentclass[compress]{beamer}
+
+% basically only used for the \to in \item
+\usepackage{listings}
+\usepackage{qtree}
+\usepackage[math]{kurier}
+\usepackage{fontspec}
+\usepackage[noflama]{hsrm}
+
+\lstset{%
+    basicstyle=\small\ttfamily, %
+    commentstyle=\color{gray}, %
+    stringstyle=\color{Green}, %
+    keywordstyle=\bfseries\color{hsrmRed}, %
+    frame=tb, % line at Top and one at Bottom
+    showstringspaces=false, %
+    language=Java, %
+    moredelim=[is][\textcolor{gray}]{\%\%}{\%\%}, %colorize opt params
+    moredelim=[is][\textcolor{hsrmSec2Dark}]{==}{==}, %To overcome the weird
+                                                      %behavior of Strings in
+                                                      %beamer
+}
+
+\newcommand{\hsrm}{Hochschule {\Medium RheinMain}}
+
+\AtBeginDocument{
+\title{Executive Summary 1}
+\subtitle{Titanic: Machine Learning from Disaster}
+\author{Niklas Böhm \& Marvin Duchmann}
+\institute{%
+\begin{tabular}{r l } %{\Medium}
+    Fachbereich & {\Medium DCSM} \\
+    Studiengang & {\Medium Angewandte Informatik}
+\end{tabular}%
+}
+\date{\today}
+}
+
+\begin{document}
+\maketitle
+
+\begin{frame}{Gliederung}
+  \tableofcontents[hideallsubsections]
+\end{frame}
+
+\section{Schlüsselergebnisse}
+\label{sec:schluesselergebnisse}
+
+\subsection{Was war die Aufgabe?}
+\label{subsec:aufg}
+
+\begin{frame}{Was war die Aufgabe?}
+  Aufgabe war es, durch die Auswertung von Daten eine gezielte Aussage
+  darüber treffen zu können, ob ein Passagier der Titanic das Unglück
+  überleben würde oder nicht.
+
+  \bigskip Dafür wurden Daten von
+  Kaggle\footnote{\url{https://www.kaggle.com/c/titanic}}
+  bereitgestellt, mit denen man versuchen konnte, Modelle
+  aufzustellen, die dabei helfen, über das Schicksal der einzelnen
+  Passagiere zu entscheiden.
+\end{frame}
+
+\subsection{Ansatz}
+\label{subsec:ansatz}
+
+\begin{frame}{Ansatz}
+  Wir haben uns dafür entschieden, einen \textit{decision tree} aufzustellen.
+  Dieser hatte folgende Kriterien:
+
+  \begin{description}
+  \item[{\textbf{Das Alter der Passagiers:}}] Hier haben wir unterschieden, ob der
+    Passagier noch ein Kind (jünger als 18 Jahre) ist.
+  \item[{\textbf{Die Klasse des Passagiers:}}] Die Gäste, die in der ersten Klasse
+    mitfuhren, hatten eine bessere Chance die Katastrophe zu überleben.
+  \item[{\textbf{Die Anzahl der Geschwister oder Ehepartner:}}] Die Trainingsdaten
+    haben gezeigt, dass Alleinreisende eine bessere
+    Überlebenschance hatten.
+  \end{description}
+
+\end{frame}
+
+\subsection{Ergebnisse}
+\label{subsec:erg}
+
+\begin{frame}{Ergebnisse}
+  Entgegen unserer Erwartungen hat sich das Ergebnis verschlechtert,
+  je mehr Classifier wir hinzugefügt haben.
+
+  \begin{center}
+    \begin{tabular}{lrr}
+      Classifier                         & Ergebnis & Platz\\
+      \hline
+      Geschlecht                         & 0.76555 & 3061\\
+      Geschlecht, Alter                  & 0.75120 & \\
+      Geschlecht, Alter, Klasse          & 0.68900 & \\
+      Geschlecht, Alter, Klasse, Familie & 0.68900 & \\
+    \end{tabular}
+  \end{center}
+\end{frame}
+
+\begin{frame}
+  \frametitle{tree}
+  \Tree [.{Age < 18?} [.{Klasse <\ 3?} 1 [.{Siblings \geq 3?} 0 [.{Age < 10?} 1 0 ] ] ]
+                      [.{female?} [.{Klasse < 3?} 1 [.{Siblings > 0?} 0 1 ] ]
+                                  [.{Klasse < 2?} 1 0 ] ] ]
+
+                                  Unser decision tree für das letzte
+                                  Ergebnis.  Nach links zu gehen
+                                  bedeutet, dass die Bedingung des
+                                  Knotens erfülllt wurde.  1~steht für
+                                  Überleben, eine 0 für den Tod.
+\end{frame}
+
+\begin{frame}{Ergebnisse}
+  Die Abnahme der Treffer hat uns überrascht, da wir dachten, das
+  durch die Verfeinerung der Auswahl die Ergebnisse auch treffender
+  werden würden.
+
+  \bigskip Insbesondere bei den männlichen Passagieren schien deren
+  Schicksal mehr oder weniger willkürlich. Der Unterschied zwischen
+  der Überlebenschance abhängig vom Geschlecht war überraschend, alles
+  andere schien im Gegensatz dazu nur kleine Auswirkungen zu haben.
+
+  % \bigskip Dass die Ergebnisse trotzdem immer deutlich über 50\%
+  % blieben war gut.
+\end{frame}
+
+\section{Offene Fragen}
+\label{sec:fragen}
+
+\subsection{Unklarheiten an der Aufgabe}
+\label{subsec:unklar}
+
+\begin{frame}{Unklarheiten an der Aufgabe}
+  Die Problemstellung war eindeutig.
+
+  \bigskip Einen Ansatz zu entwickeln war ungewohnt, da wenige
+  Strategien bisher besprochen wurden und auch bei der
+  Implementierungen Unsicherheiten aufkamen.  Darüber hinaus war auch
+  das analysieren von Datensätzen ungewohnt und verlief nicht immer
+  rund.
+\end{frame}
+
+\subsection{Bugs und Unklarheiten im Code}
+\label{subsec:code}
+
+\begin{frame}{Bugs und Unklarheiten im Code}
+  Was im Code gemacht wird, konnte nachvollzogen werden.
+\end{frame}
+
+\subsection{Unplausible Ergebnisse}
+\label{subsec:unplausibel}
+
+\begin{frame}{Unplausible Ergebnisse}
+  Wie bereits erwähnt, dass sich die Ergebnisse nicht besser geworden
+  sind, war überraschend.  Das kann unter Umständen auf Overfitting
+  zurückgeführt werden.
+
+
+\end{frame}
+
+\section{Diskussion}
+\label{sec:disku}
+
+\subsection{Alternative Ansätze}
+\label{subsec:ansatz}
+
+\begin{frame}{Alternative Ansätze}
+  Als alternativen Ansatz haben wir über ein Wertesystem diskutiert,
+  bei denen ein Passagier über einen gewissen Schwellwert kommen
+  musste, um zu überleben. Bei den Durchläufen wurde uns dann aber
+  bewusst, dass es zu wenig Überlebende gab, da die Anforderungen
+  zu hoch gesetzt waren.
+
+  \bigskip Auch hatten wir darüber geredet, andere Charakterisitka mit
+  einzubeziehen. Diese waren aber entweder zu spezifisch oder nicht
+  wirklich aussagekräftig (haben kaum zur Überlebenschance beigetragen).
+\end{frame}
+
+\subsection{Würden Sie Ihren Ansatz verändern?}
+\label{subsec:veraendern}
+
+\begin{frame}{Würden Sie Ihren Ansatz verändern?}
+  Wir würden gerne das Überprüfen der Classifier automatisieren, da
+  dieses nicht immer eindeutige Ergebnisse liefert und wir uns auch
+  teilweise geirrt hatten, was die Überlebenschancen steigern könnte.
+\end{frame}
+
+\subsection{Nächste Schritte}
+\label{subsec:next}
+
+\begin{frame}{Nächste Schritte}
+  Eventuell maschinelles Lernen einführen, dann wäre es auch möglich,
+  ein Wertesystem zu benutzen.
+\end{frame}
+
+\end{document}
