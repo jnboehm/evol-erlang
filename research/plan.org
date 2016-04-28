@@ -1,0 +1,30 @@
+* Evolutionäre Algorithmen
+Einzelne Wesen werden „gezüchtet,“ und diese werden dann gepaart.
+Dabei soll sich der Wert von Generation zu Generation verbessern,
+wobei schlechter funktionierende Wesen aussterben müssen.
+
+Die Paarung („Routen“) sind Matrizen, die verschmolzen werden sollen,
+was mit verschiedenen Möglickeiten, diese zu komibinieren oder zu
+mutieren, möglich wird (Evolutionäre Algorithmen Kap. 2.3).
+
+Crossover, damit bisher erzielte, gute Ergebnisse nicht wieder
+verschlechtert werden.
+
+** Klärung der biologischen Begriffe
+
+- Rekombination
+- Mutation
+- Fitness bzw. Fitnessfunktion
+- Phänotyp
+- Genotyp
+- Individuum
+
+* Distributierte Algorithmen
+Was können wir parallelisiseren?  In welcher Sprache soll das gemacht
+werden – Erlang oder C/C++? NIFs in Erlang würden die Schnittstelle
+zwischen den beiden Sprachen darstellen.
+
+Parallelisieren über Message Passing.
+
+* Erlang version
+CI für die Versionen 18 und 16
