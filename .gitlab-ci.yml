@@ -1,5 +1,5 @@
 before_script:
-  script/erlang_env_prep.sh
+  - script/erlang_env_prep.sh
 
 evol-erlang:
   script:
