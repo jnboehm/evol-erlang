@@ -12,12 +12,32 @@ verschlechtert werden.
 
 ** Klärung der biologischen Begriffe
 
-- Rekombination
-- Mutation
-- Fitness bzw. Fitnessfunktion
-- Phänotyp
-- Genotyp
-- Individuum
+*** Individuum
+Genotyp und Phänotyp ergeben ein Individuum. Mögliche Lösung für ein
+Optimierungsproblem, z.B. eine mögliche Rundreise beim TSP.
+
+Genotyp = Beinhaltet die im Individuum manipulierbaren Informationen
+3-Tupel aus (A.G, A.S, A.F) (Genotyp, Zusatzinfo, Fitness)
+Phänotyp = dekodieren der Information aus dem Genotyp
+
+*** Rekombination
+Paarung. Erstellen eines Individuums aus 2 oder mehr Individuen.
+
+*** Mutation
+Kleine Veränderung am Genotyp
+
+*** Fitness bzw. Fitnessfunktion
+Bewertung des Individuums im Hinblick auf das Optimierungsproblem
+
+*** Optimierungsproblem
+3-Tupel (Ω, f , <)
+Ω - Suchraum
+f - Bewertungsfunktion
+~ - Vergleichsrelation ∈ {<, >}
+
+X = { x ∈ Ω | ∀ x' ∈ Ω : f(x) ~ f(x') }
+X ∈ Ω
+
 
 * Distributierte Algorithmen
 Was können wir parallelisiseren?  In welcher Sprache soll das gemacht
