@@ -123,6 +123,43 @@ rel/example_project
 .rebar
 
 
+### LaTeX ###
+*.acn
+*.acr
+*.alg
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.dvi
+*.fdb_latexmk
+*.fls
+*.glg
+*.glo
+*.gls
+*.idx
+*.ilg
+*.ind
+*.ist
+*.lof
+*.log
+*.lot
+*.maf
+*.mtc
+*.mtc0
+*.nav
+*.nlo
+*.out
+*.pdfsync
+*.ps
+*.run.xml
+*.snm
+*.synctex.gz
+*.toc
+*.vrb
+*.xdy
+*.tdo
+
 ### Vim ###
 # swap
 [._]*.s[a-w][a-z]
@@ -134,4 +171,4 @@ Session.vim
 *~
 # auto-generated tag files
 tags
-
+/doc/slides/pres.pdf
