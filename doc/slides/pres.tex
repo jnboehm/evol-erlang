@@ -1,0 +1,62 @@
+\documentclass[compress]{beamer}
+
+% basically only used for the \to in \item
+\usepackage[math]{kurier}
+\usepackage{listings}
+\usepackage{qtree}
+\usepackage{fontspec}
+\usepackage[noflama]{hsrm}
+
+\lstset{%
+  basicstyle=\small\ttfamily, %
+  commentstyle=\color{gray}, %
+  stringstyle=\color{Green}, %
+  keywordstyle=\bfseries\color{hsrmRed}, %
+  frame=tb, % line at Top and one at Bottom
+  showstringspaces=false, %
+  language=Java, %
+  moredelim=[is][\textcolor{gray}]{\%\%}{\%\%}, %colorize opt params
+  moredelim=[is][\textcolor{hsrmSec2Dark}]{==}{==}, %To overcome the weird
+  % behavior of Strings in
+  % beamer
+}
+
+\newcommand{\hsrm}{Hochschule {\Medium RheinMain}}
+
+\AtBeginDocument{
+  \title{Executive Summary 1}
+  \subtitle{Titanic: Machine Learning from Disaster}
+  \author{Niklas Böhm \& Jens Nazarenus}
+  \institute{%
+    \begin{tabular}{r l } %{\Medium}
+      Fachbereich & {\Medium DCSM} \\
+      Studiengang & {\Medium Angewandte Informatik}
+    \end{tabular}%
+  }
+  \date{\today}
+}
+
+\begin{document}
+\maketitle
+
+\begin{frame}{Gliederung}
+  \tableofcontents[hideallsubsections]
+\end{frame}
+
+\section{Erlang vorstellen}
+\label{sec:erlang}
+
+\section{TSP definieren}
+\label{sec:tsp}
+
+
+\section{Evolutionäre Algorithmen}
+\label{sec:evolutionäre}
+
+\section{Parallelisierung}
+\label{sec:parallelisierung}
+
+\section{Auswertung der (bisherigen) Ergebnisse}
+\label{sec:auswertung}
+
+\end{document}
