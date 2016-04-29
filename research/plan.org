@@ -23,6 +23,9 @@ Phänotyp = dekodieren der Information aus dem Genotyp
 *** Rekombination
 Paarung. Erstellen eines Individuums aus 2 oder mehr Individuen.
 
+eine Möglichkeit sind uniforme crossover, oder andere Arten von
+crossover.
+
 *** Mutation
 Kleine Veränderung am Genotyp
 
@@ -30,7 +33,7 @@ Kleine Veränderung am Genotyp
 Bewertung des Individuums im Hinblick auf das Optimierungsproblem
 
 *** Optimierungsproblem
-3-Tupel (Ω, f , <)
+3-Tupel (Ω, f , ~)
 Ω - Suchraum
 f - Bewertungsfunktion
 ~ - Vergleichsrelation ∈ {<, >}
@@ -38,6 +41,18 @@ f - Bewertungsfunktion
 X = { x ∈ Ω | ∀ x' ∈ Ω : f(x) ~ f(x') }
 X ∈ Ω
 
+** Ablauf der Evolution
+
+1. Graph einlesen und in eine Matrix transformieren
+2. Ein paar Durchläufe mit Zufallswerten, deren Fitness werte
+   berechnen und speichern (Grundpopulation)
+3. Rekombination der Eltern um Kinder zu erzeugen, diese Bewerten
+4. Speichere die 10 besten Ergebnisse, der Rest „stirbt“
+5. Nächste Generation wird eingeläutet, Schritte ab (3) werden
+   wiederholt, bis Abbruchbedingung erreicht wurde (Ergebnis ist gut
+   genug)
+
+Algorithmus 2.5 auf Seite 31 in „Evolutionäre Algorithmen“ von Karsten Weicker
 
 * Distributierte Algorithmen
 Was können wir parallelisiseren?  In welcher Sprache soll das gemacht
@@ -45,6 +60,8 @@ werden – Erlang oder C/C++? NIFs in Erlang würden die Schnittstelle
 zwischen den beiden Sprachen darstellen.
 
 Parallelisieren über Message Passing.
+
+Fitness wird in externer Liste gespeichert.
 
 * Erlang version
 CI für die Versionen 18 und 16
