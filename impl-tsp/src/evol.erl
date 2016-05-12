@@ -1,5 +1,6 @@
 -module(evol).
 -export([]).
+-compile(export_all).
 
 mate(_Creature,_Creature) ->
     {ok,mated}.
