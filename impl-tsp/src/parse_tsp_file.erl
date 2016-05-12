@@ -1,4 +1,4 @@
--module(foo).
+-module(parse_tsp_file).
 -compile(export_all).
 
 make_atsp_graph(Filename) ->
@@ -6,9 +6,10 @@ make_atsp_graph(Filename) ->
   parse_graph_data(Filedesc).
 
 parse_graph_data(Filedesc) ->
-  parse_opts(Filedesc).
-  %parse_graph(Filedesc).
+  Opts = parse_opts(Filedesc),
+  {Opts, parse_graph(Filedesc, orddict:fetch(dimension, Opts))}.
 
+%% Returns an orddict filled with the options
 parse_opts(Filedesc) ->
   parse_opts(Filedesc, orddict:new()).
 parse_opts(Filedesc, Options) ->
@@ -31,8 +32,32 @@ parse_opts(Filedesc, Options) ->
     false -> parse_opts(Filedesc, UpdatedOptions)
   end.
 
-parse_graph(_Filedesc) ->
-  unimplemented.
-
 trim_str(Str) ->
   string:strip(string:strip(Str, both, $\n)).
+
+set_up_vertices(Dim) when Dim > 0 ->
+  set_up_vertices(digraph:new(), Dim).
+
+set_up_vertices(Graph, [Dim]) when is_integer(Dim) ->
+  set_up_vertices(Graph, Dim);
+set_up_vertices(Graph, Dim) when Dim > 0->
+  digraph:add_vertex(Graph, Dim, Dim),
+  set_up_vertices(Graph, Dim - 1);
+set_up_vertices(Graph, 0) ->
+  Graph.
+
+
+parse_graph(Filedesc, [Dim]) when Dim > 0 ->
+  Graph = set_up_vertices(Dim),
+  parse_graph(Filedesc, Dim, Graph, 1, 1).
+
+parse_graph(_Filedesc, Dim, Graph, Row, _Col) when (Row > Dim) ->
+  Graph;
+parse_graph(Filedesc, Dim, Graph, Row, Col) when (Row =< Dim) , (Col < Dim) ->
+  {ok, [Num]} = io:fread(Filedesc, "", "~d"),
+  digraph:add_edge(Graph, Row, Col, Num),
+  parse_graph(Filedesc, Dim, Graph, Row, Col + 1);
+parse_graph(Filedesc, Dim, Graph, Row, Col) when (Col =:= Dim) , (Row =< Dim) ->
+  {ok, [Num]} = io:fread(Filedesc, "", " ~d"),
+  digraph:add_edge(Graph, Row, Col, Num),
+  parse_graph(Filedesc, Dim, Graph, Row + 1, 1).
