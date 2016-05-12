@@ -3,9 +3,6 @@
 
 make_atsp_graph(Filename) ->
   {ok, Filedesc} = file:open(Filename, [read]),
-  parse_graph_data(Filedesc).
-
-parse_graph_data(Filedesc) ->
   Opts = parse_opts(Filedesc),
   {Opts, parse_graph(Filedesc, orddict:fetch(dimension, Opts))}.
 
