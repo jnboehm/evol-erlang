@@ -64,4 +64,4 @@ Parallelisieren über Message Passing.
 Fitness wird in externer Liste gespeichert.
 
 * Erlang version
-CI für die Versionen 18 und 16
+18 für Entwicklung, 14 auf dem Server (Ist dort OTP drauf? Brauchen wir das überhaupt?).
