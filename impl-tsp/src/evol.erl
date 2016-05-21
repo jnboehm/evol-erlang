@@ -23,8 +23,15 @@ get_rnd_roundtrip(Vertices, N, VertexList) ->
 init(InitialRoundtrips, FileName) ->
   {Opts, Graph} = parse_tsp_file:make_atsp_graph(FileName),
   EdgeList = [digraph:edge(Graph, Edge) || Edge <- digraph:edges(Graph)],
+  Roundtrips = get_rnd_roundtrip(digraph:vertices(Graph), InitialRoundtrips),
 
-  Roundtrips = get_rnd_roundtrip(digraph:vertices(Graph), InitialRoundtrips).
+  CancelFunc = fun(_) -> true end,
+  run(Opts, Graph, Roundtrips, EdgeList, CancelFunc).
+
+
+run(Opts, Graph, Roundtrips, EdgeList, CancelFunc) ->
+  graph_utils:get_fitness(EdgeList, lists:nth(1, Roundtrips)).
+
 
 %% @doc
 init() ->
