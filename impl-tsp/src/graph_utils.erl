@@ -10,6 +10,7 @@
 
 
 %% @doc Returns the weight between two adjacent vertices.
-get_weight(G, V1, V2) ->
-  ok.
-
+get_weight(EdgeList, V1, V2) ->
+  F = fun({_E,V1T,V2T,_W}) -> {V1T, V2T} =:= {V1,V2} end,
+  [{_,_,_,W}] = lists:filter(F, EdgeList),
+  W.
