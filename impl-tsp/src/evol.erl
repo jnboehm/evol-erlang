@@ -8,6 +8,15 @@
 -export([init/0]).
 -compile(export_all).
 
+
+%% @doc Let R1 mate with R2. Return the result of that process.
+mate_func(R1, R2) ->
+  ok.
+
+%% @doc
+cancel_func() -> 
+  true.
+
 %% @doc Entry point for get_rnd_roundtrip/3
 get_rnd_roundtrip(Vertices, N) ->
   get_rnd_roundtrip(Vertices, N, []).
@@ -25,8 +34,7 @@ init(InitialRoundtrips, FileName) ->
   EdgeList = [digraph:edge(Graph, Edge) || Edge <- digraph:edges(Graph)],
   Roundtrips = get_rnd_roundtrip(digraph:vertices(Graph), InitialRoundtrips),
 
-  CancelFunc = fun(_) -> true end,
-  run(Opts, Graph, Roundtrips, EdgeList, CancelFunc).
+  run(Opts, Graph, Roundtrips, EdgeList, cancel_func).
 
 
 run(Opts, Graph, Roundtrips, EdgeList, CancelFunc) ->
