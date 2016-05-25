@@ -5,6 +5,7 @@
 %%
 
 -module(evol).
+-import(lists, [nth/2]).
 -export([init/0]).
 -compile(export_all).
 
@@ -13,6 +14,40 @@
 mate_func(_R1, _R2) ->
   ok.
 
+
+%% @doc Initializes the Offspring with the random first element of the
+%% parent (should they not start at the same node anyways).
+edge_recomb(ParentA, ParentB) ->
+  AdjA = [{nth(N, ParentA),
+	   nth((N rem length(ParentA)) + 1, ParentA)}
+	  || N <- lists:seq(1, length(ParentA)) ],
+  AdjB = [{nth(N, ParentB),
+	   nth((N rem length(ParentB)) + 1, ParentB)}
+	  || N <- lists:seq(1, length(ParentB)) ],
+  %% Create a list with all available vertices in the form of {FromVertex, [Tovertex, ...]}, removing duplicates
+  Possibilities = [{FromA, lists:usort([ToA, ToB])} || {FromA, ToA} <- AdjA, {FromB, ToB} <- AdjB, FromA == FromB],
+  edge_recomb_1(Possibilities).
+
+edge_recomb_1(Possibilities) ->
+  Sort = fun({_, El1}, {_, El2}) ->
+	     length(El1) =< length(El2)
+	 end,
+  edge_recomb_1([], Possibilities, [], Sort).
+
+edge_recomb_1([], [], Offspring, _) ->
+  lists:reverse(Offspring);
+edge_recomb_1([], AllPossibilities, Offspring, SortFun) ->
+  edge_recomb_1(AllPossibilities, AllPossibilities, Offspring, SortFun);
+edge_recomb_1(P, AllPossibilities, Offspring, SortFun) ->
+  [NextV | _] = lists:sort(SortFun, P),
+  {Vertex, Paths} = NextV,
+  %% make a list with all nodes we can reach from the selected node
+  Poss = [{From, lists:delete(Vertex, To)}
+	  || {From, To} <- [{X, Y} || X <- Paths, {X1, Y} <- AllPossibilities -- [NextV], X == X1]],
+  %% Update the “global” node list.  We remove the selected node from evey possiblility.
+  UpdatedPos = [{From, lists:delete(Vertex, To)}
+		|| {From, To} <- AllPossibilities -- [NextV]],
+  edge_recomb_1(Poss, UpdatedPos, [Vertex | Offspring], SortFun).
 
 %% @doc
 cancel_func() ->
