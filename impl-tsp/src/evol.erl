@@ -14,7 +14,7 @@ mate_func(R1, R2) ->
   ok.
 
 %% @doc
-cancel_func() -> 
+cancel_func() ->
   true.
 
 %% @doc Entry point for get_rnd_roundtrip/3
@@ -34,7 +34,7 @@ init(InitialRoundtrips, FileName) ->
   EdgeList = [digraph:edge(Graph, Edge) || Edge <- digraph:edges(Graph)],
   Roundtrips = get_rnd_roundtrip(digraph:vertices(Graph), InitialRoundtrips),
 
-  run(Opts, Graph, Roundtrips, EdgeList, cancel_func).
+  run(Opts, Graph, Roundtrips, EdgeList, fun evol:cancel_func/0).
 
 
 run(Opts, Graph, Roundtrips, EdgeList, CancelFunc) ->
