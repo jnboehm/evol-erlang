@@ -10,12 +10,14 @@
 
 
 %% @doc Let R1 mate with R2. Return the result of that process.
-mate_func(R1, R2) ->
+mate_func(_R1, _R2) ->
   ok.
+
 
 %% @doc
 cancel_func() ->
   true.
+
 
 %% @doc Entry point for get_rnd_roundtrip/3
 get_rnd_roundtrip(Vertices, N) ->
@@ -29,6 +31,7 @@ get_rnd_roundtrip(Vertices, N, VertexList) ->
   Trip = [X || {_,X} <- lists:sort([{random:uniform(), Vertex} || Vertex <- Vertices])],
   get_rnd_roundtrip(Vertices, N-1, [Trip|VertexList]).
 
+
 init(InitialRoundtrips, FileName) ->
   {Opts, Graph} = parse_tsp_file:make_atsp_graph(FileName),
   EdgeList = [digraph:edge(Graph, Edge) || Edge <- digraph:edges(Graph)],
@@ -37,7 +40,7 @@ init(InitialRoundtrips, FileName) ->
   run(Opts, Graph, Roundtrips, EdgeList, fun evol:cancel_func/0).
 
 
-run(Opts, Graph, Roundtrips, EdgeList, CancelFunc) ->
+run(_Opts, _Graph, Roundtrips, EdgeList, _CancelFunc) ->
   graph_utils:get_fitness(EdgeList, lists:nth(1, Roundtrips)).
 
 
