@@ -49,6 +49,20 @@ edge_recomb_1(P, AllPossibilities, Offspring, SortFun) ->
 		|| {From, To} <- AllPossibilities -- [NextV]],
   edge_recomb_1(Poss, UpdatedPos, [Vertex | Offspring], SortFun).
 
+mutate_invert(Roundtrip) ->
+  Rnd1 = round(random:uniform() * length(Roundtrip)),
+  Rnd2 = round(random:uniform() * length(Roundtrip)),
+  mutate_invert_1(Roundtrip, Rnd1, Rnd2).
+
+mutate_invert_1(Roundtrip, N1, N2) when N1 > N2 ->
+  mutate_invert_1(Roundtrip, N2, N1);
+mutate_invert_1(Roundtrip, N1, N2) ->
+  {HeadL, _} = lists:split(N1, Roundtrip),
+  TailL = lists:nthtail(N2 + 1, Roundtrip),
+  InvertedL = lists:reverse(lists:sublist(Roundtrip, N1 + 1, N2 - N1 + 1)),
+  HeadL ++ InvertedL ++ TailL.
+
+
 %% @doc
 cancel_func() ->
   true.
