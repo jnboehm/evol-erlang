@@ -82,9 +82,7 @@ init(InitialRoundtrips, FileName) ->
   {Opts, Graph} = parse_tsp_file:make_atsp_graph(FileName),
   Edgelist = [digraph:edge(Graph, Edge) || Edge <- digraph:edges(Graph)],
   Roundtrips = get_rnd_roundtrip(digraph:vertices(Graph), InitialRoundtrips),
-  random:seed(erlang:phash2([node()]),          % from http://erlang.org/doc/man/random.html
-              erlang:monotonic_time(),
-              erlang:unique_integer()),
+  random:seed(erlang:now()),          % from http://erlang.org/doc/man/random.html
   run(Opts, Graph, Roundtrips, Edgelist, fun(_, _) -> true end).
 
 run(Opts, Graph, Roundtrips, Edgelist, CancelFun) ->
@@ -98,6 +96,7 @@ run(Opts, Graph, Roundtrips, Edgelist, CancelFun, MateFun, Gen) ->
     true -> run(Opts, Graph, NextGen, Edgelist, CancelFun, MateFun, Gen + 1);
     false -> Best
   end.
+
 
 make_offspring(Roundtrips, MateFun, Pool) ->
   make_offspring(Roundtrips, [], MateFun, Pool).
