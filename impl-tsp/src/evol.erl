@@ -94,8 +94,8 @@ run(Opts, Graph, Roundtrips, Edgelist, HiScore,CancelFun, MateFun, Gen) ->
   [Best | _] = Roundtrips,
   case CancelFun(Gen, Best) of                  % recurse as long as cancelfun tells us to
     true -> case graph_utils:get_fitness(Edgelist, Best) > HiScore of
-	      false -> run(Opts, Graph, NextGen, Edgelist, HiScore, CancelFun, MateFun, Gen + 1);
-	      true -> Best
+	      true -> run(Opts, Graph, NextGen, Edgelist, HiScore, CancelFun, MateFun, Gen + 1);
+	      false -> Best
 	    end;
     false -> Best
   end.
