@@ -86,14 +86,17 @@ init(InitialRoundtrips, FileName) ->
   run(Opts, Graph, Roundtrips, Edgelist, fun(_, _) -> true end).
 
 run(Opts, Graph, Roundtrips, Edgelist, CancelFun) ->
-  run(Opts, Graph, Roundtrips, Edgelist, CancelFun, fun edge_recomb/2, 0).
+  [Score] = orddict:fetch(best, Opts),
+  run(Opts, Graph, Roundtrips, Edgelist, Score, CancelFun, fun edge_recomb/2, 0).
 
-run(Opts, Graph, Roundtrips, Edgelist, CancelFun, MateFun, Gen) ->
+run(Opts, Graph, Roundtrips, Edgelist, HiScore,CancelFun, MateFun, Gen) ->
   NextGen = select_best(make_offspring(Roundtrips, MateFun, 50), Edgelist, length(Roundtrips)),
   [Best | _] = Roundtrips,
-  io:format("~p: ~p ~p ~p~n", [Gen, graph_utils:get_fitness(Edgelist, Best), Best, NextGen]),
   case CancelFun(Gen, Best) of                  % recurse as long as cancelfun tells us to
-    true -> run(Opts, Graph, NextGen, Edgelist, CancelFun, MateFun, Gen + 1);
+    true -> case graph_utils:get_fitness(Edgelist, Best) > HiScore of
+	      false -> run(Opts, Graph, NextGen, Edgelist, HiScore, CancelFun, MateFun, Gen + 1);
+	      true -> Best
+	    end;
     false -> Best
   end.
 
