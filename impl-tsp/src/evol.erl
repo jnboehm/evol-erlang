@@ -102,6 +102,13 @@ make_offspring(Roundtrips, Offspring, MateFun, Pool) ->
   make_offspring(Roundtrips, [New | Offspring], MateFun, Pool).
 
 
+select_best(Trips, Edgelist, HowMany) ->
+  FitnessFun = fun(El) ->
+                  {graph_utils:get_fitness(Edgelist, El), El}
+               end,
+  {Survivors, _} = lists:split(HowMany, lists:sort(lists:map(FitnessFun, Trips))),
+  [S || {_, S} <- Survivors].
+
 %% @doc
 init() ->
   init(10, "../data/br17.atsp").
