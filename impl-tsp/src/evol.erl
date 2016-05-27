@@ -88,6 +88,20 @@ init(InitialRoundtrips, FileName) ->
   run(Opts, Graph, Roundtrips, Edgelist, fun(_, _) -> true end).
 
 
+make_offspring(Roundtrips, MateFun, Pool) ->
+  make_offspring(Roundtrips, [], MateFun, Pool).
+
+make_offspring(Roundtrips, Offspring, _, Pool) when length(Offspring) == Pool ->
+  Roundtrips ++ Offspring;
+make_offspring(Roundtrips, Offspring, MateFun, Pool) ->
+  Par = nth(random:uniform(length(Roundtrips)), Roundtrips),
+  New = case random:uniform() < 0.3 of
+                  true-> mutate_invert(MateFun(Par, nth(random:uniform(length(Roundtrips)), Roundtrips)));
+                  false-> mutate_invert(Par)
+        end,
+  make_offspring(Roundtrips, [New | Offspring], MateFun, Pool).
+
+
 %% @doc
 init() ->
   init(10, "../data/br17.atsp").
