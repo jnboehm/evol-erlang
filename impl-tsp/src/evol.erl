@@ -57,8 +57,10 @@ mutate_invert(Roundtrip) ->
 mutate_invert_1(Roundtrip, N1, N2) when N1 > N2 ->
   mutate_invert_1(Roundtrip, N2, N1);
 mutate_invert_1(Roundtrip, N1, N2) ->
-  {HeadL, _} = lists:split(N1, Roundtrip),
-  TailL = lists:nthtail(N2 + 1, Roundtrip),
+  {HeadL, _} = lists:split(N1, Roundtrip),      % the indices come mostly from trial and error
+  TailL = if N2 < length(Roundtrip) -> lists:nthtail(N2 + 1, Roundtrip);
+	     true -> []
+	  end,
   InvertedL = lists:reverse(lists:sublist(Roundtrip, N1 + 1, N2 - N1 + 1)),
   HeadL ++ InvertedL ++ TailL.
 
