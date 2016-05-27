@@ -19,19 +19,19 @@ mate_func(_R1, _R2) ->
 %% parent (should they not start at the same node anyways).
 edge_recomb(ParentA, ParentB) ->
   AdjA = [{nth(N, ParentA),
-	   nth((N rem length(ParentA)) + 1, ParentA)}
-	  || N <- lists:seq(1, length(ParentA)) ],
+           nth((N rem length(ParentA)) + 1, ParentA)}
+          || N <- lists:seq(1, length(ParentA)) ],
   AdjB = [{nth(N, ParentB),
-	   nth((N rem length(ParentB)) + 1, ParentB)}
-	  || N <- lists:seq(1, length(ParentB)) ],
+           nth((N rem length(ParentB)) + 1, ParentB)}
+          || N <- lists:seq(1, length(ParentB)) ],
   %% Create a list with all available vertices in the form of {FromVertex, [Tovertex, ...]}, removing duplicates
   Possibilities = [{FromA, lists:usort([ToA, ToB])} || {FromA, ToA} <- AdjA, {FromB, ToB} <- AdjB, FromA == FromB],
   edge_recomb_1(Possibilities).
 
 edge_recomb_1(Possibilities) ->
   Sort = fun({_, El1}, {_, El2}) ->
-	     length(El1) =< length(El2)
-	 end,
+             length(El1) =< length(El2)
+         end,
   edge_recomb_1([], Possibilities, [], Sort).
 
 edge_recomb_1([], [], Offspring, _) ->
@@ -43,15 +43,15 @@ edge_recomb_1(P, AllPossibilities, Offspring, SortFun) ->
   {Vertex, Paths} = NextV,
   %% make a list with all nodes we can reach from the selected node
   Poss = [{From, lists:delete(Vertex, To)}
-	  || {From, To} <- [{X, Y} || X <- Paths, {X1, Y} <- AllPossibilities -- [NextV], X == X1]],
+          || {From, To} <- [{X, Y} || X <- Paths, {X1, Y} <- AllPossibilities -- [NextV], X == X1]],
   %% Update the “global” node list.  We remove the selected node from evey possiblility.
   UpdatedPos = [{From, lists:delete(Vertex, To)}
-		|| {From, To} <- AllPossibilities -- [NextV]],
+                || {From, To} <- AllPossibilities -- [NextV]],
   edge_recomb_1(Poss, UpdatedPos, [Vertex | Offspring], SortFun).
 
 mutate_invert(Roundtrip) ->
-  Rnd1 = round(random:uniform() * length(Roundtrip)),
-  Rnd2 = round(random:uniform() * length(Roundtrip)),
+  Rnd1 = random:uniform(length(Roundtrip)),
+  Rnd2 = random:uniform(length(Roundtrip)),
   mutate_invert_1(Roundtrip, Rnd1, Rnd2).
 
 mutate_invert_1(Roundtrip, N1, N2) when N1 > N2 ->
@@ -63,11 +63,6 @@ mutate_invert_1(Roundtrip, N1, N2) ->
 	  end,
   InvertedL = lists:reverse(lists:sublist(Roundtrip, N1 + 1, N2 - N1 + 1)),
   HeadL ++ InvertedL ++ TailL.
-
-
-%% @doc
-cancel_func() ->
-  true.
 
 
 %% @doc Entry point for get_rnd_roundtrip/3
@@ -85,17 +80,12 @@ get_rnd_roundtrip(Vertices, N, VertexList) ->
 
 init(InitialRoundtrips, FileName) ->
   {Opts, Graph} = parse_tsp_file:make_atsp_graph(FileName),
-  EdgeList = [digraph:edge(Graph, Edge) || Edge <- digraph:edges(Graph)],
+  Edgelist = [digraph:edge(Graph, Edge) || Edge <- digraph:edges(Graph)],
   Roundtrips = get_rnd_roundtrip(digraph:vertices(Graph), InitialRoundtrips),
-  random:seed(erlang:phash2([node()]),		% from http://erlang.org/doc/man/random.html
-	      erlang:monotonic_time(),
-	      erlang:unique_integer()),
-
-  run(Opts, Graph, Roundtrips, EdgeList, fun evol:cancel_func/0).
-
-
-run(_Opts, _Graph, Roundtrips, EdgeList, _CancelFunc) ->
-  graph_utils:get_fitness(EdgeList, lists:nth(1, Roundtrips)).
+  random:seed(erlang:phash2([node()]),          % from http://erlang.org/doc/man/random.html
+              erlang:monotonic_time(),
+              erlang:unique_integer()),
+  run(Opts, Graph, Roundtrips, Edgelist, fun(_, _) -> true end).
 
 
 %% @doc
