@@ -5,7 +5,7 @@
 %%
 
 -module(parse_tsp_file).
--export([make_atsp_graph/1]).
+-export([make_atsp_graph/1, set_up_vertices/1]).
 
 %% @doc Returns a pair of options and graph for the specified file.
 %% @spec make_atsp_graph(Filename::string()) -> tuple()
