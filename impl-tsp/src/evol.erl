@@ -13,7 +13,7 @@
 gapx_recomb(_ParentA, _ParentB, _EdgeList) ->
   ok.
 
-%% @doc Creates an uniform graph of the two parent elements
+%% @doc Creates an union graph of the two parent elements
 ug_of(ParentA, ParentB, EdgeList) ->
   G = parse_tsp_file:set_up_vertices(length(ParentA)),
   ug_of(G, ParentA, [], EdgeList, 1),
