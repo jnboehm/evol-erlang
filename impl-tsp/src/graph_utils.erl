@@ -17,7 +17,7 @@ get_weight(EdgeList, V1, V2) ->
   F = fun({_E, V1T, V2T, _W}) -> {V1T, V2T} =:= {V1,V2} end,
   case lists:filter(F, EdgeList) of
     [{_,_,_,W}] -> W;
-    [] -> no
+    [] -> undef
   end.
 
 %% @doc Creates an edge list for the given graph.

@@ -28,9 +28,9 @@ ug_of(Graph, Parent, TempEdgeList, EdgeList, N) when N =< length(Parent) ->
   % Add the edge if there isn't an edge describing the
   % connection between V1 and V2 with the same flow direction.
   case graph_utils:get_weight(TempEdgeList, V1, V2) of
-    no -> digraph:add_edge(Graph, V1, V2, 
+    undef -> digraph:add_edge(Graph, V1, V2, 
                             graph_utils:get_weight(EdgeList, V1, V2));
-    _ -> ok
+    _ -> ok.
   end,
   ug_of(Graph, Parent, TempEdgeList, EdgeList, N + 1).
 
