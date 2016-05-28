@@ -11,10 +11,18 @@
 
 
 %% @doc Returns the weight between two adjacent vertices.
+%% If no weight can be determined, which means tthat there is no
+%% connection between V1 -> V2, the atom no is returned.
 get_weight(EdgeList, V1, V2) ->
   F = fun({_E, V1T, V2T, _W}) -> {V1T, V2T} =:= {V1,V2} end,
-  [{_,_,_,W}] = lists:filter(F, EdgeList),
-  W.
+  case lists:filter(F, EdgeList) of
+    [{_,_,_,W}] -> W;
+    [] -> no
+  end.
+
+%% @doc Creates an edge list for the given graph.
+get_edge_list(Graph) ->
+  [digraph:edge(Graph, Edge) || Edge <- digraph:edges(Graph)].
 
 %% @doc Returns the fitness value for a specific roundtrip
 get_fitness(EdgeList, Roundtrip) ->
