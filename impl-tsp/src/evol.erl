@@ -10,10 +10,29 @@
 -compile(export_all).
 
 
-%% @doc Let R1 mate with R2. Return the result of that process.
-mate_func(_R1, _R2) ->
+gapx_recomb(_ParentA, _ParentB, _EdgeList) ->
   ok.
 
+%% @doc Creates an uniform graph of the two parent elements
+ug_of(ParentA, ParentB, EdgeList) ->
+  G = parse_tsp_file:set_up_vertices(length(ParentA)),
+  ug_of(G, ParentA, [], EdgeList, 1),
+  ug_of(G, ParentB, graph_utils:get_edge_list(G), EdgeList, 1).
+
+ug_of(Graph, Parent, _TempEdgeList, _EdgeList, N) when N > length(Parent) ->
+  Graph;
+ug_of(Graph, Parent, TempEdgeList, EdgeList, N) when N =< length(Parent) ->
+  V1 = nth(N, Parent), 
+  V2 = nth((N rem length(Parent)) + 1, Parent),
+  
+  % Add the edge if there isn't an edge describing the
+  % connection between V1 and V2 with the same flow direction.
+  case graph_utils:get_weight(TempEdgeList, V1, V2) of
+    no -> digraph:add_edge(Graph, V1, V2, 
+                            graph_utils:get_weight(EdgeList, V1, V2));
+    _ -> ok
+  end,
+  ug_of(Graph, Parent, TempEdgeList, EdgeList, N + 1).
 
 %% @doc Initializes the Offspring with the random first element of the
 %% parent (should they not start at the same node anyways).
@@ -80,10 +99,11 @@ get_rnd_roundtrip(Vertices, N, VertexList) ->
 
 init(InitialRoundtrips, FileName) ->
   {Opts, Graph} = parse_tsp_file:make_atsp_graph(FileName),
-  Edgelist = [digraph:edge(Graph, Edge) || Edge <- digraph:edges(Graph)],
   Roundtrips = get_rnd_roundtrip(digraph:vertices(Graph), InitialRoundtrips),
-  random:seed(erlang:now()),          % from http://erlang.org/doc/man/random.html
-  run(Opts, Graph, Roundtrips, Edgelist, fun(_, _) -> true end).
+  Edgelist = graph_utils:get_edge_list(Graph).
+
+  %random:seed(erlang:now()),          % from http://erlang.org/doc/man/random.html
+  %run(Opts, Graph, Roundtrips, Edgelist, fun(_, _) -> true end).
 
 run(Opts, Graph, Roundtrips, Edgelist, CancelFun) ->
   [Score] = orddict:fetch(best, Opts),
