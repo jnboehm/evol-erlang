@@ -30,7 +30,7 @@ ug_of(Graph, Parent, TempEdgeList, EdgeList, N) when N =< length(Parent) ->
   case graph_utils:get_weight(TempEdgeList, V1, V2) of
     undef -> digraph:add_edge(Graph, V1, V2, 
                             graph_utils:get_weight(EdgeList, V1, V2));
-    _ -> ok.
+    _ -> ok
   end,
   ug_of(Graph, Parent, TempEdgeList, EdgeList, N + 1).
 
