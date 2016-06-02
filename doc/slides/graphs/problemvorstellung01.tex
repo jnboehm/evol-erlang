@@ -1,0 +1,30 @@
+
+\begin{tikzpicture}[>=latex,line join=bevel,]
+%%
+\begin{scope}
+  \pgfsetstrokecolor{black}
+  \definecolor{strokecol}{rgb}{1.0,1.0,1.0};
+  \pgfsetstrokecolor{strokecol}
+  \definecolor{fillcol}{rgb}{1.0,1.0,1.0};
+  \pgfsetfillcolor{fillcol}
+\end{scope}
+  \node (A) at (10.0bp,9.5bp) [draw,ellipse] {A};
+  \node (C) at (157.0bp,55.5bp) [draw,ellipse] {C};
+  \node (B) at (83.0bp,51.5bp) [draw,ellipse] {B};
+  \node (E) at (304.5bp,9.5bp) [draw,ellipse] {E};
+  \node (D) at (231.5bp,55.5bp) [draw,ellipse] {D};
+  \draw [->] (D) ..controls (251.74bp,43.033bp) and (273.02bp,29.249bp)  .. (E);
+  \definecolor{strokecol}{rgb}{0.0,0.0,0.0};
+  \pgfsetstrokecolor{strokecol}
+  \draw (268.5bp,46.5bp) node {1};
+  \draw [->] (A) ..controls (29.9bp,20.68bp) and (50.243bp,32.714bp)  .. (B);
+  \draw (46.5bp,44.5bp) node {4};
+  \draw [->] (C) ..controls (178.01bp,55.5bp) and (196.31bp,55.5bp)  .. (D);
+  \draw (194.5bp,64.5bp) node {3};
+  \draw [->] (B) ..controls (103.99bp,52.61bp) and (122.45bp,53.636bp)  .. (C);
+  \draw (119.5bp,62.5bp) node {2};
+  \draw [->] (E) ..controls (281.36bp,9.5bp) and (254.93bp,9.5bp)  .. (232.5bp,9.5bp) .. controls (82.0bp,9.5bp) and (82.0bp,9.5bp)  .. (82.0bp,9.5bp) .. controls (64.493bp,9.5bp) and (44.557bp,9.5bp)  .. (A);
+  \draw (157.0bp,18.5bp) node {12};
+%
+\end{tikzpicture}
+

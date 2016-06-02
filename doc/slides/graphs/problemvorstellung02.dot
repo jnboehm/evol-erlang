@@ -1,0 +1,8 @@
+digraph G { 
+{
+node [margin=0 fontcolor=blue fontsize=30 width=0.2 shape=ellipse style=filled] 
+}
+rankdir=LR  
+A -> B
+B -> C -> D -> E -> C -> A
+}

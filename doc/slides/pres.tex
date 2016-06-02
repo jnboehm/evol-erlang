@@ -3,8 +3,13 @@
 % basically only used for the \to in \item
 \usepackage[math]{kurier}
 \usepackage{listings}
+\usepackage[ngerman]{babel}
 \usepackage{qtree}
 \usepackage{fontspec}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{snakes,arrows,shapes}
+
 \usepackage[noflama]{hsrm}
 
 \lstset{%
@@ -43,11 +48,88 @@
   \tableofcontents[hideallsubsections]
 \end{frame}
 
-\section{TSP definieren}
+\section{Traveling Salesman Problem}
 \label{sec:tsp}
+
+\frame{\frametitle{Problemvorstellung} 
+\begin{itemize}
+  \item Gegeben sei ein Graph $G$
+  \item Ziel: Finde eine möglichst kurze \glqq Rundreise\grqq{}
+  \item Bedingung 1: Besuche jeden Knoten aus $G$ nur einmal
+  \item Bedingung 2: Startknoten $=$ Endknoten
+\end{itemize}
+  \include{graphs/problemvorstellung01} 
+}
+
+\frame{\frametitle{Abgrenzung TSP-Varianten}
+\begin{itemize}
+  \item Traveling Salesman Problem (TSP)
+  \item Asymetric TSP
+  \item metrisches TSP
+\end{itemize}
+
+}
+
+
+\frame{\frametitle{Komplexität}
+  \begin{itemize}
+    \item kombinatorisches Problem 
+    \item \textbf{NP-hard}
+  \end{itemize}
+}
+
+\frame{\frametitle{Lösungsmöglichkeiten}
+
+}
+
+
 
 \section{Evolutionäre Algorithmen}
 \label{sec:evolutionäre}
+\frame{\frametitle{Grundlegende Begriffe}
+  \begin{itemize}
+    \item Optimierungsproblem
+  \end{itemize}
+}
+\frame{\frametitle{Evolutionärer Ablauf}
+
+}
+
+\frame{\frametitle{Initialisierung}
+
+}
+
+\frame{\frametitle{Abbruchbedingung}
+
+}
+
+\frame{\frametitle{Paarungsselektion}
+
+}
+
+\frame{\frametitle{Rekombination}
+
+}
+
+\frame{\frametitle{GAPX}
+
+}
+
+\frame{\frametitle{Mutation}
+
+}
+
+\frame{\frametitle{Bewertung mittels Fitness-Funktion}
+
+}
+
+\frame{\frametitle{Selektion}
+
+}
+
+\frame{\frametitle{Coming up}
+
+}
 
 \section{Erlang vorstellen}
 \label{sec:erlang}

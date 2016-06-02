@@ -1,0 +1,11 @@
+digraph G { 
+{
+node [margin=0 fontcolor=blue fontsize=5 shape=ellipse] A;B;C;D;E
+}
+rankdir=LR;
+A -> B [label="4"] 
+B -> C [label="2"] 
+C -> D [label="3" weight=3]
+D -> E [label="1" weight=1]
+E -> A [label="12" weight=10]
+}
