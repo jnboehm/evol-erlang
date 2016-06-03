@@ -150,6 +150,9 @@ tags
 *.cb
 *.cb2
 
+*.ps
+*.dot
+
 ## Intermediate documents:
 *.dvi
 *-converted-to.*

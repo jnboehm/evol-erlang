@@ -8,9 +8,13 @@
 \usepackage{fontspec}
 \usepackage{xcolor}
 \usepackage{tikz}
+\usepackage{graphicx}
+\usepackage{graphviz}
+\usepackage{auto-pst-pdf}
 \usetikzlibrary{snakes,arrows,shapes}
 
 \usepackage[noflama]{hsrm}
+
 
 \lstset{%
   basicstyle=\small\ttfamily, %
@@ -54,22 +58,49 @@
 \frame{\frametitle{Problemvorstellung} 
 \begin{itemize}
   \item Gegeben sei ein Graph $G$
-  \item Ziel: Finde eine möglichst kurze \glqq Rundreise\grqq{}
-  \item Bedingung 1: Besuche jeden Knoten aus $G$ nur einmal
+  \pause
+  \item Ziel: Finde eine möglichst kurze „Rundreise“
+  \pause
+  \item Bedingung 1: Besuche jeden Knoten aus $G$ nur einmal  
+  \pause
   \item Bedingung 2: Startknoten $=$ Endknoten
+  \pause
 \end{itemize}
-  \include{graphs/problemvorstellung01} 
+\vfill
+\vfill
+\digraph[scale=0.6]{prob001}{  
+  rankdir=LR; 
+  A->B[label="2"]; 
+  B->C[label="2"];
+  C->D[label="4"];
+  D->E[label="2"];
+  E->A[label="9"];
+}
+\vfill
 }
 
 \frame{\frametitle{Abgrenzung TSP-Varianten}
 \begin{itemize}
   \item Traveling Salesman Problem (TSP)
-  \item Asymetric TSP
+  \pause
+  \item Asymmetric TSP
+  \pause
   \item metrisches TSP
 \end{itemize}
-
 }
 
+\frame{\frametitle{Asymmetric TSP}
+  \begin{itemize}
+    \item Kantengewichte zwischen zwei Knoten unterschiedlich
+  \end{itemize}
+  \vfill
+  \digraph[scale=0.6]{prob002}{  
+    rankdir=LR;
+    A->B[label="9"];
+    B->A[label="5"];
+  }
+  \vfill
+}
 
 \frame{\frametitle{Komplexität}
   \begin{itemize}
@@ -79,7 +110,6 @@
 }
 
 \frame{\frametitle{Lösungsmöglichkeiten}
-
 }
 
 
