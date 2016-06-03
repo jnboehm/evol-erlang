@@ -29,7 +29,7 @@
   keywordstyle=\bfseries\color{hsrmRed}, %
   frame=tb, % line at Top and one at Bottom
   showstringspaces=false, %
-  language=Java, %
+  language=erlang, %
   moredelim=[is][\textcolor{gray}]{\%\%}{\%\%}, %colorize opt params
   moredelim=[is][\textcolor{hsrmSec2Dark}]{==}{==}, %To overcome the weird
   % behavior of Strings in
@@ -442,9 +442,25 @@
 
 }
 
-\section{Erlang vorstellen}
+\section{Erlang}
 \label{sec:erlang}
 
+\begin{frame}[fragile]
+  \frametitle{}
+  $$
+  f(n) =
+  \begin{cases}
+    1            \hfill &\textrm{wenn } n = 0 \\
+    n \cdot f(n - 1) & \textrm{sonst}
+  \end{cases}
+  $$
+  \vfill
+
+  \begin{lstlisting}
+    f(0) -> 1;
+    f(N) -> N * f(N - 1).
+  \end{lstlisting}
+\end{frame}
 \section{Parallelisierung}
 \label{sec:parallelisierung}
 
