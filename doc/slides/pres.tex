@@ -11,7 +11,8 @@
 \usepackage{graphicx}
 \usepackage{graphviz}
 \usepackage{auto-pst-pdf}
-\usetikzlibrary{snakes,arrows,shapes}
+\usepackage{tikz}
+\usetikzlibrary{shapes,shapes.geometric,arrows,fit,calc,positioning,automata}
 
 \usepackage[noflama]{hsrm}
 
@@ -31,6 +32,7 @@
 }
 
 \newcommand{\hsrm}{Hochschule {\Medium RheinMain}}
+\tikzset{elliptic state/.style={draw,ellipse}}
 
 \AtBeginDocument{
   \title{Traveling Salesman Problem}
@@ -66,67 +68,172 @@
   \item Bedingung 2: Startknoten $=$ Endknoten
   \pause
 \end{itemize}
-\vfill
-\vfill
-\digraph[scale=0.6]{prob001}{  
-  rankdir=LR; 
-  A->B[label="2"]; 
-  B->C[label="2"];
-  C->D[label="4"];
-  D->E[label="2"];
-  E->A[label="9"];
-}
-\vfill
+
+  \begin{figure}
+    \centering
+    \begin{tikzpicture}[%
+      >=stealth,
+      node distance=2cm,
+      on grid,
+      auto
+    ]
+    \node[state] (A)              {A};
+    \node[state] (B) [right of=A] {B};
+    \node[state] (C) [right of=B] {C};
+    \node[state] (D) [right of=C] {D};
+    \node[state] (E) [right of=D] {E};
+    \path[->] (A) edge node {9} (B);
+    \path[->] (B) edge node {2} (C);
+    \path[->] (C) edge node {4} (D);
+    \path[->] (D) edge node {5} (E);
+    \path[->] (E) edge [bend left=25] node  {22} (A);
+    \end{tikzpicture}
+  \end{figure}
 }
 
 \frame{\frametitle{Abgrenzung TSP-Varianten}
 \begin{itemize}
-  \item Traveling Salesman Problem (TSP)
+  \item Symmetrisches TSP 
   \pause
-  \item Asymmetric TSP
+  \item Asmymmetrisches TSP
   \pause
   \item metrisches TSP
 \end{itemize}
 }
 
-\frame{\frametitle{Asymmetric TSP}
+\frame{\frametitle{Symmetrisches TSP}
   \begin{itemize}
-    \item Kantengewichte zwischen zwei Knoten unterschiedlich
+    \item Kantengewichte zwischen $A$ und $B$ sind gleich. 
+    \pause
   \end{itemize}
-  \vfill
-  \digraph[scale=0.6]{prob002}{  
-    rankdir=LR;
-    A->B[label="9"];
-    B->A[label="5"];
-  }
-  \vfill
+  \begin{figure}
+    \centering
+  \begin{tikzpicture}[%
+    >=stealth,
+    node distance=2cm,
+    on grid,
+    auto
+  ]
+    \node[state] (A)              {A};
+    \node[state] (B) [right of=A] {B};
+    \path[->] (A) edge [bend right=-20] node {9} (B);
+    \path[->] (B) edge [bend left=20] node  {9} (A);
+  \end{tikzpicture}
+  \end{figure}
+}
+
+\frame{\frametitle{Asymmetrisches TSP}
+  \begin{itemize}
+    \item Kantengewichte, um von $A$ nach $B$ zu kommen sind unterschiedlich
+    \pause
+  \end{itemize}
+  \begin{figure}
+    \centering
+    \begin{tikzpicture}[%
+      >=stealth,
+      node distance=2cm,
+      on grid,
+      auto
+    ]
+    \node[state] (A)              {A};
+    \node[state] (B) [right of=A] {B};
+    \path[->] (A) edge [bend right=-20] node {9} (B);
+    \path[->] (B) edge [bend left=20] node  {5} (A);
+    \end{tikzpicture}
+  \end{figure}
+  
+  \begin{itemize}
+    \item Wir suchen Lösungen für dieses Problem!
+  \end{itemize}
+}
+
+
+\frame{\frametitle{metrisches TSP}
+  \begin{itemize}
+      \item Dreiecksungleichung $c \leq a + b$ gilt für alle
+        Kantenlängen
+      \pause
+      \item Der direkte Weg von Knoten $A$ nach $B$ ist immer der
+        kürzeste.
+      \pause
+      \item Es lohnen sich also keine Umwege
+      \pause
+  \end{itemize}
+  \begin{figure}
+    \centering
+    \def\svgwidth{220pt}
+    \input{triangle.pdf_tex}
+  \end{figure}
 }
 
 \frame{\frametitle{Komplexität}
   \begin{itemize}
-    \item kombinatorisches Problem 
+    \item kombinatorisches Problem
+    \pause
+    \item Anzahl Touren: $(n-1)! = (n-1) \cdot (n-2) \cdot ...
+      \cdot 2 \cdot 1$
+    \pause
+    \item Nicht in polynomieller Zeit lösbar
+    \pause
     \item \textbf{NP-hard}
+    \pause
+    \item Komplexität direkte Lösung: $\mathcal{O}(n!)$
   \end{itemize}
 }
-
-\frame{\frametitle{Lösungsmöglichkeiten}
-}
-
-
 
 \section{Evolutionäre Algorithmen}
 \label{sec:evolutionäre}
-\frame{\frametitle{Grundlegende Begriffe}
+\frame{\frametitle{Grundlegendes}
   \begin{itemize}
-    \item Optimierungsproblem
+    \item Evolutionärer Ansatz ist eine Heuristik
+    \item Für jegliche Art von Optimierungsproblemen geeignet
+    \item Beim TSP: Finde eine möglichst \textbf{optimale} (kurze) Rundreise
   \end{itemize}
 }
+
+\frame{\frametitle{Optimierungsproblem}
+  \begin{itemize}
+    \item 3-Tupel $(\Omega, f, \{<, >\})$
+      \item $\Omega$, Suchraum, z.B. alle möglichen Rundreisen
+      \item $f : \Omega \rightarrow \mathbb{R}$, die Fitnessfunktion
+        (Definition für TSP später)
+      \item $<, >$, Vergleichsrelation, Maximierung oder Minimierung
+  \end{itemize}
+}
+
 \frame{\frametitle{Evolutionärer Ablauf}
+  \begin{figure}
+    \centering
+    \begin{tikzpicture}[%
+      >=stealth,
+      node distance=1.5cm,
+      on grid,
+      auto
+    ]
+    \node[elliptic state] (A)    {Initialisierung};
+    \node[elliptic state] (B) [below=1.3cm] {Abbruchbedigung};
+    \node[elliptic state] (C) [below right=1.3cm and 3cm of B] {Paarungsselektion};
+    \node[elliptic state] (D) [below=of C] {Rekombination};
+    \node[elliptic state] (E) [below left=1.3cm and 3cm of D] {Mutation};
+    \node[elliptic state] (F) [above left=1.3cm and 3cm of E] {Bewertung};
+    \node[elliptic state] (G) [above=of F] {Umweltselektion};
+    \path[->] (A) edge node {} (B);
+      \path[->] (B) edge node {} (C);
+      \path[->] (C) edge node {} (D);
+      \path[->] (D) edge node {} (E);
+      \path[->] (E) edge node {} (F);
+      \path[->] (F) edge node {} (G);
+      \path[->] (G) edge node {} (B);
+    \end{tikzpicture}
+  \end{figure}
 
 }
 
 \frame{\frametitle{Initialisierung}
-
+  \begin{itemize}
+    \item Erzeugen der ersten Individuen
+    \item Individuen $\equiv$ Rundreisen
+  \end{itemize}
 }
 
 \frame{\frametitle{Abbruchbedingung}
