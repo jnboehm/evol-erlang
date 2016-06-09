@@ -28,7 +28,7 @@
   keywordstyle=\bfseries\color{hsrmRed}, %
   frame=tb, % line at Top and one at Bottom
   showstringspaces=false, %
-  language=Java, %
+  language=erlang, %
   moredelim=[is][\textcolor{gray}]{\%\%}{\%\%}, %colorize opt params
   moredelim=[is][\textcolor{hsrmSec2Dark}]{==}{==}, %To overcome the weird
   % behavior of Strings in
@@ -60,13 +60,13 @@
 \section{Traveling Salesman Problem}
 \label{sec:tsp}
 
-\frame{\frametitle{Problemvorstellung} 
+\frame{\frametitle{Problemvorstellung}
 \begin{itemize}
   \item Gegeben sei ein gerichteter Graph $G = (V, E)$
   \pause
   \item Ziel: Finde eine möglichst kurze „Rundreise“
   \pause
-  \item Bedingung 1: Besuche jeden Knoten aus $G$ nur einmal  
+  \item Bedingung 1: Besuche jeden Knoten aus $G$ nur einmal
   \pause
   \item Bedingung 2: Startknoten $=$ Endknoten
   \pause
@@ -96,7 +96,7 @@
 
 \frame{\frametitle{Abgrenzung TSP-Varianten}
 \begin{itemize}
-  \item Symmetrisches TSP 
+  \item Symmetrisches TSP
   \pause
   \item Asmymmetrisches TSP
   \pause
@@ -106,7 +106,7 @@
 
 \frame{\frametitle{Symmetrisches TSP}
   \begin{itemize}
-    \item Kantengewichte zwischen $A$ und $B$ sind gleich. 
+    \item Kantengewichte zwischen $A$ und $B$ sind gleich.
     \pause
   \end{itemize}
   \begin{figure}
@@ -144,7 +144,7 @@
     \path[->] (B) edge [bend left=20] node  {5} (A);
     \end{tikzpicture}
   \end{figure}
-  
+
   \begin{itemize}
     \item Wir suchen Lösungen für dieses Problem!
   \end{itemize}
@@ -204,7 +204,7 @@
   \end{itemize}
 }
 
-% Definition des Bildes des evolutionären Ablaufs. 
+% Definition des Bildes des evolutionären Ablaufs.
 \newsavebox{\evolpicture}
 \begin{lrbox}{\evolpicture}
   \begin{tikzpicture}[%
@@ -407,6 +407,7 @@
           \Highlight{D}
           \evolpictureside
         }
+
     \end{column}
   \end{columns}
 }
@@ -435,7 +436,7 @@
     \begin{column}{.75\textwidth}
 % TEXT
       \begin{itemize}
-        \item  
+        \item
       \end{itemize}
     \end{column}
     \begin{column}{.25\textwidth}
@@ -453,7 +454,7 @@
     \begin{column}{.75\textwidth}
 % TEXT
       \begin{itemize}
-        \item 
+        \item
       \end{itemize}
     \end{column}
     \begin{column}{.25\textwidth}
@@ -471,7 +472,7 @@
     \begin{column}{.75\textwidth}
 % TEXT
       \begin{itemize}
-        \item 
+        \item
       \end{itemize}
     \end{column}
     \begin{column}{.25\textwidth}
@@ -488,9 +489,75 @@
 
 }
 
-\section{Erlang vorstellen}
+\section{Erlang}
 \label{sec:erlang}
 
+\begin{frame}
+  \frametitle{Was ist Erlang?}
+
+  Erlang ist, eine funktionale Programmiersprache für massiv
+  skalierbare und distributierte Systeme.
+
+  Wir haben uns für Erlang entschieden, da Parallelisierung mithilfe
+  von „message passing“ ein Grundprinzip der Sprache ist, was auch auf
+  mehrere Systeme ausgeweitet werden kann.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Andere Charakteristika}
+
+  Mehr Eigenschaften:
+
+  \begin{itemize}
+  \item verlässliche und langlaufende Systeme
+  \item soft real time
+  \item hot code loading
+  \item hohe Fehlertoleranz
+  \item garbage collected
+  \item läuft auf einer virutellen Maschine (BEAM)
+  \end{itemize}
+
+  Ursprünglich wurde die Sprache für Telekommunikationssysteme
+  entwickelt, wo diese Punkte eine deutlich größere Rolle spielen.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Was ist funktionale Programmierung überhaupt?}
+
+  Basiert auf dem λ-Kalkül von Alonzo Church – der Doktorvater von
+  Turing.
+
+  Das funktionale Paradigma ist stärker an der mathematischen Notation
+  angelehnt.
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{}
+  $$
+  f(n) =
+  \begin{cases}
+    1             &\textrm{wenn } n = 0 \\
+    n \cdot f(n - 1) & \textrm{sonst}
+  \end{cases}
+  $$
+  \vfill
+
+  \begin{lstlisting}
+    f(0) -> 1;
+    f(N) -> N * f(N - 1).
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Listen und Mengen}
+  $$ \{\,\forall\; x \in X \mid 2 \cdot x\,\}$$
+
+  \vfill
+
+  \begin{lstlisting}
+    [2 * X || X <- Xs].
+  \end{lstlisting}
+\end{frame}
 \section{Parallelisierung}
 \label{sec:parallelisierung}
 
