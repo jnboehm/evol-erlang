@@ -509,7 +509,6 @@
   Mehr Eigenschaften:
 
   \begin{itemize}
-  \item verlässliche und langlaufende Systeme
   \item soft real time
   \item hot code loading
   \item hohe Fehlertoleranz
@@ -522,13 +521,20 @@
 \end{frame}
 
 \begin{frame}
-  \frametitle{Was ist funktionale Programmierung überhaupt?}
+  \frametitle{Was ist funktionale Programmierung?}
 
-  Basiert auf dem λ-Kalkül von Alonzo Church – der Doktorvater von
-  Turing.
+  FP ist an mathemaitsche Notation angelehnt.
 
-  Das funktionale Paradigma ist stärker an der mathematischen Notation
-  angelehnt.
+  Im idealen Sinn haben Funktionen keine Seiteneffekte.
+
+  Im Allgemeinen werden Funktionen nur mit „call-by-value“ aufgerufen.
+  Allerdings muss das Konzept teilweise gebrochen werden, um z. B. IO
+  zu realisieren.
+
+  Daten, bzw. Variablen, können nicht mehr verändert
+  werden. \lstinline{i += 1} ist nicht möglich. % Evtl. ist ein Beispiel eingänglicher.
+
+
 \end{frame}
 
 \begin{frame}[fragile]
@@ -550,7 +556,7 @@
 
 \begin{frame}[fragile]
   \frametitle{Listen und Mengen}
-  $$ \{\,\forall\; x \in X \mid 2 \cdot x\,\}$$
+  $$ \{\,2 \cdot x \mid x \in X\,\}$$
 
   \vfill
 
@@ -561,7 +567,7 @@
 \section{Parallelisierung}
 \label{sec:parallelisierung}
 
-\section{Auswertung der (bisherigen) Ergebnisse}
-\label{sec:auswertung}
+% \section{Auswertung der (bisherigen) Ergebnisse}
+% \label{sec:auswertung}
 
 \end{document}
