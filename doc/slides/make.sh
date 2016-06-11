@@ -1,2 +1,4 @@
 #/bin/bash
-latexmk -xelatex -shell-escape -pvc pres.tex  
+#latexmk -bibtex -xelatex -shell-escape -pvc pres.tex  
+
+latexmk -xelatex -pvc -bibtex  pres.tex

@@ -277,17 +277,19 @@
     \begin{column}{.75\textwidth}
 % TEXT
         \begin{itemize}
-          \item Erzeugen der ersten Individuen
-          \item Individuen $\equiv$ Rundreisen
-          \item Ziel: Rundreisen versuchen zu verbessern
+          \item \onslide<2-> {Erzeugen der ersten Individuen}
+          \item \onslide<3-> {Individuen $\equiv$ Rundreisen}
+          \item \onslide<4-> {Ziel: Rundreisen versuchen zu verbessern}
         \end{itemize}
     \end{column}
     \begin{column}{.25\textwidth}
 % IMAGE
+      \onslide<1-> {
         \resizebox{85pt}{180pt}{%
           \Highlight{A}
           \evolpictureside
         }
+      }
     \end{column}
   \end{columns}
 }
@@ -297,16 +299,19 @@
     \begin{column}{.75\textwidth}
 % TEXT
       \begin{itemize}
-        \item Abbruch nach $n$ Generationen \\
-        \item Generation: Eltern $+$ Kinder nach einem Durchlauf
+        \item \onslide<2-> {Abbruch nach $n$ Generationen}
+        \item \onslide<3-> {Generation: Eltern $+$ Kinder nach einem
+          Durchlauf}
       \end{itemize}
     \end{column}
     \begin{column}{.25\textwidth}
 % IMAGE
+      \onslide<1-> {
       \resizebox{85pt}{180pt}{%
           \Highlight{B}
           \evolpictureside
         }
+      }
     \end{column}
   \end{columns}
 }
@@ -316,22 +321,24 @@
     \begin{column}{.75\textwidth}
 % TEXT
       \begin{itemize}
-        \item Vorhanden: Pool von Rundreisen
-        \item Frage: Welche Rundreise mit welcher paaren?
-        \item Möglichkeiten:
+        \item \onslide<2-> {Vorhanden: Pool von Rundreisen}
+        \item \onslide<3-> {Frage: Welche Rundreise mit welcher paaren?}
+        \item \onslide<4-> {Möglichkeiten:
           \begin{itemize}
             \item Random
             \item „Gleich gute”
-          \end{itemize}
+          \end{itemize} }
       \end{itemize}
 
     \end{column}
     \begin{column}{.25\textwidth}
 % IMAGE
+      \onslide<1-> {
       \resizebox{85pt}{180pt}{%
           \Highlight{C}
           \evolpictureside
         }
+      }
     \end{column}
   \end{columns}
 }
@@ -341,72 +348,25 @@
     \begin{column}{.75\textwidth}
 % TEXT
       \begin{itemize}
-        \item Wir wollen zwei Rundreisen $G_1$ und $G_2$ paaren.
-        \item Frage: Wie machen wir das?
-        \item verschiedene Strategien (sog. Crossover)
+        \item \onslide<2-> {Wir wollen zwei Rundreisen $G_1$ und $G_2$
+          paaren.}
+        \item \onslide<3-> {Ergebnis ist ein Kind oder Offspring $G_o$}
+        \item \onslide<4-> {Frage: Wie machen wir das?}
+        \item \onslide<5-> {verschiedene Strategien (sog. Crossover)}
           \begin{itemize}
-            \item Kantenrekombination
-            \item GAPX
+            \item \onslide<6-> {Kantenrekombination}
+            \item \onslide<7-> {GAPX}
           \end{itemize}
       \end{itemize}
-            \begin{columns}[T]
-        \begin{column}{.375\textwidth}
-          % Figure left
-
-    \resizebox{80pt}{50pt} {
-    \begin{tikzpicture}[%
-      >=stealth,
-      node distance=2cm,
-      on grid,
-      auto
-    ]
-    \node[state] (A)              {A};
-    \node[state] (B) [right of=A] {B};
-    \node[state] (C) [right of=B] {C};
-    \node[state] (D) [below of=C] {D};
-    \node[state] (E) [below of=A] {E};
-    \path[->] (A) edge [bend right=0] node {9} (B);
-    \path[->] (B) edge [bend left=0] node  {2} (D);
-    \path[->] (D) edge [bend left=0] node  {4} (C);
-    \path[->] (C) edge [bend left=0] node  {3} (E);
-    \path[->] (E) edge [bend left=0] node  {6} (A);
-    \end{tikzpicture}
-    }
-
-        \end{column}
-        \begin{column}{.375\textwidth}
-          % Figure right
-
-    \resizebox{80pt}{50pt} {
-    \begin{tikzpicture}[%
-      >=stealth,
-      node distance=2cm,
-      on grid,
-      auto
-    ]
-    \node[state] (A)              {A};
-    \node[state] (B) [right of=A] {B};
-    \node[state] (C) [right of=B] {C};
-    \node[state] (D) [below of=C] {D};
-    \node[state] (E) [below of=A] {E};
-    \path[->] (A) edge [bend right=0] node {9} (B);
-    \path[->] (B) edge [bend left=0] node  {5} (E);
-    \path[->] (E) edge [bend left=0] node  {3} (C);
-    \path[->] (C) edge [bend left=0] node  {2} (D);
-    \path[->] (D) edge [bend left=0] node  {5} (A);
-    \end{tikzpicture}
-    }
-
-        \end{column}
-      \end{columns}
     \end{column}
     \begin{column}{.25\textwidth}
 % IMAGE
+      \onslide<1-> {
       \resizebox{85pt}{180pt}{%
           \Highlight{D}
           \evolpictureside
         }
-
+      }
     \end{column}
   \end{columns}
 }
@@ -433,21 +393,14 @@
   \end{columns}
 }
 
-\frame{\frametitle{GAPX: Partitionierung}
+\frame{\frametitle{GAPX: Partition-Crossover}
   \begin{columns}[T]
     \begin{column}{.75\textwidth}
 % TEXT
-      \begin{itemize}
-        \item\onslide<2->{ Gegeben sind zwei Graphen  
-          $\begingroup\color{blue}G_1\endgroup$
-          und
-          $\begingroup\color{hsrmRed}G_2\endgroup$}
-        \item\onslide<3->{ Ghost-Knoten $v'$ einfügen, falls ein Knoten $v$
-          existiert mit $deg(v) = 4$}
-      \end{itemize}
+      \vspace{0.2cm}
       \begin{columns}[T]
         \begin{column}{.5\textwidth}
-    \onslide<4-> {
+    \onslide<2-> {
     \resizebox{120pt}{150pt}{%
       \begin{tikzpicture}[%
         >=stealth,
@@ -474,39 +427,39 @@
         \node[state] (8) [right of=9] {8};
 
         % solid: parent 1
-        \path[-] (1) edge [blue, bend left=0] node  {} (3);
-        \path[-] (3) edge [blue, bend left=0] node  {} (2);
-        \path[-] (2) edge [blue, bend left=0] node  {} (5);
-        \path[-] (5) edge [blue, bend left=0] node  {} (4);
-        \path[-] (4) edge [blue, bend left=0] node  {} (6);
-        \path[-] (6) edge [blue, bend left=0] node  {} (8);
-        \path[-] (8) edge [blue, bend left=0] node  {} (7);
-        \path[-] (7) edge [blue, bend left=0] node  {} (10);
-        \path[-] (10) edge [blue, bend left=0] node  {} (9);
-        \path[-] (9) edge [blue, bend left=0] node  {} (11);
-        \path[-] (11) edge [blue, bend left=0] node  {} (1);
+        \path[->] (1) edge [blue, bend left=0] node  {} (3);
+        \path[->] (3) edge [blue, bend left=0] node  {} (2);
+        \path[->] (2) edge [blue, bend left=0] node  {} (5);
+        \path[->] (5) edge [blue, bend left=0] node  {} (4);
+        \path[->] (4) edge [blue, bend left=0] node  {} (6);
+        \path[->] (6) edge [blue, bend left=0] node  {} (8);
+        \path[->] (8) edge [blue, bend left=0] node  {} (7);
+        \path[->] (7) edge [blue, bend left=0] node  {} (10);
+        \path[->] (10) edge [blue, bend left=0] node  {} (9);
+        \path[->] (9) edge [blue, bend left=0] node  {} (11);
+        \path[->] (11) edge [blue, bend left=0] node  {} (1);
 
         % dashed: parent 2
-        \path[-] (1) edge [bend left=0, dashed, hsrmRed] node {} (2);
-        \path[-] ([xshift=0.7ex] 2.north) edge [hsrmRed, dashed] node {}
+        \path[->] (1) edge [bend left=0, dashed, hsrmRed] node {} (2);
+        \path[->] ([xshift=0.7ex] 2.north) edge [hsrmRed, dashed] node {}
                  ([xshift=0.7ex] 3.south);
-        \path[-] (3) edge [hsrmRed, dashed] node {}
+        \path[->] (3) edge [hsrmRed, dashed] node {}
                  (4);
-        \path[-] ([xshift=0.7ex] 4.south) edge [hsrmRed, dashed] node {}
+        \path[->] ([xshift=0.7ex] 4.south) edge [hsrmRed, dashed] node {}
                  ([xshift=0.7ex] 5.north);
-        \path[-] (5) edge [hsrmRed, dashed] node {}
+        \path[->] (5) edge [hsrmRed, dashed] node {}
                  (6);
-        \path[-] (6) edge [hsrmRed, dashed] node {}
+        \path[->] (6) edge [hsrmRed, dashed] node {}
                  (7);
-        \path[-] ([xshift=0.7ex] 7.south) edge [hsrmRed, dashed] node {}
+        \path[->] ([xshift=0.7ex] 7.south) edge [hsrmRed, dashed] node {}
                  ([xshift=0.7ex] 8.north);
-        \path[-] (8) edge [hsrmRed, dashed] node {}
+        \path[->] (8) edge [hsrmRed, dashed] node {}
                  (9);
-        \path[-] ([xshift=0.7ex] 9.north) edge [hsrmRed, dashed] node {}
+        \path[->] ([xshift=0.7ex] 9.north) edge [hsrmRed, dashed] node {}
                  ([xshift=0.7ex] 10.south);
-        \path[-] (10) edge [hsrmRed, dashed] node {}
+        \path[->] (10) edge [hsrmRed, dashed] node {}
                  (11);
-        \path[-] ([xshift=0.7ex] 11.north) edge [hsrmRed, dashed] node {}
+        \path[->] ([xshift=0.7ex] 11.north) edge [hsrmRed, dashed] node {}
                  ([xshift=0.7ex] 1.south);
       \end{tikzpicture}
       }
@@ -515,7 +468,8 @@
 
         \end{column}
         \begin{column}{.5\textwidth}
-      \onslide<5->
+
+        \onslide<3-> {
             \resizebox{120pt}{150pt}{%
       \begin{tikzpicture}[%
         >=stealth,
@@ -543,51 +497,61 @@
         \node[state] (8) [right of=9] {8};
 
         % solid: parent 1
-        \path[-] (1) edge [blue, bend left=0] node  {} (3);
-        \path[-] (3) edge [blue, bend left=0] node  {} (2);
-        \path[-] (2) edge [blue, bend left=0] node  {} (5);
-        \path[-] (5) edge [blue, bend left=0] node  {} (4);
-        \path[-] (6') edge [blue, bend left=0] node  {} (8);
-        \path[-] (4) edge [blue, bend left=0] node  {} (6);
-        \path[-] (8) edge [blue, bend left=0] node  {} (7);
-        \path[-] (7) edge [blue, bend left=0] node  {} (10);
-        \path[-] (10) edge [blue, bend left=0] node  {} (9);
-        \path[-] (9) edge [blue, bend left=0] node  {} (11);
-        \path[-] (11) edge [blue, bend left=0] node  {} (1);
-        \path[-] (6) edge [blue, bend left=0] node  {} (6');
+        \path[->] (1) edge [blue, bend left=0] node  {} (3);
+        \path[->] (3) edge [blue, bend left=0] node  {} (2);
+        \path[->] (2) edge [blue, bend left=0] node  {} (5);
+        \path[->] (5) edge [blue, bend left=0] node  {} (4);
+        \path[->] (6') edge [blue, bend left=0] node  {} (8);
+        \path[->] (4) edge [blue, bend left=0] node  {} (6);
+        \path[->] (8) edge [blue, bend left=0] node  {} (7);
+        \path[->] (7) edge [blue, bend left=0] node  {} (10);
+        \path[->] (10) edge [blue, bend left=0] node  {} (9);
+        \path[->] (9) edge [blue, bend left=0] node  {} (11);
+        \path[->] (11) edge [blue, bend left=0] node  {} (1);
+        \path[->] (6) edge [blue, bend left=0] node  {} (6');
 
         % dashed: parent 2
-        \path[-] (1) edge [bend left=0, dashed, hsrmRed] node {} (2);
-        \path[-] ([xshift=0.7ex] 2.north) edge [hsrmRed, dashed] node {}
+        \path[->] (1) edge [bend left=0, dashed, hsrmRed] node {} (2);
+        \path[->] ([xshift=0.7ex] 2.north) edge [hsrmRed, dashed] node {}
                  ([xshift=0.7ex] 3.south);
-        \path[-] (3) edge [hsrmRed, dashed] node {}
+        \path[->] (3) edge [hsrmRed, dashed] node {}
                  (4);
-        \path[-] ([xshift=0.7ex] 4.south) edge [hsrmRed, dashed] node {}
+        \path[->] ([xshift=0.7ex] 4.south) edge [hsrmRed, dashed] node {}
                  ([xshift=0.7ex] 5.north);
-        \path[-] (5) edge [hsrmRed, dashed] node {}
+        \path[->] (5) edge [hsrmRed, dashed] node {}
                  (6);
-        \path[-] (6') edge [hsrmRed, dashed] node {}
+        \path[->] (6') edge [hsrmRed, dashed] node {}
                  (7);
-        \path[-] ([xshift=0.7ex] 7.south) edge [hsrmRed, dashed] node {}
+        \path[->] ([xshift=0.7ex] 7.south) edge [hsrmRed, dashed] node {}
                  ([xshift=0.7ex] 8.north);
-        \path[-] (8) edge [hsrmRed, dashed] node {}
+        \path[->] (8) edge [hsrmRed, dashed] node {}
                  (9);
-        \path[-] ([xshift=0.7ex] 9.north) edge [hsrmRed, dashed] node {}
+        \path[->] ([xshift=0.7ex] 9.north) edge [hsrmRed, dashed] node {}
                  ([xshift=0.7ex] 10.south);
-        \path[-] (10) edge [hsrmRed, dashed] node {}
+        \path[->] (10) edge [hsrmRed, dashed] node {}
                  (11);
-        \path[-] ([xshift=0.7ex] 11.north) edge [hsrmRed, dashed] node {}
+        \path[->] ([xshift=0.7ex] 11.north) edge [hsrmRed, dashed] node {}
                  ([xshift=0.7ex] 1.south);
-        \path[-] ([xshift=0.7ex] 6.south) edge [hsrmRed, dashed] node {}
+        \path[->] ([xshift=0.7ex] 6.south) edge [hsrmRed, dashed] node {}
                  ([xshift=0.7ex] 6'.north);
 
 
       \end{tikzpicture}
       }
-
+      }
         
         \end{column}
       \end{columns}
+      \begin{itemize}
+        \item\onslide<2->{ Gegeben sind zwei Graphen  
+          $\begingroup\color{blue}G_1\endgroup$
+          und
+          $\begingroup\color{hsrmRed}G_2\endgroup$}
+        \item\onslide<3->{ Ghost-Knoten $v'$ in
+          $\begingroup\color{blue}G_1\endgroup \cup
+          \begingroup\color{hsrmRed}G_2\endgroup$ einfügen, für alle Knoten $v$
+          mit $deg(v) = 4$}
+      \end{itemize}
     \end{column}
     \begin{column}{.25\textwidth}
 % IMAGE
@@ -601,18 +565,194 @@
   \end{columns}
 }
 
-\frame{\frametitle{Partitionierung}
-  \begin{itemize}
-    \item 
-  \end{itemize}
-  }
+\frame{\frametitle{GAPX: Partition-Crossover}
+  \begin{columns}[T]
+    \begin{column}{.75\textwidth}
+% TEXT
+
+      \vspace{0.2cm}
+
+      \begin{columns}[T]
+        \begin{column}{.5\textwidth}
+
+      \resizebox{120pt}{150pt}{%
+      \begin{tikzpicture}[%
+        >=stealth,
+        node distance=2cm,
+        on grid,
+        auto
+      ]
+        \node[state] (1)              {1};
+
+        
+        \node[state] (3) [above right of=1]             {3};
+        \node[state] (2) [below right of=1]            {2};
+        \node[state] (4) [right of=3]             {4};
+        \node[state] (5) [right of=2]             {5};
+
+        \node[state] (6) [above right of=5] {6};
+
+        \node[state] (7) [below of=5] {7};
+        \node[state] (6') [below right of=7] {6'};
+        \node[state] (10) [left of=7] {10};
+        
+        \node[state] (11) [below left of=10] {11};
+
+        \node[state] (9) [below right of=11] {9};
+        \node[state] (8) [right of=9] {8};
+
+        % solid: parent 1
+        \path[->] (1) edge [blue, bend left=0] node  {} (3);
+        \path[->] (3) edge [blue, bend left=0] node  {} (2);
+        \path[->] (2) edge [blue, bend left=0] node  {} (5);
+        \path[->] (5) edge [blue, bend left=0] node  {} (4);
+        \path[->] (6') edge [blue, bend left=0] node  {} (8);
+        \path[->] (4) edge [blue, bend left=0] node  {} (6);
+        \path[->] (8) edge [blue, bend left=0] node  {} (7);
+        \path[->] (7) edge [blue, bend left=0] node  {} (10);
+        \path[->] (10) edge [blue, bend left=0] node  {} (9);
+        \path[->] (9) edge [blue, bend left=0] node  {} (11);
+        \path[->] (11) edge [blue, bend left=0] node  {} (1);
+        \path[->] (6) edge [blue, bend left=0] node  {} (6');
+
+        % dashed: parent 2
+        \path[->] (1) edge [bend left=0, dashed, hsrmRed] node {} (2);
+        \path[->] ([xshift=0.7ex] 2.north) edge [hsrmRed, dashed] node {}
+                 ([xshift=0.7ex] 3.south);
+        \path[->] (3) edge [hsrmRed, dashed] node {}
+                 (4);
+        \path[->] ([xshift=0.7ex] 4.south) edge [hsrmRed, dashed] node {}
+                 ([xshift=0.7ex] 5.north);
+        \path[->] (5) edge [hsrmRed, dashed] node {}
+                 (6);
+        \path[->] (6') edge [hsrmRed, dashed] node {}
+                 (7);
+        \path[->] ([xshift=0.7ex] 7.south) edge [hsrmRed, dashed] node {}
+                 ([xshift=0.7ex] 8.north);
+        \path[->] (8) edge [hsrmRed, dashed] node {}
+                 (9);
+        \path[->] ([xshift=0.7ex] 9.north) edge [hsrmRed, dashed] node {}
+                 ([xshift=0.7ex] 10.south);
+        \path[->] (10) edge [hsrmRed, dashed] node {}
+                 (11);
+        \path[->] ([xshift=0.7ex] 11.north) edge [hsrmRed, dashed] node {}
+                 ([xshift=0.7ex] 1.south);
+        \path[->] ([xshift=0.7ex] 6.south) edge [hsrmRed, dashed] node {}
+                 ([xshift=0.7ex] 6'.north);
+
+
+        \end{tikzpicture}
+        }
+
+        \end{column}
+
+        \begin{column}{.5\textwidth}
+
+      \onslide<1-> {
+      \resizebox{120pt}{150pt}{%
+      \begin{tikzpicture}[%
+        >=stealth,
+        node distance=2cm,
+        on grid,
+        auto
+      ]
+        \node[state] (1)              {1};
+
+        
+        \node[state] (3) [above right of=1]             {3};
+        \node[state] (2) [below right of=1]            {2};
+        \node[state] (4) [right of=3]             {4};
+        \node[state] (5) [right of=2]             {5};
+
+        \node[state] (6) [above right of=5] {6};
+
+        \node[state] (7) [below of=5] {7};
+        \node[state] (6') [below right of=7] {6'};
+        \node[state] (10) [left of=7] {10};
+        
+        \node[state] (11) [below left of=10] {11};
+
+        \node[state] (9) [below right of=11] {9};
+        \node[state] (8) [right of=9] {8};
+
+        % solid: parent 1
+        \path[->] (1) edge [blue, bend left=0] node  {} (3);
+        \path[->] (3) edge [blue, bend left=0] node  {} (2);
+        \path[->] (2) edge [blue, bend left=0] node  {} (5);
+        \path[->] (5) edge [blue, bend left=0] node  {} (4);
+        %\path[->] (6') edge [blue, bend left=0] node  {} (8);
+        \path[->] (4) edge [blue, bend left=0] node  {} (6);
+        %\path[->] (8) edge [blue, bend left=0] node  {} (7);
+        %\path[->] (7) edge [blue, bend left=0] node  {} (10);
+        %\path[->] (10) edge [blue, bend left=0] node  {} (9);
+        %\path[->] (9) edge [blue, bend left=0] node  {} (11);
+        \path[->] (11) edge [blue, bend left=0] node  {} (1);
+        \path[->] (6) edge [blue, bend left=0] node  {} (6');
+
+        % dashed: parent 2
+        %\path[->] (1) edge [bend left=0, dashed, hsrmRed] node {} (2);
+        %\path[->] ([xshift=0.7ex] 2.north) edge [hsrmRed, dashed] node {}
+        %         ([xshift=0.7ex] 3.south);
+        %\path[->] (3) edge [hsrmRed, dashed] node {}
+        %         (4);
+        %\path[->] ([xshift=0.7ex] 4.south) edge [hsrmRed, dashed] node {}
+        %         ([xshift=0.7ex] 5.north);
+        %\path[->] (5) edge [hsrmRed, dashed] node {}
+        %         (6);
+        \path[->] (6') edge [hsrmRed, dashed] node {}
+                 (7);
+        \path[->] ([xshift=0.7ex] 7.south) edge [hsrmRed, dashed] node {}
+                 ([xshift=0.7ex] 8.north);
+        \path[->] (8) edge [hsrmRed, dashed] node {}
+                 (9);
+        \path[->] ([xshift=0.7ex] 9.north) edge [hsrmRed, dashed] node {}
+                 ([xshift=0.7ex] 10.south);
+        \path[->] (10) edge [hsrmRed, dashed] node {}
+                 (11);
+        \path[->] ([xshift=0.7ex] 11.north) edge [hsrmRed, dashed] node {}
+                 ([xshift=0.7ex] 1.south);
+        \path[->] ([xshift=0.7ex] 6.south) edge [hsrmRed, dashed] node {}
+                 ([xshift=0.7ex] 6'.north);
+
+
+      \end{tikzpicture}
+      }
+      }
+    \end{column}
+  \end{columns}
+
+
+      \begin{itemize}
+        \item Erzeugung des Offsprings $G_o$ aus $\begingroup\color{blue}G_1\endgroup \cup
+          \begingroup\color{hsrmRed}G_2\endgroup$
+        \item Innerhalb der Partition: Bereits optimaler Weg 
+      \end{itemize}
+    \end{column}
+    \begin{column}{.25\textwidth}
+% IMAGE
+
+      \onslide<1-> {
+      \resizebox{85pt}{180pt}{%
+          \Highlight{D}
+          \evolpictureside
+        }
+      }
+    \end{column}
+  \end{columns}
+}
 
 \frame{\frametitle{Mutation}
   \begin{columns}[T]
     \begin{column}{.75\textwidth}
 % TEXT
       \begin{itemize}
-        \item
+        \item Teile einer Rundreise stärker verändern
+        \item Man möchte nicht im lokalen Optimum gefangen sein
+        \item Möglichkeiten
+          \begin{itemize}
+            \item mittels Permutation
+            \item invertierende Mutation
+          \end{itemize}
       \end{itemize}
     \end{column}
     \begin{column}{.25\textwidth}
@@ -745,5 +885,15 @@
 
 % \section{Auswertung der (bisherigen) Ergebnisse}
 % \label{sec:auswertung}
+
+\section{Literatur}
+\label{sec:literatur}
+
+
+\frame { \frametitle{Literatur I}
+  \bibliographystyle{plain}
+  \nocite{*}
+  \tiny\bibliography{literatur}
+}
 
 \end{document}
