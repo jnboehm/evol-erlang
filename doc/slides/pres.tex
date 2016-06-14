@@ -175,7 +175,8 @@
     \item Anzahl Touren: $(n-1)! = (n-1) \cdot (n-2) \cdot ...
       \cdot 2 \cdot 1$
     \pause
-  \item Wahrscheinlich nicht in polynomieller Zeit lösbar $\mathcal{O}(2^n)$
+  \item Nicht in polynomieller Zeit lösbar $\mathcal{O}(2^n)$, falls
+    \textbf{P} $\neq$ \textbf{NP}
     \pause
     \item NP-vollständig
   \end{itemize}
@@ -326,7 +327,7 @@
         \item \onslide<4-> {Möglichkeiten:
           \begin{itemize}
             \item Random
-            \item „Gleich gute”
+            \item Turnierselektion
           \end{itemize} }
       \end{itemize}
 
@@ -746,21 +747,24 @@
     \begin{column}{.75\textwidth}
 % TEXT
       \begin{itemize}
-        \item Teile einer Rundreise stärker verändern
-        \item Man möchte nicht im lokalen Optimum gefangen sein
-        \item Möglichkeiten
+        \item \onslide<2-> {Teile einer Rundreise stärker verändern}
+        \item \onslide<3-> {Man möchte nicht im lokalen Optimum gefangen
+          sein}
+        \item \onslide<4-> {Möglichkeiten}
           \begin{itemize}
-            \item mittels Permutation
-            \item invertierende Mutation
+            \item \onslide<5-> {mittels Permutation}
+            \item \onslide<6-> {invertierende Mutation}
           \end{itemize}
       \end{itemize}
     \end{column}
     \begin{column}{.25\textwidth}
 % IMAGE
+      \onslide<1-> {
       \resizebox{85pt}{180pt}{%
           \Highlight{E}
           \evolpictureside
         }
+      }
     \end{column}
   \end{columns}
 }
@@ -770,39 +774,59 @@
     \begin{column}{.75\textwidth}
 % TEXT
       \begin{itemize}
-        \item
+        \item \onslide<2-> {Kantengewicht $d(e)$, mit $e \in E$}
+        \item \onslide<3-> {Gegeben eine Rundreise $G= (V, E)$}
       \end{itemize}
+
+      \onslide<4-> {
+      \begin{align*}
+        f(G) = \sum_{e \in E} d(e)
+      \end{align*}
+      }
+
+      \begin{itemize}
+        \item \onslide<5-> {Wir summieren alle Kantengewichte}
+        \item \onslide<6-> {Beste Lösung: $f(G) = \min\{\, f(x) \mid x
+          \in \Omega\,\}$}
+        \item \onslide<7-> {$G \in \Omega$}
+      \end{itemize}
+      
     \end{column}
     \begin{column}{.25\textwidth}
 % IMAGE
+      \onslide<1-> {
       \resizebox{85pt}{180pt}{%
           \Highlight{F}
           \evolpictureside
         }
+      }
     \end{column}
   \end{columns}
 }
 
-\frame{\frametitle{Selektion}
+\frame{\frametitle{Umweltselektion}
   \begin{columns}[T]
     \begin{column}{.75\textwidth}
 % TEXT
       \begin{itemize}
-        \item
+        \item \onslide<2-> {Frage: Wer kommt in die nächste Generation}
+        \item \onslide<3-> {Möglichkeiten:}
+        \begin{itemize}
+          \item \onslide<4-> {Nur erzeugte Kinder}
+          \item \onslide<5-> {Kinder $+$ Eltern}
+        \end{itemize}
       \end{itemize}
     \end{column}
     \begin{column}{.25\textwidth}
 % IMAGE
+      \onslide<1-> {
       \resizebox{85pt}{180pt}{%
           \Highlight{G}
           \evolpictureside
         }
+      }
     \end{column}
   \end{columns}
-}
-
-\frame{\frametitle{Coming up}
-
 }
 
 \section{Erlang}
