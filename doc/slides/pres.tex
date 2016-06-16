@@ -843,7 +843,7 @@
   \frametitle{Was ist Erlang?}
 
   Erlang ist, eine funktionale Programmiersprache für massiv
-  skalierbare und distributierte Systeme.
+  skalierbare und distributierte Systeme.\footnote{\url{http://www.erlang.org/}}
 
   Wir haben uns für Erlang entschieden, da Parallelisierung mithilfe
   von „message passing“ ein Grundprinzip der Sprache ist, was auch auf
@@ -853,8 +853,7 @@
 \begin{frame}
   \frametitle{Andere Charakteristika}
 
-  Mehr Eigenschaften:
-
+  Weitere Eigenschaften:
   \begin{itemize}
   \item soft real time
   \item hot code loading
@@ -863,25 +862,69 @@
   \item läuft auf einer virutellen Maschine (BEAM)
   \end{itemize}
 
-  Ursprünglich wurde die Sprache für Telekommunikationssysteme
-  entwickelt, wo diese Punkte eine deutlich größere Rolle spielen.
+  Ursprünglich wurde die Sprache für langläufige
+  Telekommunikationssysteme entwickelt, wo diese Punkte eine deutlich
+  größere Rolle spielen.
+\end{frame}
+
+\begin{frame}
+  \frametitle{BEAM}
+
+  Ist ein Prozess in dem Betriebssystem.  Erstellt pro Prozessorkern
+  einen Thread.
+
+  Benutzt eine eigene run-queue.  Wurde ähnlich einem Betriebssystem
+  konzipiert; es gibt sogar „Erlang on Xen“ – Erlang läuft als eigenes
+  Betriebssystem auf bare metal.
 \end{frame}
 
 \begin{frame}
   \frametitle{Was ist funktionale Programmierung?}
 
-  FP ist an mathemaitsche Notation angelehnt.
+  FP ist an mathematscher Notation angelehnt.
 
   Im idealen Sinn haben Funktionen keine Seiteneffekte.
 
-  Im Allgemeinen werden Funktionen nur mit „call-by-value“ aufgerufen.
-  Allerdings muss das Konzept teilweise gebrochen werden, um z. B. IO
-  zu realisieren.
+  Daten können nicht verändert werden. % immutability
+\end{frame}
 
-  Daten, bzw. Variablen, können nicht mehr verändert
-  werden. \lstinline{i += 1} ist nicht möglich. % Evtl. ist ein Beispiel eingänglicher.
+\begin{frame}
+  \frametitle{Seiteneffekte}
 
+  \begin{block}{Referentielle Transparenz}
+    Ausdruck kann durch sein Ergebnis ersetzt werden ohne die
+    Korrektheit des Programms zu verändern.
+  \end{block}
+  Das impliziert Determinismus und ist unter anderem wichtig für
+  Compiler-Optimierungen.  Außerdem ermöglicht es Memoisierung.
+  % Cachen von Funktionsergebnissen
 
+  \bigskip Im Allgemeinen werden Funktionen nur mit „call-by-value“
+  aufgerufen.  Allerdings wird das Konzept teilweise gebrochen, um
+  z. B. IO zu realisieren.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Immutable data}
+
+  Variablen können nach dem Binden nicht mehr verändert werden. Zum
+  Beipiel ist \lstinline{i = i + 1} nicht möglich in Erlang.
+
+  \pause
+  \bigskip Sieht $n=n+1$ natürlich aus?
+  % Evtl. ist ein Beispiel eingänglicher.
+
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Elemente der Sprache}
+
+  Variablen fangen mit einem Großbuchstaben an.  Kleingeschriebene
+  Wörter sind {\Medium Atome}.
+
+  Ein Tupel $(km, 20)$ wird in Erlang \verb|{km, 20}| geschrieben.
+
+  Listen sehen so aus: \quad\verb|List = [this, is, a, list].|
 \end{frame}
 
 \begin{frame}[fragile]
@@ -905,17 +948,12 @@
   \frametitle{Listen und Mengen}
   $$ \{\,2 \cdot x \mid x \in X\,\}$$
 
-  \vfill
+  % \vfill
 
-  \begin{lstlisting}
-    [2 * X || X <- Xs].
-  \end{lstlisting}
+  % \begin{lstlisting}
+  %   [2 * X || X <- Xs].
+  % \end{lstlisting}
 \end{frame}
-\section{Parallelisierung}
-\label{sec:parallelisierung}
-
-% \section{Auswertung der (bisherigen) Ergebnisse}
-% \label{sec:auswertung}
 
 \section{Literatur}
 \label{sec:literatur}
