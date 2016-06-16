@@ -14,6 +14,7 @@
 \usepackage{tikz}
 \usetikzlibrary{shapes,shapes.geometric,arrows,fit,calc,positioning,automata}
 
+\def\mathunderline#1#2{\color{#1}\underline{{\color{hsrmWarmGreyDark}#2}}\color{hsrmWarmGreyDark}}
 
 % verschiedene Shapes für die Zustände
 \tikzset{elliptic state/.style={draw,ellipse}}
@@ -152,20 +153,20 @@
 
 \frame{\frametitle{metrisches TSP}
   \begin{itemize}
-      \item Dreiecksungleichung $c \leq a + b$ gilt für alle
-        Kantenlängen
-      \pause
-      \item Der direkte Weg von Knoten $A$ nach $B$ ist immer der
-        kürzeste.
-      \pause
-      \item Es lohnen sich also keine Umwege
+    \item\onslide<2-> { Dreiecksungleichung $c \leq a + b$ gilt für alle
+      Kantenlängen}
+    \item \onslide<3-> {Der direkte Weg von Knoten $A$ nach $B$ ist immer der
+      kürzeste.}
+    \item \onslide<4-> {Es lohnen sich also keine Umwege}
       \pause
   \end{itemize}
+  \onslide<1-> {
   \begin{figure}
     \centering
     \def\svgwidth{220pt}
     \input{triangle.pdf_tex}
   \end{figure}
+  }
 }
 
 \frame{\frametitle{Komplexität}
@@ -175,9 +176,12 @@
     \item Anzahl Touren: $(n-1)! = (n-1) \cdot (n-2) \cdot ...
       \cdot 2 \cdot 1$
     \pause
-  \item Nicht in polynomieller Zeit lösbar $\mathcal{O}(2^n)$, falls
-    \textbf{P} $\neq$ \textbf{NP}
-    \pause
+      \item
+      $\mathcal{O}{(n!)}$ bzw. $\mathcal{O}(2^n)$
+      \pause
+    \item Nicht in polynomieller Zeit lösbar, falls
+      \textbf{P} $\neq$ \textbf{NP}
+      \pause
     \item NP-vollständig
   \end{itemize}
 }
@@ -360,7 +364,7 @@
           paaren.}
         \item \onslide<3-> {Ergebnis ist ein Kind oder Offspring $G_o$}
         \item \onslide<4-> {Frage: Wie machen wir das?}
-        \item \onslide<5-> {verschiedene Strategien (sog. Crossover)}
+        \item \onslide<5-> {verschiedene Strategien (Crossover)}
           \begin{itemize}
             \item \onslide<6-> {Kantenrekombination}
             \item \onslide<7-> {GAPX}
@@ -384,7 +388,7 @@
     \begin{column}{.75\textwidth}
 % TEXT
       \begin{itemize}
-        \item\onslide<2->{ „Generalized Asymetric Partition Crossover“}
+        \item\onslide<2->{ „Generalized Asymmetric Partition Crossover“}
         \item\onslide<3->{Speziell für ATSP}
       \end{itemize}
 
@@ -583,6 +587,7 @@
       \begin{columns}[T]
         \begin{column}{.5\textwidth}
 
+      \onslide<1-> {
       \resizebox{120pt}{150pt}{%
       \begin{tikzpicture}[%
         >=stealth,
@@ -620,8 +625,8 @@
         \path[->] (7) edge [blue, bend left=0] node  {} (10);
         \path[->] (10) edge [blue, bend left=0] node  {} (9);
         \path[->] (9) edge [blue, bend left=0] node  {} (11);
-        \path[->] (11) edge [blue, bend left=0] node  {} (1);
-        \path[->] (6) edge [blue, bend left=0] node  {} (6');
+        %\path[->] (11) edge [blue, bend left=0] node  {} (1);
+        %\path[->] (6) edge [blue, bend left=0] node  {} (6');
 
         % dashed: parent 2
         \path[->] (1) edge [bend left=0, dashed, hsrmRed] node {} (2);
@@ -643,20 +648,21 @@
                  ([xshift=0.7ex] 10.south);
         \path[->] (10) edge [hsrmRed, dashed] node {}
                  (11);
-        \path[->] ([xshift=0.7ex] 11.north) edge [hsrmRed, dashed] node {}
-                 ([xshift=0.7ex] 1.south);
-        \path[->] ([xshift=0.7ex] 6.south) edge [hsrmRed, dashed] node {}
-                 ([xshift=0.7ex] 6'.north);
+        %\path[->] ([xshift=0.7ex] 11.north) edge [hsrmRed, dashed] node {}
+        %         ([xshift=0.7ex] 1.south);
+        %\path[->] ([xshift=0.7ex] 6.south) edge [hsrmRed, dashed] node {}
+        %         ([xshift=0.7ex] 6'.north);
 
 
         \end{tikzpicture}
+        }
         }
 
         \end{column}
 
         \begin{column}{.5\textwidth}
 
-      \onslide<1-> {
+      \onslide<2-> {
       \resizebox{120pt}{150pt}{%
       \begin{tikzpicture}[%
         >=stealth,
@@ -731,9 +737,12 @@
 
 
       \begin{itemize}
-        \item Erzeugung des Offsprings $G_o$ aus $\begingroup\color{blue}G_1\endgroup \cup
-          \begingroup\color{hsrmRed}G_2\endgroup$
-        \item Innerhalb der Partition: Bereits optimaler Weg 
+        \item \onslide<1-> {Löschen von Kanten, bei denen
+          $\begingroup\color{blue}G_1\endgroup$
+          und $\begingroup\color{hsrmRed}G_2\endgroup$ in die selbe
+          Richtung zeigen }
+        \item \onslide<2-> {Erzeugung des Offsprings $G_o$ aus $\begingroup\color{blue}G_1\endgroup \cup
+          \begingroup\color{hsrmRed}G_2\endgroup$}
       \end{itemize}
     \end{column}
     \begin{column}{.25\textwidth}
@@ -759,8 +768,13 @@
           sein}
         \item \onslide<4-> {Möglichkeiten}
           \begin{itemize}
-            \item \onslide<5-> {mittels Permutation}
-            \item \onslide<6-> {invertierende Mutation}
+            \item \onslide<5-> {vertauschende Mutation
+              $(1,\mathunderline{hsrmRed}{2},3,4,5,\mathunderline{hsrmRed}{6},7,8)
+              \rightarrow
+              (1,\mathunderline{hsrmRed}{6},3,4,5,\mathunderline{hsrmRed}{2},7,8)$}
+            \item \onslide<6-> {invertierende Mutation
+              $(1,\mathunderline{hsrmRed}{2},3,4,5,\mathunderline{hsrmRed}{6},7,8)
+              \rightarrow (1,\mathunderline{hsrmRed}{6,5,4,3,2},7,8)$}
           \end{itemize}
       \end{itemize}
     \end{column}
@@ -781,8 +795,8 @@
     \begin{column}{.75\textwidth}
 % TEXT
       \begin{itemize}
-        \item \onslide<2-> {Kantengewicht $d(e)$, mit $e \in E$}
-        \item \onslide<3-> {Gegeben eine Rundreise $G= (V, E)$}
+        \item \onslide<2-> {Gegeben sei eine Rundreise $G=(V, E\,)$}
+        \item \onslide<3-> {Kantengewicht: $d(e)$, mit $e \in E$}
       \end{itemize}
 
       \onslide<4-> {
@@ -793,10 +807,13 @@
 
       \begin{itemize}
         \item \onslide<5-> {Wir summieren alle Kantengewichte}
-        \item \onslide<6-> {Beste Lösung: $f(G) = \min\{\, f(x) \mid x
-          \in \Omega\,\}$}
-        \item \onslide<7-> {$G \in \Omega$}
+        \item \onslide<6-> {Beste Lösung:}
       \end{itemize}
+      \onslide<7-> {
+      \begin{align*}
+        f(G\,) = \min\{\, f(x) \mid x \in \Omega\,\}, G \in \Omega
+      \end{align*}
+      }
       
     \end{column}
     \begin{column}{.25\textwidth}
