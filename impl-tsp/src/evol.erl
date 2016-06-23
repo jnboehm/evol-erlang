@@ -10,9 +10,6 @@
 -compile(export_all).
 
 
-gapx_recomb(_ParentA, _ParentB, _EdgeList) ->
-  ok.
-
 %% @doc Creates an union graph of the two parent elements
 ug_of(ParentA, ParentB, EdgeList) ->
   G = parse_tsp_file:set_up_vertices(length(ParentA)),
@@ -98,9 +95,13 @@ get_rnd_roundtrip(Vertices, N, VertexList) ->
 
 
 init(InitialRoundtrips, FileName) ->
-  {Opts, Graph} = parse_tsp_file:make_atsp_graph(FileName),
-  Roundtrips = get_rnd_roundtrip(digraph:vertices(Graph), InitialRoundtrips),
-  Edgelist = graph_utils:get_edge_list(Graph).
+  {Opts, Graph} = parse_tsp_file:make_atsp_graph(FileName).
+  
+  %Roundtrips = get_rnd_roundtrip(digraph:vertices(Graph), InitialRoundtrips),
+  %Edgelist = graph_utils:get_edge_list(Graph).
+
+  
+
 
   %random:seed(erlang:now()),          % from http://erlang.org/doc/man/random.html
   %run(Opts, Graph, Roundtrips, Edgelist, fun(_, _) -> true end).
@@ -119,6 +120,27 @@ run(Opts, Graph, Roundtrips, Edgelist, HiScore,CancelFun, MateFun, Gen) ->
 	    end;
     false -> Best
   end.
+
+select_parents(Roundtrips) ->
+  Par1 = nth(random:uniform(length(Roundtrips)), Roundtrips),
+  Par2 = nth(random:uniform(length(Roundtrips)), Roundtrips),
+  {Par1, Par2}.
+
+
+gapx(Par1, Par2, EdgeList) ->
+  Ug = ug_of(Par1, Par2, EdgeList),
+  EdgeListUg = graph_utils:get_edge_list(Ug),
+
+  % Create ghost nodes for all nodes of degree 4.
+  lists:map(fun (Vertex) -> graph_utils:create_ghost_node(Ug,
+                                                          EdgeListUg,
+                                                          Vertex) end, 
+            [ V || V <- digraph:vertices(Ug), graph_utils:has_deg_4(Ug, V) =:= true ]),
+
+  % Partitioning
+  
+  % Return offspring
+  [].
 
 
 make_offspring(Roundtrips, MateFun, Pool) ->
