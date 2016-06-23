@@ -35,7 +35,13 @@ get_fitness(EdgeList, Roundtrip) ->
 %% Returns true iff the given vertex has a degree of 4. Returns false
 %% otherwise.
 has_deg_4(G, V) ->
-  digraph:in_degree(G, V) + digraph:out_degree(G,V) =:= 4.
+%  digraph:in_degree(G, V) + digraph:out_degree(G,V) =:= 4.
+  ([] =:= [ V2 || V1 <- digraph:in_neighbours(G, V), 
+                       V2 <- digraph:out_neighbours(G, V),
+                       V1 == V2 
+                ]) and (digraph:in_degree(G, V) +
+                       digraph:out_degree(G,V) =:= 4).
+
 
 %% Creates a ghost node for the given Node V in the given union graph.
 %% Note: Ghost nodes can only be created if the degree of the node is
@@ -56,18 +62,15 @@ has_deg_4(G, V) ->
 create_ghost_node(GU, EdgeList, V) ->
   digraph:add_vertex(GU, -V, -V),
   Out = digraph:out_edges(GU, V),
-  In = digraph:in_edges(GU, V),
 
-  [{_,VI,_,WI}] = lists:filter(fun({E, _V1, _V2, _W}) -> E =:= nth(1, In)
-                                end, EdgeList),
-  [{_,_,VO,WO}] = lists:filter(fun({E, _V1, _V2, _W}) -> E =:= nth(2, Out)
+  [{_,_,VO,WO}, {_,_,V1,W1}] = lists:filter(fun({E, _V1, _V2, _W}) -> lists:member(E, Out)
                                 end, EdgeList),
     
-  digraph:add_edge(GU, VI, -V, WI), % E3
+  digraph:add_edge(GU, -V, V1, W1), % E3
   digraph:add_edge(GU, -V, VO, WO), % E2
 
   % delete the original paths to V
-  digraph:del_edge(GU, nth(1, In)),
+  digraph:del_edge(GU, nth(1, Out)),
   digraph:del_edge(GU, nth(2, Out)),
 
   % create the dummy edge of weight 0 between V and V' (E5)
