@@ -1,0 +1,41 @@
+{O, G} = evol:init().
+EdgeList = graph_utils:get_edge_list(G).
+Rnds = evol:get_rnd_roundtrip(digraph:vertices(G), 2).
+Ug = graph_utils:ug_of(hd(Rnds), hd(tl(Rnds)), EdgeList).
+EdgeListUg = graph_utils:get_edge_list(Ug).
+lists:map(fun (Vertex) -> graph_utils:create_ghost_node(Ug, EdgeListUg, Vertex) end, [ V || V <- digraph:vertices(Ug), graph_utils:has_deg_4(Ug, V) =:= true ]).
+G1 = graph_utils:list_to_graph(hd(Rnds), EdgeList).
+G2 = graph_utils:list_to_graph(hd(tl(Rnds)), EdgeList).
+G1Merged = graph_utils:merge_graphs(G1, G2).
+EdgeListG1Merged = graph_utils:get_edge_list(G1Merged).
+lists:map(fun (Vertex) -> graph_utils:create_ghost_node(G1Merged, EdgeListG1Merged, Vertex) end, [ V || V <- digraph:vertices(G1Merged), graph_utils:has_deg_4(G1Merged, V) =:= true ]).
+
+{O, G} = evol:init().
+EdgeList = graph_utils:get_edge_list(G).
+Rnds = evol:get_rnd_roundtrip(digraph:vertices(G), 2).
+Ug = graph_utils:ug_of([1,3,4,2,5], [1,2,5,3,4], EdgeList).
+EdgeListUg = graph_utils:get_edge_list(Ug).
+lists:map(fun (Vertex) -> graph_utils:create_ghost_node(Ug, EdgeListUg, Vertex) end, [ V || V <- digraph:vertices(Ug), graph_utils:has_deg_4(Ug, V) =:= true ]).
+G1 = graph_utils:list_to_graph([1,3,4,2,5], EdgeList).
+G2 = graph_utils:list_to_graph([1,2,5,3,4], EdgeList).
+G1G2Merged = graph_utils:merge_graphs(G1, G2).
+EdgeListG1G2Merged = graph_utils:get_edge_list(G1G2Merged).
+
+
+{O, G} = evol:init().
+EdgeList = graph_utils:get_edge_list(G).
+Gu = graph_utils:merge_graphs(graph_utils:list_to_graph([1,3,4,2,5], EdgeList), graph_utils:list_to_graph([1,2,5,3,4], EdgeList)).
+GuDash = graph_utils:merge_graphs(graph_utils:list_to_graph([1,3,4,2,5], EdgeList), graph_utils:list_to_graph([1,2,5,3,4], EdgeList)).
+EdgeListGuDash = graph_utils:get_edge_list(GuDash).
+lists:map(fun (Vertex) -> graph_utils:create_ghost_node(GuDash, EdgeListGuDash, Vertex) end, [ V || V <- digraph:vertices(GuDash), graph_utils:has_deg_4(GuDash, V) =:= true ]).
+graph_utils:get_common_edges(graph_utils:get_edge_list(GuDash)).
+graph_utils:display_graph(GuDash).
+
+{O, G} = evol:init().
+EdgeList = graph_utils:get_edge_list(G).
+Rnds = evol:get_rnd_roundtrip(digraph:vertices(G), 2).
+Gu = graph_utils:merge_graphs(graph_utils:list_to_graph(hd(Rnds),EdgeList), graph_utils:list_to_graph(hd(tl(Rnds)), EdgeList)).
+GuDash = graph_utils:merge_graphs(graph_utils:list_to_graph(hd(Rnds), EdgeList), graph_utils:list_to_graph(hd(tl(Rnds)), EdgeList)).
+EdgeListGuDash = graph_utils:get_edge_list(GuDash).
+lists:map(fun (Vertex) -> graph_utils:create_ghost_node(GuDash, EdgeListGuDash, Vertex) end, [ V || V <- digraph:vertices(GuDash), graph_utils:has_deg_4(GuDash, V) =:= true ]).
+graph_utils:get_common_edges(graph_utils:get_edge_list(GuDash)).
