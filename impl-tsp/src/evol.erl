@@ -126,7 +126,6 @@ select_parents(Roundtrips) ->
   Par2 = nth(random:uniform(length(Roundtrips)), Roundtrips),
   {Par1, Par2}.
 
-
 gapx(Par1, Par2, EdgeList) ->
   Ug = ug_of(Par1, Par2, EdgeList),
   EdgeListUg = graph_utils:get_edge_list(Ug),
