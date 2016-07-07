@@ -107,9 +107,9 @@ optmove3_run(G, EdgeList, BitList, N) ->
     true ->
       V1 = hd(Members),
       Neighborhood = optmove3_get_subneighborhood(G, [V1], N),
-      io:format("~p~n", [BitList]),
-      io:format("~p~n", [Neighborhood]),
-      io:format("~p~n", [optmove3_next_triple(BitList, Neighborhood)]),
+      %io:format("~p~n", [BitList]),
+      %io:format("~p~n", [Neighborhood]),
+      %io:format("~p~n", [optmove3_next_triple(BitList, Neighborhood)]),
       case optmove3_next_triple(BitList, Neighborhood) of
         [V1,V3,V5] ->
           case optmove3(G, V1, V3, V5, EdgeList) of
