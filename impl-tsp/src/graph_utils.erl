@@ -87,6 +87,14 @@ create_ghost_node(GU, EdgeList, V) ->
   % create the dummy edge of weight 0 between V and V' (E5)
   digraph:add_edge(GU, V, -V, 0).
 
+%% Creates all the ghost nodes for a merged graph G
+%% G - the merged graph of two parents
+%% EdgeList - the edge list of G
+create_ghost_node_run(G) ->
+  EdgeListG = get_edge_list(G),
+  lists:map(fun (Vertex) -> graph_utils:create_ghost_node(G, EdgeListG, Vertex) end, 
+            [ V || V <- digraph:vertices(G), graph_utils:has_deg_4(G, V) =:= true ]).
+
 
 %% @doc Identifies common edges in the given merged graph.
 %% Returns the edges in a list.
@@ -96,6 +104,29 @@ get_common_edges(EdgeList) ->
                 (V1 =:= -V2) % Ghost edge between v and v' 
            ],
   Common.
+
+%% @doc Returns a list of poisened vertices, which must not be an entry or
+%% exit point in the given component. 
+%%
+%% A vertex is poisened iff the in- or outgoing edge of the vertex is
+%% a) a common edge as returned in get_common_edges/1
+%% b) points to a vertex which is also part of the component.
+%%
+%% Example poisened:
+%% We assume: There was a common edge between 15 and -15.
+%%
+%%  14' -----> 1 <----- -15
+%%   |                   |
+%%   V                   V
+%%  15  <----- 8 -----> 9
+%%
+%% Result: Since there was a common edge between 15 and -15 and both
+%% vertices are inside this component: 15 and -15 are poisened vertices.
+get_poisened_vertices(SubGraph, CommonEdgeList) ->
+  P = [ {X, Y} || {_,X,Y,_} <- CommonEdgeList, lists:member(X, digraph:vertices(SubGraph)), 
+              lists:member(Y, digraph:vertices(SubGraph)) ],
+  lists:flatten(tuple_to_list(lists:unzip(P))).
+
 
 %% @doc Deletes common edges in the given graph.
 %% G - the graph
@@ -125,7 +156,7 @@ ug_of(Graph, Parent, TempEdgeList, EdgeList, N) when N =< length(Parent) ->
     undef -> digraph:add_edge(Graph, V1, V2, 
                             graph_utils:get_weight(EdgeList, V1, V2));
     _ -> ok
-  end,
+  end, 
   ug_of(Graph, Parent, TempEdgeList, EdgeList, N + 1).
 
 %% @doc Creats a union graph of the given graph.
@@ -134,18 +165,18 @@ ug_of(Graph, Parent, TempEdgeList, EdgeList, N) when N =< length(Parent) ->
 union_graph(G, EdgeList) ->
   ok.
 
-%% @doc Entry point for merge_graphs/3
-merge_graphs(G1, G2) ->
-  merge_graphs(G1, G2, get_edge_list(G2)).
-
-%% @doc Merges all edges from G2 into G1. Nodes of G1 and G2 must be equal in order to
-%% create the edges.
-%% G1 - The graph to merge into.
-%% G2 - The graph where the merges come from
-%% G2EdgeList - The edge list of G2.
-merge_graphs(G1, _G2, G2EdgeList) ->
-  [ digraph:add_edge(G1, V1, V2, W) || {_, V1, V2, W} <- G2EdgeList ],
-  G1.
+%% @doc Returns the merged graph of G1 and G2 with G1 and G2 untouched.
+%% The vertices will be taken from G1.
+%%
+%% G1 - the first graph
+%% G2 - the second graph
+get_merged_graph_of(G1, G2) ->
+  GM = parse_tsp_file:set_up_vertices(digraph:no_vertices(G1)),
+  EdgeListG1 = get_edge_list(G1),
+  EdgeListG2 = get_edge_list(G2),
+  [ digraph:add_edge(GM, V1, V2, W) || {_, V1, V2, W} <- EdgeListG1 ],
+  [ digraph:add_edge(GM, V1, V2, W) || {_, V1, V2, W} <- EdgeListG2 ],
+  GM.  
 
 %% @doc Transforms a given list into a graph
 %% G - the graph to transform
@@ -177,22 +208,41 @@ graph_to_list(G) ->
 %% V1 - the first vertex
 %% V2 - the second vertex
 %% EdgeList - the edge list where the weights can be found
-optmove2(G,V1,V2,EdgeList) ->
-  V1OutNeighbor = hd(digraph:out_neighbours(G, V1)),
-  V2OutNeighbor = hd(digraph:out_neighbours(G, V2)),
+%%optmove2(G,V1,V2,EdgeList) ->
+%%  V1OutNeighbor = hd(digraph:out_neighbours(G, V1)),
+%%  V2OutNeighbor = hd(digraph:out_neighbours(G, V2)),
+%%
+%%  digraph:add_edge(G, V1, V2, get_weight(EdgeList, V1, V2)),
+%%  digraph:add_edge(G, V1OutNeighbor, V2OutNeighbor, get_weight(EdgeList,
+%%                                                              V1OutNeighbor,
+%%                                                              V2OutNeighbor)),
+%%
+%% digraph:del_edge(G, hd(digraph:out_edges(G, V1))),
+%% digraph:del_edge(G, hd(digraph:out_edges(G, V2))).
+%%
+%%  % direction swap?
 
-  digraph:add_edge(G, V1, V2, get_weight(EdgeList, V1, V2)),
-  digraph:add_edge(G, V1OutNeighbor, V2OutNeighbor, get_weight(EdgeList,
-                                                              V1OutNeighbor,
-                                                              V2OutNeighbor)),
+%% @doc Returns the entry points for the specified sub graph, which is a
+%% component of a merged graph.
+%%
+%% SubGraph - the sub graph in which to search for entry points
+%% CommonEdges - the common edges of all components
+get_entry_points(SubGraph, CommonEdges) ->
+  Poison = get_poisened_vertices(SubGraph, CommonEdges),
+  [ X || X <- digraph:vertices(SubGraph),
+         length(digraph:in_neighbours(SubGraph, X)) =:= 0, 
+         not lists:member(X, Poison) ].
 
-  digraph:del_edge(G, hd(digraph:out_edges(G, V1))),
-  digraph:del_edge(G, hd(digraph:out_edges(G, V2))).
-
-  % direction swap?
-  % TODO
-
-
+%% @doc Equivalent to get_entry_points/1 this function searches for exit
+%% points in the given component
+%%
+%% SubGraph - the sub graph in which to seach for exit points
+%% CommonEdges - the common edges of all components
+get_exit_points(SubGraph, CommonEdges) ->
+  Poison = get_poisened_vertices(SubGraph, CommonEdges),
+  [ X || X <- digraph:vertices(SubGraph),
+         length(digraph:out_neighbours(SubGraph, X)) =:= 0, 
+         not lists:member(X, Poison) ].
 
 %% @doc Displays a graph in a very unconventional way. :-)
 %% It uses fdp for graph rendering.
