@@ -39,3 +39,55 @@ GuDash = graph_utils:merge_graphs(graph_utils:list_to_graph(hd(Rnds), EdgeList),
 EdgeListGuDash = graph_utils:get_edge_list(GuDash).
 lists:map(fun (Vertex) -> graph_utils:create_ghost_node(GuDash, EdgeListGuDash, Vertex) end, [ V || V <- digraph:vertices(GuDash), graph_utils:has_deg_4(GuDash, V) =:= true ]).
 graph_utils:get_common_edges(graph_utils:get_edge_list(GuDash)).
+
+{O, G} = evol:init().
+EdgeList = graph_utils:get_edge_list(G).
+GuDash = graph_utils:merge_graphs(graph_utils:list_to_graph([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15], EdgeList), graph_utils:list_to_graph([1,2,4,3,6,5,7,8,15,9,13,10,12,11,14], EdgeList)).
+EdgeListGuDash = graph_utils:get_edge_list(GuDash).
+lists:map(fun (Vertex) -> graph_utils:create_ghost_node(GuDash, EdgeListGuDash, Vertex) end, [ V || V <- digraph:vertices(GuDash), graph_utils:has_deg_4(GuDash, V) =:= true ]).
+graph_utils:get_common_edges(graph_utils:get_edge_list(GuDash)).
+graph_utils:display_graph(GuDash).
+
+{O, G} = evol:init().
+EdgeList = graph_utils:get_edge_list(G).
+BitList = [ {V, false} || V <- digraph:vertices(G) ].
+G1 = graph_utils:list_to_graph([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17], EdgeList).
+optmove3:optmove3_run(G1, EdgeList, 5).
+
+
+Neighborhood = optmove3::optmove3_get_subneighborhood(G1, [15], 5).
+graph_utils:optmove3_next_triple(BitList, Neighborhood).
+graph_utils:optmove3_get_subneighborhood(G1, hd([ X || {X,Y} <- BitList, Y =:= false]), [], 5).
+
+G2 = graph_utils:list_to_graph([1,2,3,4,5,6], EdgeList).
+graph_utils:optmove3_get_subneighborhood(G1, 3).
+
+
+
+---
+Random Rundreise
+---
+
+{O, G} = evol:init().
+EdgeList = graph_utils:get_edge_list(G).
+Rnds = evol:get_rnd_roundtrip(digraph:vertices(G), 2).
+G1 = graph_utils:list_to_graph(hd(Rnds), EdgeList).
+G2 = graph_utils:list_to_graph(hd(tl(Rnds)), EdgeList).
+optmove3:optmove3_run(G1, EdgeList, 10).
+optmove3:optmove3_run(G2, EdgeList, 10).
+GM = graph_utils:get_merged_graph_of(G1, G2).
+graph_utils:create_ghost_node_run(GM).
+graph_utils:del_common_edges(GM).
+graph_utils:display_graph(GM).
+
+
+---
+Beispiel aus PDF
+---
+{O, G} = evol:init().
+EdgeList = graph_utils:get_edge_list(G).
+GM  = graph_utils:get_merged_graph_of(graph_utils:list_to_graph([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15], EdgeList), graph_utils:list_to_graph([1,2,4,3,6,5,7,8,15,9,13,10,12,11,14], EdgeList)).
+graph_utils:create_ghost_node_run(GM).
+CommonEdges = graph_utils:get_common_edges(graph_utils:get_edge_list(GM)).
+graph_utils:del_common_edges(GM).
+graph_utils:display_graph(GM).
