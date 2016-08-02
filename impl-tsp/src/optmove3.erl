@@ -95,6 +95,7 @@ optmove3_yes(G, V1, V3, V5, EdgeList) ->
 %%
 %% G - the graph (roundtrip) to perform the 3-opt-moves
 %% EdgeList - the edge list with all the weights
+%% N - neighborhood size
 optmove3_run(G, EdgeList, N) ->
   BitList = [ {V, false} || V <- digraph:vertices(G) ],
   optmove3_run(G, EdgeList, BitList, N).
@@ -132,7 +133,7 @@ optmove3_run(G, EdgeList, BitList, N) ->
 %% perform a 3-opt-move. This function respects the 3-opt-move variant
 %% where "don't look bits" are used.
 %%
-%% Bitlist - The 2 tuple of {Ver)ex, true|false}
+%% Bitlist - The 2 tuple of [Vertex, true|false]
 %% Neighborhood - the neighborhood.
 %% V - the vertex to start looking for a triple
 optmove3_next_triple(BitList, Neighborhood) ->
