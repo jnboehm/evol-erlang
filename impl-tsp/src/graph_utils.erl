@@ -6,6 +6,7 @@
 
 -module(graph_utils).
 -import(lists, [nth/2, seq/2, zip/2, sum/1]).
+-import(string, [concat/2]).
 -export([]).
 -compile(export_all).
 
@@ -249,11 +250,24 @@ get_exit_points(SubGraph, CommonEdges) ->
 display_graph(G) ->
   EdgeList = graph_utils:get_edge_list(G),
   CommandStr = io_lib:format("~p", [ [{V1, V2} || {_, V1,V2,_} <- EdgeList]]),
-  SedStr = string:concat(string:concat("echo \"", CommandStr), "\" | sed 's/{//g;s/},/\\n/g;s/,/->/g;s/}]//g;s/\\[//g'"),
+  NodeStr = os:cmd(concat_all(["echo \"", io_lib:format("~p", [digraph:vertices(G)]),"\" | sed ''"]),
+
+  SedStr = concat_all(["echo \"", NodeStr, CommandStr,
+		       "\" | sed 's/{//g;s/},/\\n/g;s/,/->/g;s/}]//g;s/\\[//g'"]),
   CmdOut = os:cmd(SedStr),
   CmdStr = io_lib:format("echo \" digraph x { ~s }\" | fdp -Tsvg | display", [CmdOut]),
-  io:format("~s", [CmdStr]),
+  io:format("~s", [SedStr]),
   os:cmd(CmdStr).
+
+concat_all(L) ->
+  concat_all([], L).
+
+concat_all(Str,  [NextStr | TailStr]) ->
+  concat_all(concat(Str, NextStr), TailStr);
+concat_all(Str, []) ->
+  Str.
+
+
 
 %% @doc Helper function to count the element X in the list H.
 %% X - the element to count
