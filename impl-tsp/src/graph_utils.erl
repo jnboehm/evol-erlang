@@ -256,7 +256,6 @@ display_graph(G) ->
 		       "\" | sed 's/{//g;s/},/\\n/g;s/,/->/g;s/}]//g;s/\\[//g'"]),
   CmdOut = os:cmd(SedStr),
   CmdStr = io_lib:format("echo \" digraph x { ~s }\" | fdp -Tsvg | display", [CmdOut]),
-  io:format("~s", [SedStr]),
   os:cmd(CmdStr).
 
 concat_all(L) ->
