@@ -71,11 +71,6 @@ optmove3_yes(G, V1, V3, V5, EdgeList) ->
   V4 = hd(digraph:out_neighbours(G, V3)),
   V6 = hd(digraph:out_neighbours(G, V5)),
 
-  % weights before
-  W_V1_V2 = graph_utils:get_weight(EdgeList, V1, V2),
-  W_V3_V4 = graph_utils:get_weight(EdgeList, V3, V4),
-  W_V5_V6 = graph_utils:get_weight(EdgeList, V5, V6),
-
   % weights after
   W_V1_V4 = graph_utils:get_weight(EdgeList, V1, V4),
   W_V3_V6 = graph_utils:get_weight(EdgeList, V3, V6),
@@ -139,7 +134,7 @@ optmove3_run(G, EdgeList, BitList, N) ->
 optmove3_next_triple(BitList, Neighborhood) ->
   optmove3_next_triple(BitList, Neighborhood, [], 3).
 
-optmove3_next_triple(BitList, Neighborhood, Triple, 0) ->
+optmove3_next_triple(_BitList, _Neighborhood, Triple, 0) ->
   lists:reverse(Triple);
 
 optmove3_next_triple(BitList, Neighborhood, Triple, N) ->
@@ -186,7 +181,7 @@ optmove3_update_bitlist(BitList, Elements, N) ->
 %%
 %% G - the graph
 %% V - the V to to satisfy condition N(V) = V1
-optmove3_get_subneighborhood(G, Neighborhood, 1) ->
+optmove3_get_subneighborhood(_G, Neighborhood, 1) ->
   lists:reverse(Neighborhood);
 
 optmove3_get_subneighborhood(G, Neighborhood, N) ->
