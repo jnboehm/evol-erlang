@@ -260,13 +260,7 @@ display_graph(G) ->
   os:cmd(CmdStr).
 
 concat_all(L) ->
-  concat_all([], L).
-
-concat_all(Str,  [NextStr | TailStr]) ->
-  concat_all(concat(Str, NextStr), TailStr);
-concat_all(Str, []) ->
-  Str.
-
+  lists:foldl(fun string:concat/2, "", L).
 
 
 %% @doc Helper function to count the element X in the list H.
