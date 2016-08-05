@@ -250,7 +250,7 @@ get_exit_points(SubGraph, CommonEdges) ->
 display_graph(G) ->
   EdgeList = graph_utils:get_edge_list(G),
   CommandStr = io_lib:format("~p", [ [{V1, V2} || {_, V1,V2,_} <- EdgeList]]),
-  NodeStr = os:cmd(concat_all(["echo \"", io_lib:format("~p", [digraph:vertices(G)]),"\" | sed ''"]),
+  NodeStr = os:cmd(concat_all(["echo \"", io_lib:format("~p", [digraph:vertices(G)]),"\" | sed ''"])),
 
   SedStr = concat_all(["echo \"", NodeStr, CommandStr,
 		       "\" | sed 's/{//g;s/},/\\n/g;s/,/->/g;s/}]//g;s/\\[//g'"]),
