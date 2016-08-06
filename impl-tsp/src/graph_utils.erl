@@ -11,28 +11,34 @@
 -compile(export_all).
 
 
+-record(digraph, {vtab = notable :: ets:tab(),
+		  etab = notable :: ets:tab(),
+		  ntab = notable :: ets:tab(),
+	          cyclic = true  :: boolean()}).
+
 %% @doc Returns the weight between two adjacent vertices.
 %% If no weight can be determined, which means that there is no
 %% connection between V1 -> V2, the atom undef is returned.
-get_weight(EdgeList, V1, V2) ->
-  F = fun({_E, V1T, V2T, _W}) -> {V1T, V2T} =:= {V1,V2} end,
-  case lists:filter(F, EdgeList) of
-    [{_,_,_,W}] -> W;
-    [] -> undef
+get_weight(G, V1, V2) ->
+  WL = ets:select(G#digraph.etab, [{{'_',V1,V2,'$1'},[],['$1']}]),
+  case WL of
+    [] -> undef;
+    WL -> hd(WL)
   end.
 
-get_weight(EdgeList, E) ->
-  F = fun({E1, _, _, _W}) -> E1 =:= E end,
-  case lists:filter(F, EdgeList) of
-    [{_,_,_,W}] -> W;
-    [] -> undef
+get_weight(G, E) ->
+  WL = ets:select(G#digraph.etab, [{{E,'_','_','$1'},[],['$1']}]),
+  case WL of
+    [] -> undef;
+    WL -> hd(WL)
   end.
 
 %% @doc Creates an edge list for the given graph.
 get_edge_list(Graph) ->
-  [digraph:edge(Graph, Edge) || Edge <- digraph:edges(Graph)].
+  ets:select(Graph#digraph.etab, [{{'$1','$2','$3','$4'},[],[{{'$1','$2','$3','$4'}}]}]).
 
 %% @doc Returns the fitness value for a specific roundtrip
+%% DEPRECATED!!!
 get_fitness(EdgeList, Roundtrip) ->
   Weights = [get_weight(EdgeList, 
                         nth(N, Roundtrip), 
@@ -44,8 +50,9 @@ get_fitness(EdgeList, Roundtrip) ->
 %%
 %% EdgeList - the list where the weights can be found
 %% G - the graph which represents the roundtrip
-get_fitness_graph(EdgeList, G) ->
-  Weights = [ get_weight(EdgeList, X) || X <- digraph:edges(G) ],
+%% TODO make and ets_select/2 funcall
+get_fitness_graph(_EdgeList, G) ->
+  Weights = [ get_weight(G, X) || X <- digraph:edges(G) ],
   sum(Weights).
 
 %% Returns true iff the given vertex has a degree of 4. Returns false
@@ -182,12 +189,11 @@ get_merged_graph_of(G1, G2) ->
 
 %% @doc Transforms a given list into a graph
 %% G - the graph to transform
-%% EdgeList - The edge list where the weights between two vertices A and
-%% B can be found
-list_to_graph(L, EdgeList) ->
+%% CompleteGraph - The complete graph created by parse_tsp_file
+list_to_graph(L, CompleteGraph) ->
   G = parse_tsp_file:set_up_vertices(length(L)),
   [ digraph:add_edge(G, nth(N, L), nth((N rem length(L)) + 1, L), 
-      graph_utils:get_weight(EdgeList, nth(N, L), nth((N rem length(L)) + 1, L)))
+      graph_utils:get_weight(CompleteGraph, nth(N, L), nth((N rem length(L)) + 1, L)))
       || N <- lists:seq(1, length(L)) ],
   G.
 
