@@ -107,9 +107,10 @@ create_ghost_node_run(G) ->
 
 %% @doc Identifies common edges in the given merged graph.
 %% Returns the edges in a list.
-get_common_edges(EdgeList) ->
+get_common_edges(G) ->
+  EdgeList = get_edge_list(G),
   Common = [ {E,V1,V2,W} || {E,V1,V2,W} <- EdgeList, 
-                (graph_utils:count({V1,V2}, [{V1,V2} || {_,V1,V2,_} <- EdgeList ]) > 1) or 
+                (graph_utils:count({V1,V2}, [{X1,X2} || {_,X1,X2,_} <- EdgeList ]) > 1) or 
                 (V1 =:= -V2) % Ghost edge between v and v' 
            ],
   Common.
@@ -140,7 +141,7 @@ get_poisened_vertices(SubGraph, CommonEdgeList) ->
 %% @doc Deletes common edges in the given graph.
 %% G - the graph
 del_common_edges(G) ->
-  CommonEdges = get_common_edges(graph_utils:get_edge_list(G)),
+  CommonEdges = get_common_edges(G),
   [ digraph:del_edge(G, E) || {E,_,_,_} <- CommonEdges ].
 
 
@@ -171,7 +172,7 @@ ug_of(Graph, Parent, TempEdgeList, EdgeList, N) when N =< length(Parent) ->
 %% @doc Creats a union graph of the given graph.
 %% Not implemented yet.
 %% This function should replace all instances of ug_of in the future.
-union_graph(G, EdgeList) ->
+union_graph(_G) ->
   ok.
 
 %% @doc Returns the merged graph of G1 and G2 with G1 and G2 untouched.
@@ -204,7 +205,7 @@ get_unique_neighbors(G, V) ->
 
 %% @doc Transforms a graph into a list.
 %% L - the list to transform into a graph.
-graph_to_list(G) ->
+graph_to_list(_G) ->
   ok.
 
 %% @doc Performs a 2-opt-move as described in 
@@ -293,9 +294,9 @@ check_component(GM, Component, CommonEdges, ParentA, ParentB, GhostNodes) ->
   ExitPoints = get_exit_points(CompGraph, CommonEdges),
 
   CompParA = subgraph_comp(ParentA, GhostNodes, EntryPoints, 
-                             get_edge_list(GM), Component),
+                             GM, Component),
   CompParB = subgraph_comp(ParentB, GhostNodes, EntryPoints, 
-                             get_edge_list(GM), Component),
+                             GM, Component),
 
   %graph_utils:display_graph(CompParA),
   %graph_utils:display_graph(CompParB),
@@ -339,12 +340,12 @@ check_component(GM, Component, CommonEdges, ParentA, ParentB, GhostNodes) ->
 %% G - the base graph
 %% GhostNodes - the ghost nodes which were inserted
 %% EntryVertices - the entry vertices of the components
-%% EdgeListGM - the edge list where the information about the ghost
 %%              nodes and the edges of the ghost nodes can be found 
 %%              (after removing the common edges
 %% Vertices - the vertices to insert in the subgraph
-subgraph_comp(G, GhostNodes, EntryVertices, EdgeListGM, Vertices) ->
+subgraph_comp(G, GhostNodes, EntryVertices, GM, Vertices) ->
   Comp = digraph_utils:subgraph(G, Vertices),
+  EdgeListGM = get_edge_list(GM),
   GhostInCand = [ {E,V1,V2,W} || {E,V1,V2,W} <- EdgeListGM, 
                              lists:member(V1, EntryVertices) and 
                              lists:member(V1, GhostNodes) and 
@@ -354,7 +355,7 @@ subgraph_comp(G, GhostNodes, EntryVertices, EdgeListGM, Vertices) ->
   %% Here we somehow reverse the ghost node in order to get a complete subgraph
   %% of the given base graph with the ghost node inserted.
   GhostIn = [ {V1,V2,W} || {_,V1,V2,W} <- GhostInCand, lists:member({V1,V2}, 
-    [ {X1 * (-1),X2} || {_,X1,X2,W} <- get_edge_list(G)]) ],
+    [ {X1 * (-1), X2} || {_,X1,X2,_} <- get_edge_list(G)]) ],
   
   %% Note: Only realised for ghost nodes which flow is "incoming",
   %% ghostnodes with outgoing flow direction is probably not possible.

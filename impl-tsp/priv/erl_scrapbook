@@ -121,4 +121,21 @@ GM = graph_utils:get_merged_graph_of(G1, G2).
 GhostNodes = graph_utils:create_ghost_node_run(GM).
 CommonEdges = graph_utils:get_common_edges(graph_utils:get_edge_list(GM)).
 graph_utils:del_common_edges(GM).
+graph_utils:is_feasable_partition(GM, CommonEdges, G1,G2, GhostNodes).
+
+
+{O, G} = evol:init().
+EdgeList = graph_utils:get_edge_list(G).
+G1 = graph_utils:list_to_graph([1,6,9,17,15,2,3,12,7,4,16,11,8,14,13,10,5], EdgeList).
+F = fun(X,Y) -> graph_utils:get_weight(EdgeList, X,Y) end.
+{Cost, Path} = a_star:run(G1, 1, 11, F).
+
+{O, G} = evol:init().
+G1 = graph_utils:list_to_graph([1,6,9,17,15,2,3,12,7,4,16,11,8,14,13,10,5], G).
+G2 = graph_utils:list_to_graph([1,7,13,3,17,8,14,16,5,4,15,6,2,11,10,9,12], G).
+GM = graph_utils:get_merged_graph_of(G1, G2).
+GhostNodes = graph_utils:create_ghost_node_run(GM).
+CommonEdges = graph_utils:get_common_edges(GM).
+graph_utils:del_common_edges(GM).
 graph_utils:is_feasible_partition(GM, CommonEdges, G1,G2, GhostNodes).
+
