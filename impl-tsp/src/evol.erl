@@ -94,8 +94,8 @@ get_rnd_roundtrip(Vertices, N, VertexList) ->
   get_rnd_roundtrip(Vertices, N-1, [Trip|VertexList]).
 
 
-init(InitialRoundtrips, FileName) ->
-  {Opts, Graph} = parse_tsp_file:make_atsp_graph(FileName).
+init(_InitialRoundtrips, FileName) ->
+  {_Opts, _Graph} = parse_tsp_file:make_atsp_graph(FileName).
   
   %Roundtrips = get_rnd_roundtrip(digraph:vertices(Graph), InitialRoundtrips),
   %Edgelist = graph_utils:get_edge_list(Graph).
