@@ -1,7 +1,7 @@
 all: compile
 
 compile:
-				erlc -Wall -o ebin +debug_info src/*.erl
+				erlc -Wall -o ebin +debug_info src/*.erl lib/*.erl
 
 .PHONY: doc
 doc:
