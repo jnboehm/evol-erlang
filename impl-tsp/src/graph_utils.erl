@@ -247,7 +247,7 @@ get_exit_points(SubGraph, CommonEdges) ->
          not lists:member(X, Poison) ].
 
 %% @doc Checks if the merged graph with its common edges removed is a
-%% feasable partition for GAPX.
+%% feasible partition for GAPX.
 %%
 %% GM - the merged graph with its common edges removed
 %% CommonEdges - the list of common edges which are already removed.
@@ -255,7 +255,7 @@ get_exit_points(SubGraph, CommonEdges) ->
 %% ParentB - the graph of Parent B
 %% GhostNodes - the ghostnodes which were used to remove common edges
 %%              and partition the graph GM
-is_feasable_partition(GM, CommonEdges, ParentA, ParentB, GhostNodes) ->
+is_feasible_partition(GM, CommonEdges, ParentA, ParentB, GhostNodes) ->
   Components = digraph_utils:components(GM),
   io:format("Components: ~p~n", [Components]),
   case length(Components) > 1 of
