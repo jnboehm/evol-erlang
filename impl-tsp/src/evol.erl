@@ -100,9 +100,6 @@ init(InitialRoundtrips, FileName) ->
   %Roundtrips = get_rnd_roundtrip(digraph:vertices(Graph), InitialRoundtrips),
   %Edgelist = graph_utils:get_edge_list(Graph).
 
-  
-
-
   %random:seed(erlang:now()),          % from http://erlang.org/doc/man/random.html
   %run(Opts, Graph, Roundtrips, Edgelist, fun(_, _) -> true end).
 
