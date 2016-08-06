@@ -86,7 +86,8 @@ create_ghost_node(GU, EdgeList, V) ->
   digraph:del_edge(GU, nth(2, Out)),
 
   % create the dummy edge of weight 0 between V and V' (E5)
-  digraph:add_edge(GU, V, -V, 0).
+  digraph:add_edge(GU, V, -V, 0),
+  -V.
 
 %% Creates all the ghost nodes for a merged graph G
 %% G - the merged graph of two parents
@@ -245,8 +246,120 @@ get_exit_points(SubGraph, CommonEdges) ->
          length(digraph:out_neighbours(SubGraph, X)) =:= 0, 
          not lists:member(X, Poison) ].
 
+%% @doc Checks if the merged graph with its common edges removed is a
+%% feasable partition for GAPX.
+%%
+%% GM - the merged graph with its common edges removed
+%% CommonEdges - the list of common edges which are already removed.
+%% ParentA - the graph of Parent A
+%% ParentB - the graph of Parent B
+%% GhostNodes - the ghostnodes which were used to remove common edges
+%%              and partition the graph GM
+is_feasable_partition(GM, CommonEdges, ParentA, ParentB, GhostNodes) ->
+  Components = digraph_utils:components(GM),
+  io:format("Components: ~p~n", [Components]),
+  case length(Components) > 1 of
+    false ->
+      false;
+    true ->
+      F = fun(Component) -> check_component(GM, Component, CommonEdges,
+                                        ParentA, ParentB, GhostNodes) end,
+      CompList = lists:map(F, Components),
+      R = lists:foldl(fun(A,B) -> A and B end, true, CompList),
+      io:format("Feasable partition: ~p~n", [R]),
+      R
+    end.
+
+%% @doc Checks a specific component of GM
+%%
+%% GM - the merged graph with its common edges removed
+%% Component - the list of vertices which represents a component of the
+%%             partition
+%% CommonEdges - the list of common edges which are already removed
+%% ParentA - the graph of Parent A
+%% ParentB - the graph of Parent B
+%% GhostNodes - the ghostnodes which were used to remove common edges
+%%              and partition the graph GM
+check_component(GM, Component, CommonEdges, ParentA, ParentB, GhostNodes) ->
+  CompGraph = digraph_utils:subgraph(GM, Component),
+
+  EntryPoints = get_entry_points(CompGraph, CommonEdges),
+  ExitPoints = get_exit_points(CompGraph, CommonEdges),
+
+  CompParA = subgraph_comp(ParentA, GhostNodes, EntryPoints, 
+                             get_edge_list(GM), Component),
+  CompParB = subgraph_comp(ParentB, GhostNodes, EntryPoints, 
+                             get_edge_list(GM), Component),
+
+  %graph_utils:display_graph(CompParA),
+  %graph_utils:display_graph(CompParB),
+
+  io:format("EdgeList A: ~p~n", [get_edge_list(CompParA)]),
+  io:format("EdgeList B: ~p~n", [get_edge_list(CompParB)]),
+  io:format("Entry Points: ~p~n", [EntryPoints]),
+  io:format("Exit Points: ~p~n", [ExitPoints]),
+  
+  case length(EntryPoints) =:= 1 of
+    true -> % Only one entry and one exit 
+      PathA = digraph:get_path(CompParA, hd(EntryPoints),
+                               hd(ExitPoints)),
+      io:format("Path A: ~p~n", [PathA]),
+
+      PathB = digraph:get_path(CompParB, hd(EntryPoints),
+                               hd(ExitPoints)),
+      io:format("Path B: ~p~n", [PathB]),
+
+      R = (hd(PathA) =:= hd(PathB)) and (lists:last(PathA) =:= lists:last(PathB)),
+      io:format("Returns: ~p~n", [R]),
+      R;
+    false -> % N entry points and N exit points
+      Combs = [{X,Y} || X <- EntryPoints, Y <- ExitPoints],
+      PathsA = lists:map(fun({E,X}) -> digraph:get_path(CompParA, E,X) end, Combs),
+      io:format("Paths A: ~p~n", [PathsA]),
+      PathsB = lists:map(fun({E,X}) -> digraph:get_path(CompParB, E,X) end, Combs),
+      io:format("Paths B: ~p~n", [PathsA]),
+
+      A1 = lists:filter(fun(E) -> E =/= false end, PathsA),
+      B1 = lists:filter(fun(E) -> E =/= false end, PathsB),
+      R = lists:map(fun(E) -> {hd(E),lists:last(E)} end, A1) 
+            =:= lists:map(fun(E) -> {hd(E),lists:last(E)} end, B1),
+      io:format("Returns: ~p~n", [R]),
+      R
+  end.
+
+%% @doc Creates a subgraph for the given base graph. This function
+%% respects inserted ghost nodes which may be entry vertices.
+%%
+%% G - the base graph
+%% GhostNodes - the ghost nodes which were inserted
+%% EntryVertices - the entry vertices of the components
+%% EdgeListGM - the edge list where the information about the ghost
+%%              nodes and the edges of the ghost nodes can be found 
+%%              (after removing the common edges
+%% Vertices - the vertices to insert in the subgraph
+subgraph_comp(G, GhostNodes, EntryVertices, EdgeListGM, Vertices) ->
+  Comp = digraph_utils:subgraph(G, Vertices),
+  GhostInCand = [ {E,V1,V2,W} || {E,V1,V2,W} <- EdgeListGM, 
+                             lists:member(V1, EntryVertices) and 
+                             lists:member(V1, GhostNodes) and 
+                             lists:member(V2, Vertices)
+            ],
+  
+  %% Here we somehow reverse the ghost node in order to get a complete subgraph
+  %% of the given base graph with the ghost node inserted.
+  GhostIn = [ {V1,V2,W} || {_,V1,V2,W} <- GhostInCand, lists:member({V1,V2}, 
+    [ {X1 * (-1),X2} || {_,X1,X2,W} <- get_edge_list(G)]) ],
+  
+  %% Note: Only realised for ghost nodes which flow is "incoming",
+  %% ghostnodes with outgoing flow direction is probably not possible.
+  GhostToAdd = sets:to_list(sets:from_list([ V || {V,_,_} <- GhostIn ])),
+
+  lists:map(fun (Vertex) -> digraph:add_vertex(Comp, Vertex) end, GhostToAdd),
+  lists:map(fun ({V1,V2,W}) -> digraph:add_edge(Comp,V1,V2,W) end, GhostIn),
+  Comp.
+
 %% @doc Displays a graph in a very unconventional way. :-)
-%% It uses fdp for graph rendering.
+%% It uses f)p for graph rendering.
 display_graph(G) ->
   EdgeList = graph_utils:get_edge_list(G),
   CommandStr = io_lib:format("~p", [ [{V1, V2} || {_, V1,V2,_} <- EdgeList]]),
