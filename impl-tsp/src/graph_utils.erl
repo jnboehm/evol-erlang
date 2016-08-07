@@ -48,9 +48,9 @@ get_fitness(EdgeList, Roundtrip) ->
 
 %% @doc Returns the fitness value for the individual (roundtrip)
 %%
-%% EdgeList - the list where the weights can be found
+%% EdgeList - the list where the weights can be found (isn't needed any more)
 %% G - the graph which represents the roundtrip
-%% TODO make and ets_select/2 funcall
+%% TODO make an ets_select/2 funcall and remove the param EdgeList
 get_fitness_graph(_EdgeList, G) ->
   Weights = [ get_weight(G, X) || X <- digraph:edges(G) ],
   sum(Weights).
@@ -366,7 +366,7 @@ subgraph_comp(G, GhostNodes, EntryVertices, GM, Vertices) ->
   Comp.
 
 %% @doc Displays a graph in a very unconventional way. :-)
-%% It uses f)p for graph rendering.
+%% It uses fdp for graph rendering.
 display_graph(G) ->
   EdgeList = graph_utils:get_edge_list(G),
   CommandStr = io_lib:format("~p", [ [{V1, V2} || {_, V1,V2,_} <- EdgeList]]),
@@ -379,7 +379,7 @@ display_graph(G) ->
   os:cmd(CmdStr).
 
 concat_all(L) ->
-  lists:foldl(fun string:concat/2, "", L).
+  lists:foldr(fun string:concat/2, "", L).
 
 
 %% @doc Helper function to count the element X in the list H.
