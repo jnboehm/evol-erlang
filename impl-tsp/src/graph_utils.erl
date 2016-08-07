@@ -147,7 +147,7 @@ del_common_edges(G) ->
 
 %% @doc Creates an union graph of the two parent elements
 %% ParentA - list of a roundtrip
-%% ParentB - list of the second roundtrip
+%% ParentB - list of the second roundtr)p
 %% EdgeList - the edgeList for the weights and edges
 ug_of(ParentA, ParentB, EdgeList) ->
   G = parse_tsp_file:set_up_vertices(length(ParentA)),
@@ -169,11 +169,24 @@ ug_of(Graph, Parent, TempEdgeList, EdgeList, N) when N =< length(Parent) ->
   end, 
   ug_of(Graph, Parent, TempEdgeList, EdgeList, N + 1).
 
-%% @doc Creats a union graph of the given graph.
-%% Not implemented yet.
-%% This function should replace all instances of ug_of in the future.
-union_graph(_G) ->
-  ok.
+%% @doc Creats a union graph of the given graphs
+%% G1 - the first graph
+%% G2 - the second graph
+%%
+%% Note: We assume, that the vertices of G1 and G2 are equal, since this
+%% will always be the case, when a union graph between two parents are
+%% created.
+union_graph(G1, G2) ->
+  GU = parse_tsp_file:set_up_vertices(digraph:no_vertices(G1)),
+  InsertFunc = fun({V1,V2,W}) -> digraph:add_edge(GU,V1,V2,W) end,
+
+  InsFromG1 = [ {V1,V2,W} || {_,V1,V2,W} <- get_edge_list(G1) ],
+  lists:map(InsertFunc, InsFromG1),
+
+  InsFromG2 = [ {V1,V2,W} || {_,V1,V2,W} <- get_edge_list(G2),
+                         get_weight(GU, V1,V2) =:= undef ],
+  lists:map(InsertFunc, InsFromG2),
+  GU.
 
 %% @doc Returns the merged graph of G1 and G2 with G1 and G2 untouched.
 %% The vertices will be taken from G1.
