@@ -169,7 +169,7 @@ ug_of(Graph, Parent, TempEdgeList, EdgeList, N) when N =< length(Parent) ->
   end, 
   ug_of(Graph, Parent, TempEdgeList, EdgeList, N + 1).
 
-%% @doc Creats a union graph of the given graphs
+%% @doc Creates a union graph of the given base graphs
 %% G1 - the first graph
 %% G2 - the second graph
 %%
