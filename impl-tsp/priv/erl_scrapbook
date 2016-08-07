@@ -149,6 +149,6 @@ GU = graph_utils:union_graph(G1,G2).
 G1 = graph_utils:list_to_graph([1,2,3,5,4], G).
 G2 = graph_utils:list_to_graph([1,3,5,4,2], G).
 GU = digraph_utils:subgraph(G1, digraph:vertices(G1)).
-Ins = [ {V1,V2,W} || {_,V1,V2,W} <- get_edge_list(G2), get_weight(GU, V1,V2) =:= undef ].
+Ins = [ {V1,V2,W} || {_,V1,V2,W} <- graph_utils:get_edge_list(G2), graph_utils:get_weight(GU, V1,V2) =:= undef ].
 
 GU = graph_utils:union_graph(G1,G2).
