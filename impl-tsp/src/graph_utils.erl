@@ -51,7 +51,7 @@ get_fitness(EdgeList, Roundtrip) ->
 %% EdgeList - the list where the weights can be found (isn't needed any more)
 %% G - the graph which represents the roundtrip
 %% TODO make an ets_select/2 funcall and remove the param EdgeList
-get_fitness_graph(_EdgeList, G) ->
+get_fitness_graph(G) ->
   Weights = [ get_weight(G, X) || X <- digraph:edges(G) ],
   sum(Weights).
 
@@ -176,7 +176,7 @@ ug_of(Graph, Parent, TempEdgeList, EdgeList, N) when N =< length(Parent) ->
 %% Note: We assume, that the vertices of G1 and G2 are equal, since this
 %% will always be the case, when a union graph between two parents are
 %% created.
-union_graph(G1, G2) ->
+union_graph_of(G1, G2) ->
   GU = parse_tsp_file:set_up_vertices(digraph:no_vertices(G1)),
   InsertFunc = fun({V1,V2,W}) -> digraph:add_edge(GU,V1,V2,W) end,
 
@@ -275,19 +275,26 @@ get_exit_points(SubGraph, CommonEdges) ->
 %% ParentB - the graph of Parent B
 %% GhostNodes - the ghostnodes which were used to remove common edges
 %%              and partition the graph GM
-is_feasible_partition(GM, CommonEdges, ParentA, ParentB, GhostNodes) ->
+feasible_partition(GM, CommonEdges, ParentA, ParentB, GhostNodes) ->
   Components = digraph_utils:components(GM),
   io:format("Components: ~p~n", [Components]),
   case length(Components) > 1 of
     false ->
+      io:format("Not feasible. Components == 1~n"),
       false;
     true ->
       F = fun(Component) -> check_component(GM, Component, CommonEdges,
                                         ParentA, ParentB, GhostNodes) end,
       CompList = lists:map(F, Components),
-      R = lists:foldl(fun(A,B) -> A and B end, true, CompList),
+      io:format("CompList: ~p~n", [CompList]),
+      R = lists:foldl(fun(A,B) -> A and B end, true, [ X || {X,_,_,_,_} <- CompList]),
       io:format("Feasable partition: ~p~n", [R]),
-      R
+      case R of
+        true ->
+          [ {C,CA,CB,SimplGraphs} || {_,C,CA,CB,SimplGraphs} <- CompList ];
+        false ->
+          false
+      end
     end.
 
 %% @doc Checks a specific component of GM
@@ -328,10 +335,16 @@ check_component(GM, Component, CommonEdges, ParentA, ParentB, GhostNodes) ->
       PathB = digraph:get_path(CompParB, hd(EntryPoints),
                                hd(ExitPoints)),
       io:format("Path B: ~p~n", [PathB]),
-
-      R = (hd(PathA) =:= hd(PathB)) and (lists:last(PathA) =:= lists:last(PathB)),
-      io:format("Returns: ~p~n", [R]),
-      R;
+      
+      case (PathA =:= false) or (PathB =:= false) of
+        true -> 
+          {false, [],[],[],[]};
+        false ->
+          Simpl = {hd(PathA), lists:last(PathA)},
+          R = (hd(PathA) =:= hd(PathB)) and (lists:last(PathA) =:= lists:last(PathB)),
+          io:format("Returns: ~p~n", [R]),
+          {R, CompGraph, CompParA, CompParB, [Simpl]} % <- return
+      end;
     false -> % N entry points and N exit points
       Combs = [{X,Y} || X <- EntryPoints, Y <- ExitPoints],
       PathsA = lists:map(fun({E,X}) -> digraph:get_path(CompParA, E,X) end, Combs),
@@ -341,10 +354,12 @@ check_component(GM, Component, CommonEdges, ParentA, ParentB, GhostNodes) ->
 
       A1 = lists:filter(fun(E) -> E =/= false end, PathsA),
       B1 = lists:filter(fun(E) -> E =/= false end, PathsB),
-      R = lists:map(fun(E) -> {hd(E),lists:last(E)} end, A1) 
-            =:= lists:map(fun(E) -> {hd(E),lists:last(E)} end, B1),
+
+      A1Simpl = lists:map(fun(E) -> {hd(E),lists:last(E)} end, A1),
+      B1Simpl = lists:map(fun(E) -> {hd(E),lists:last(E)} end, B1),
+      R = A1Simpl =:= B1Simpl,
       io:format("Returns: ~p~n", [R]),
-      R
+      {R, CompGraph, CompParA, CompParB, A1Simpl } % <- return
   end.
 
 %% @doc Creates a subgraph for the given base graph. This function

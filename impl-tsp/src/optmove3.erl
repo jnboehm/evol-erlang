@@ -91,7 +91,8 @@ optmove3_yes(G, V1, V3, V5, EdgeList) ->
 %% G - the graph (roundtrip) to perform the 3-opt-moves
 %% EdgeList - the edge list with all the weights
 %% N - neighborhood size
-optmove3_run(G, EdgeList, N) ->
+optmove3_run(G, N) ->
+  EdgeList = graph_utils:get_edge_list(G),
   BitList = [ {V, false} || V <- digraph:vertices(G) ],
   optmove3_run(G, EdgeList, BitList, N).
 
