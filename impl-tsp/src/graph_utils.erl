@@ -352,6 +352,7 @@ check_component(GM, Component, CommonEdges, ParentA, ParentB, GhostNodes) ->
       
       case (PathA =:= false) or (PathB =:= false) of
         true -> 
+	  lists:map(fun digraph:delete/1, [CompGraph, CompParA, CompParB]),
           {false, [],[],[],[]};
         false ->
           Simpl = {hd(PathA), lists:last(PathA)},
@@ -371,7 +372,8 @@ check_component(GM, Component, CommonEdges, ParentA, ParentB, GhostNodes) ->
       B1 = lists:filter(fun(E) -> E =/= false end, PathsB),
 
       case length(A1) + length(B1) =:= 0 of
-        true -> 
+        true ->
+	  lists:map(fun digraph:delete/1, [CompGraph, CompParA, CompParB]),
           {false,[],[],[],[]};
         false -> 
           A1Simpl = lists:map(fun(E) -> {hd(E),lists:last(E)} end, A1),

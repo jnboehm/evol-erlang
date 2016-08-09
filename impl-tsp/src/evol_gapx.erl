@@ -55,6 +55,7 @@ crossover(CompleteGraph, ParentA, ParentB) ->
                                         ParentA, ParentB, GhostNodes),
   case P of
     false ->
+      digraph:delete(MergedGraph),
       no_offspring;
     CompMapping -> 
       % [ {Comp, Simpl} ]
