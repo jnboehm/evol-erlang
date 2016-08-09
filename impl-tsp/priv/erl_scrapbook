@@ -180,3 +180,11 @@ graph_utils:del_common_edges(GM).
 graph_utils:feasible_partition(GM, CommonEdges, G1,G2, GhostNodes).
 
 
+======
+evol_gapx run stuff
+======
+% may not succee the first time
+A = evol_gapx:run().
+{A1, A2} = A.
+{GCom1, GA1, GB1, _} = hd(A1).
+{GCom2, GA2, GB2, _} = hd(tl(A1)).
