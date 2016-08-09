@@ -37,21 +37,21 @@
 %% V5 - the third vertex
 %%
 %% Returns true if the tour has been improved, return false otherwise.
-optmove3(G, V1, V3, V5, EdgeList) ->
-  V2 = hd(digraph:out_neighbours(G, V1)),
-  V4 = hd(digraph:out_neighbours(G, V3)),
-  V6 = hd(digraph:out_neighbours(G, V5)),
+optmove3(G, V1, V3, V5, CompleteGraph) ->
+  V2 = hd(digraph:out_neighbours(CompleteGraph, V1)),
+  V4 = hd(digraph:out_neighbours(CompleteGraph, V3)),
+  V6 = hd(digraph:out_neighbours(CompleteGraph, V5)),
 
   % weights before
-  W_V1_V2 = graph_utils:get_weight(EdgeList, V1, V2),
-  W_V3_V4 = graph_utils:get_weight(EdgeList, V3, V4),
-  W_V5_V6 = graph_utils:get_weight(EdgeList, V5, V6),
+  W_V1_V2 = graph_utils:get_weight(CompleteGraph, V1, V2),
+  W_V3_V4 = graph_utils:get_weight(CompleteGraph, V3, V4),
+  W_V5_V6 = graph_utils:get_weight(CompleteGraph, V5, V6),
 
   % weights after
-  W_V1_V4 = graph_utils:get_weight(EdgeList, V1, V4),
-  W_V3_V6 = graph_utils:get_weight(EdgeList, V3, V6),
-  W_V5_V2 = graph_utils:get_weight(EdgeList, V5, V2),
-  
+  W_V1_V4 = graph_utils:get_weight(CompleteGraph, V1, V4),
+  W_V3_V6 = graph_utils:get_weight(CompleteGraph, V3, V6),
+  W_V5_V2 = graph_utils:get_weight(CompleteGraph, V5, V2),
+
   case (W_V1_V4 + W_V3_V6 + W_V5_V2) < (W_V1_V2 + W_V3_V4 + W_V5_V6) of
     true -> 
       digraph:del_edge(G, hd(digraph:out_edges(G, V1))),
@@ -66,15 +66,15 @@ optmove3(G, V1, V3, V5, EdgeList) ->
   end.
 
 
-optmove3_yes(G, V1, V3, V5, EdgeList) ->
-  V2 = hd(digraph:out_neighbours(G, V1)),
-  V4 = hd(digraph:out_neighbours(G, V3)),
-  V6 = hd(digraph:out_neighbours(G, V5)),
+optmove3_yes(G, V1, V3, V5, CompleteGraph) ->
+  V2 = hd(digraph:out_neighbours(CompleteGraph, V1)),
+  V4 = hd(digraph:out_neighbours(CompleteGraph, V3)),
+  V6 = hd(digraph:out_neighbours(CompleteGraph, V5)),
 
   % weights after
-  W_V1_V4 = graph_utils:get_weight(EdgeList, V1, V4),
-  W_V3_V6 = graph_utils:get_weight(EdgeList, V3, V6),
-  W_V5_V2 = graph_utils:get_weight(EdgeList, V5, V2),
+  W_V1_V4 = graph_utils:get_weight(CompleteGraph, V1, V4),
+  W_V3_V6 = graph_utils:get_weight(CompleteGraph, V3, V6),
+  W_V5_V2 = graph_utils:get_weight(CompleteGraph, V5, V2),
   
   digraph:del_edge(G, hd(digraph:out_edges(G, V1))),
   digraph:del_edge(G, hd(digraph:out_edges(G, V3))),
@@ -89,14 +89,13 @@ optmove3_yes(G, V1, V3, V5, EdgeList) ->
 %% TSP. Expert Syst. with Applications, 39(10):8947–8953, 2012."
 %%
 %% G - the graph (roundtrip) to perform the 3-opt-moves
-%% EdgeList - the edge list with all the weights
+%% CompleteGraph - the edge list with all the weights
 %% N - neighborhood size
-optmove3_run(G, N) ->
-  EdgeList = graph_utils:get_edge_list(G),
+optmove3_run(G, CompleteGraph, N) ->
   BitList = [ {V, false} || V <- digraph:vertices(G) ],
-  optmove3_run(G, EdgeList, BitList, N).
+  optmove3_run(G, CompleteGraph, BitList, N).
 
-optmove3_run(G, EdgeList, BitList, N) ->
+optmove3_run(G, CompleteGraph, BitList, N) ->
   Members = [ X || {X,Y} <- BitList, Y =:= false],
   case length(Members) >= 1 of
     false ->
@@ -109,16 +108,16 @@ optmove3_run(G, EdgeList, BitList, N) ->
       %io:format("~p~n", [optmove3_next_triple(BitList, Neighborhood)]),
       case optmove3_next_triple(BitList, Neighborhood) of
         [V1,V3,V5] ->
-          case optmove3(G, V1, V3, V5, EdgeList) of
+          case optmove3(G, V1, V3, V5, CompleteGraph) of
             true ->
               % V1, V3, V5 remain false in bitlist, tour is replaced
-              optmove3_run(G, EdgeList, BitList, N);
+              optmove3_run(G, CompleteGraph, BitList, N);
             false ->
-              optmove3_run(G, EdgeList, optmove3_update_bitlist(BitList, [V1,V3,V5]), N)
+              optmove3_run(G, CompleteGraph, optmove3_update_bitlist(BitList, [V1,V3,V5]), N)
             % set V1, V3, V5 in bitlist to true, tour remains in state
           end;
         no_triple ->
-          optmove3_run(G, EdgeList, optmove3_update_bitlist(BitList, Neighborhood), N);
+          optmove3_run(G, CompleteGraph, optmove3_update_bitlist(BitList, Neighborhood), N);
         finished ->
           G
       end

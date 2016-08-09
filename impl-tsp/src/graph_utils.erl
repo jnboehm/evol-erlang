@@ -216,10 +216,25 @@ list_to_graph(L, CompleteGraph) ->
 get_unique_neighbors(G, V) ->
   sets:to_list(sets:from_list(digraph:out_neighbours(G, V) ++ digraph:in_neighbours(G,V))).
 
-%% @doc Transforms a graph into a list.
-%% L - the list to transform into a graph.
-graph_to_list(_G) ->
-  ok.
+graph_to_list(G) ->
+  Comps = digraph_utils:components(G),
+  EdgeList = get_edge_list(G),
+  In0 = lists:filter(fun(V) -> digraph:in_degree(G, V) =:= 0 end, lists:flatten(Comps)),
+  In0Map = [ {I, C} || I <- In0, C <- Comps, lists:member(I, C) ],
+
+  case length(In0) =:= 0 of
+    true ->
+      undef; % we always have components
+    false ->
+      lists:map(fun({I,C}) -> graph_to_list(G, EdgeList, C, [I]) end, In0Map)
+  end.
+
+graph_to_list(G, EdgeList, Comp, []) ->
+  []; 
+graph_to_list(G, EdgeList, Comp, I) ->
+  V2 = [ V2 || {_,V1,V2,_} <- EdgeList, V1 =:= hd(I)],
+  [hd(I) | graph_to_list(G, EdgeList, Comp, V2)].
+
 
 %% @doc Performs a 2-opt-move as described in 
 %% http://web.tuke.sk/fei-cit/butka/hop/htsp.pdf
@@ -277,18 +292,18 @@ get_exit_points(SubGraph, CommonEdges) ->
 %%              and partition the graph GM
 feasible_partition(GM, CommonEdges, ParentA, ParentB, GhostNodes) ->
   Components = digraph_utils:components(GM),
-  io:format("Components: ~p~n", [Components]),
+  %io:format("Components: ~p~n", [Components]),
   case length(Components) > 1 of
     false ->
-      io:format("Not feasible. Components == 1~n"),
+      %io:format("Not feasible. Components == 1~n"),
       false;
     true ->
       F = fun(Component) -> check_component(GM, Component, CommonEdges,
                                         ParentA, ParentB, GhostNodes) end,
       CompList = lists:map(F, Components),
-      io:format("CompList: ~p~n", [CompList]),
+      %io:format("CompList: ~p~n", [CompList]),
       R = lists:foldl(fun(A,B) -> A and B end, true, [ X || {X,_,_,_,_} <- CompList]),
-      io:format("Feasable partition: ~p~n", [R]),
+      io:format("Feasible partition: ~p~n", [R]),
       case R of
         true ->
           [ {C,CA,CB,SimplGraphs} || {_,C,CA,CB,SimplGraphs} <- CompList ];
@@ -321,20 +336,20 @@ check_component(GM, Component, CommonEdges, ParentA, ParentB, GhostNodes) ->
   %graph_utils:display_graph(CompParA),
   %graph_utils:display_graph(CompParB),
 
-  io:format("EdgeList A: ~p~n", [get_edge_list(CompParA)]),
-  io:format("EdgeList B: ~p~n", [get_edge_list(CompParB)]),
-  io:format("Entry Points: ~p~n", [EntryPoints]),
-  io:format("Exit Points: ~p~n", [ExitPoints]),
+  %io:format("EdgeList A: ~p~n", [get_edge_list(CompParA)]),
+  %io:format("EdgeList B: ~p~n", [get_edge_list(CompParB)]),
+  %io:format("Entry Points: ~p~n", [EntryPoints]),
+  %io:format("Exit Points: ~p~n", [ExitPoints]),
   
   case length(EntryPoints) =:= 1 of
     true -> % Only one entry and one exit 
       PathA = digraph:get_path(CompParA, hd(EntryPoints),
                                hd(ExitPoints)),
-      io:format("Path A: ~p~n", [PathA]),
+      %io:format("Path A: ~p~n", [PathA]),
 
       PathB = digraph:get_path(CompParB, hd(EntryPoints),
                                hd(ExitPoints)),
-      io:format("Path B: ~p~n", [PathB]),
+      %io:format("Path B: ~p~n", [PathB]),
       
       case (PathA =:= false) or (PathB =:= false) of
         true -> 
@@ -342,24 +357,31 @@ check_component(GM, Component, CommonEdges, ParentA, ParentB, GhostNodes) ->
         false ->
           Simpl = {hd(PathA), lists:last(PathA)},
           R = (hd(PathA) =:= hd(PathB)) and (lists:last(PathA) =:= lists:last(PathB)),
-          io:format("Returns: ~p~n", [R]),
+          io:format("XX PathA: ~p, PathB: ~p, Result:~p~n", [hd(PathA),
+                                                          lists:last(PathA),R]),
           {R, CompGraph, CompParA, CompParB, [Simpl]} % <- return
       end;
     false -> % N entry points and N exit points
       Combs = [{X,Y} || X <- EntryPoints, Y <- ExitPoints],
       PathsA = lists:map(fun({E,X}) -> digraph:get_path(CompParA, E,X) end, Combs),
-      io:format("Paths A: ~p~n", [PathsA]),
+      %io:format("Paths A: ~p~n", [PathsA]),
       PathsB = lists:map(fun({E,X}) -> digraph:get_path(CompParB, E,X) end, Combs),
-      io:format("Paths B: ~p~n", [PathsA]),
+      %io:format("Paths B: ~p~n", [PathsA]),
 
       A1 = lists:filter(fun(E) -> E =/= false end, PathsA),
       B1 = lists:filter(fun(E) -> E =/= false end, PathsB),
 
-      A1Simpl = lists:map(fun(E) -> {hd(E),lists:last(E)} end, A1),
-      B1Simpl = lists:map(fun(E) -> {hd(E),lists:last(E)} end, B1),
-      R = A1Simpl =:= B1Simpl,
-      io:format("Returns: ~p~n", [R]),
-      {R, CompGraph, CompParA, CompParB, A1Simpl } % <- return
+      case length(A1) + length(B1) =:= 0 of
+        true -> 
+          {false,[],[],[],[]};
+        false -> 
+          A1Simpl = lists:map(fun(E) -> {hd(E),lists:last(E)} end, A1),
+          B1Simpl = lists:map(fun(E) -> {hd(E),lists:last(E)} end, B1),
+          R = (A1Simpl =:= B1Simpl),
+          io:format("ZZ PathsA: ~p, PathB: ~p, Result:~p~n", [A1Simpl,
+                                                          B1Simpl,R]),
+          {R, CompGraph, CompParA, CompParB, A1Simpl } % <- return
+        end
   end.
 
 %% @doc Creates a subgraph for the given base graph. This function

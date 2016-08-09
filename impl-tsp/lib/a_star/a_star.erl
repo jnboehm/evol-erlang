@@ -64,7 +64,7 @@
 
 %% Graph Abstractions
 -define(GET_NEIGHBOURS(Vertex, Graph), digraph:out_neighbours(Graph, Vertex)).
--define(EDGE_WEIGHT(Graph, From, To), graph_utils:get_weight(graph_utils:get_edge_list(Graph), From, To)).
+-define(EDGE_WEIGHT(Graph, From, To), graph_utils:get_weight(Graph, From, To)).
 %% Open Set Abstractions
 -define(EMPTY_OPEN, dict:new()).
 -define(IS_OPEN_EMPTY(Open), dict:size(Open) =:= 0).
