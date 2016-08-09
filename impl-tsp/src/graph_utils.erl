@@ -10,7 +10,7 @@
 -export([]).
 -compile(export_all).
 
-
+%% copied from digraph.erl
 -record(digraph, {vtab = notable :: ets:tab(),
 		  etab = notable :: ets:tab(),
 		  ntab = notable :: ets:tab(),
@@ -79,7 +79,7 @@ has_deg_4(G, V) ->
 %%
 %% The name of the ghost node is V * (-1).
 %%
-create_ghost_node(GU, EdgeList, V) ->
+create_ghost_node(GU, _EdgeList, V) ->
   digraph:add_vertex(GU, -V, -V),
   Out = digraph:out_edges(GU, V),
 
@@ -88,7 +88,7 @@ create_ghost_node(GU, EdgeList, V) ->
   digraph:add_edge(GU, -V, V1, W1), % E3
   digraph:add_edge(GU, -V, VO, WO), % E2
 
-  % delete the original paths to V
+  % delete the original paths from V to the ones now connected through V'
   digraph:del_edge(GU, nth(1, Out)),
   digraph:del_edge(GU, nth(2, Out)),
 
@@ -98,7 +98,6 @@ create_ghost_node(GU, EdgeList, V) ->
 
 %% Creates all the ghost nodes for a merged graph G
 %% G - the merged graph of two parents
-%% EdgeList - the edge list of G
 create_ghost_node_run(G) ->
   EdgeListG = get_edge_list(G),
   lists:map(fun (Vertex) -> graph_utils:create_ghost_node(G, EdgeListG, Vertex) end, 
@@ -115,14 +114,14 @@ get_common_edges(G) ->
            ],
   Common.
 
-%% @doc Returns a list of poisened vertices, which must not be an entry or
+%% @doc Returns a list of poisoned vertices, which must not be an entry or
 %% exit point in the given component. 
 %%
-%% A vertex is poisened iff the in- or outgoing edge of the vertex is
+%% A vertex is poisoned iff the in- or outgoing edge of the vertex is
 %% a) a common edge as returned in get_common_edges/1
 %% b) points to a vertex which is also part of the component.
 %%
-%% Example poisened:
+%% Example poisoned:
 %% We assume: There was a common edge between 15 and -15.
 %%
 %%  14' -----> 1 <----- -15
@@ -131,8 +130,8 @@ get_common_edges(G) ->
 %%  15  <----- 8 -----> 9
 %%
 %% Result: Since there was a common edge between 15 and -15 and both
-%% vertices are inside this component: 15 and -15 are poisened vertices.
-get_poisened_vertices(SubGraph, CommonEdgeList) ->
+%% vertices are inside this component: 15 and -15 are poisoned vertices.
+get_poisoned_vertices(SubGraph, CommonEdgeList) ->
   P = [ {X, Y} || {_,X,Y,_} <- CommonEdgeList, lists:member(X, digraph:vertices(SubGraph)), 
               lists:member(Y, digraph:vertices(SubGraph)) ],
   lists:flatten(tuple_to_list(lists:unzip(P))).
@@ -265,7 +264,7 @@ graph_to_list(G, EdgeList, Comp, I) ->
 %% SubGraph - the sub graph in which to search for entry points
 %% CommonEdges - the common edges of all components
 get_entry_points(SubGraph, CommonEdges) ->
-  Poison = get_poisened_vertices(SubGraph, CommonEdges),
+  Poison = get_poisoned_vertices(SubGraph, CommonEdges),
   [ X || X <- digraph:vertices(SubGraph),
          length(digraph:in_neighbours(SubGraph, X)) =:= 0, 
          not lists:member(X, Poison) ].
@@ -276,7 +275,7 @@ get_entry_points(SubGraph, CommonEdges) ->
 %% SubGraph - the sub graph in which to seach for exit points
 %% CommonEdges - the common edges of all components
 get_exit_points(SubGraph, CommonEdges) ->
-  Poison = get_poisened_vertices(SubGraph, CommonEdges),
+  Poison = get_poisoned_vertices(SubGraph, CommonEdges),
   [ X || X <- digraph:vertices(SubGraph),
          length(digraph:out_neighbours(SubGraph, X)) =:= 0, 
          not lists:member(X, Poison) ].
