@@ -421,11 +421,12 @@ subgraph_comp(G, GhostNodes, EntryVertices, GM, Vertices) ->
 display_graph(G) ->
   EdgeList = graph_utils:get_edge_list(G),
   CommandStr = io_lib:format("~p", [ [{V1, V2} || {_, V1,V2,_} <- EdgeList]]),
-  %% NodeStr = os:cmd(concat_all(["echo \"", io_lib:format("~p", [digraph:vertices(G)]),"\" | sed ''"])),
-
-  SedStr = concat_all(["echo \"", CommandStr, "\" | sed 's/{//g;s/},/\\n/g;s/,/->/g;s/}]//g;s/\\[//g'"]),
+  NodeStr = os:cmd(concat_all(["echo \"", io_lib:format("~p", [digraph:vertices(G)]),
+                               "\" | sed 's/\\[//g;s/,/\\n/g;s/\\]/\\n/g'"])),
+  SedStr = concat_all(["echo \"", CommandStr,
+                       "\" | sed 's/{//g;s/},/\\n/g;s/,/->/g;s/}]//g;s/\\[//g'"]),
   CmdOut = os:cmd(SedStr),
-  CmdStr = io_lib:format("echo \" digraph x { ~s }\" | fdp -Tsvg | display", [CmdOut]),
+  CmdStr = io_lib:format("echo \" digraph x { ~s~n~s }\" | fdp -Tsvg | display", [NodeStr, CmdOut]),
   os:cmd(CmdStr).
 
 concat_all(L) ->
