@@ -6,7 +6,10 @@
 
 -module(evol_gapx).
 -export([run/0, run/2]).
--compile(export_all).
+-compile([export_all, {nowarn_deprecated_function, [{random,uniform,0},
+                                                    {random,uniform,1},
+                                                    {random,seed,   1},
+                                                    {erlang,now,    0}]}]).
 
 %% @doc Creates the initial population
 %% Returns a list of digraphs

@@ -7,7 +7,10 @@
 -module(evol).
 -import(lists, [nth/2]).
 -export([init/0]).
--compile(export_all).
+-compile([export_all, {nowarn_deprecated_function, [{random,uniform,0},
+                                                    {random,uniform,1},
+                                                    {random,seed,   1},
+                                                    {erlang,now,    0}]}]).
 
 
 %% @doc Creates an union graph of the two parent elements
