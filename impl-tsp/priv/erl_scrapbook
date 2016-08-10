@@ -183,6 +183,7 @@ graph_utils:feasible_partition(GM, CommonEdges, G1,G2, GhostNodes).
 ======
 evol_gapx run stuff
 ======
-B1 = evol_gapx:run().
-graph_utils:display_graph(B1).
+G = evol_gapx:run(20, '../data/br17.atsp').
+graph_utils:get_fitness_graph(G).
 [] == [V || V <- digraph:vertices(G), digraph:out_degree(G, V) =/= 1] ++ [V || V <- digraph:vertices(G),  digraph:in_degree(G, V) =/= 1].
+graph_utils:display_graph(B1).
