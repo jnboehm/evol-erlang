@@ -11,6 +11,22 @@
                                                     {random,seed,   1},
                                                     {erlang,now,    0}]}]).
 
+
+%% @doc reverses the ghost node.  It gives all edges emanating from -V
+%% to V (there are no incident ones) and afterwards deletes -V which
+%% cause all adjacent edges of -V to be deleted as well.
+%%
+%% Graph - the graph that the ghost node will be deleted from.
+%% V - the real node (I think it doesn't have to have a ghost node).
+reverse_ghost_node(Graph, V) ->
+  GhostEdges = lists:map(fun(E) -> {_,_,EndV, W} =  digraph:edge(Graph, E), {EndV, W} end,
+                         digraph:edges(Graph, -V)),
+  lists:map(fun({EndV, W}) -> io:format("Ghost: ~p, V: ~p, EndV: ~p, W: ~p~n",
+                                        [digraph:add_edge(Graph, V, EndV, W), V, EndV, W]) end, GhostEdges),
+  digraph:del_vertex(Graph, -V),
+  %% io:format("Got ~p edges from ghost node ~p, real one ~p~n", [GhostEdges, -V, V]),
+  Graph.
+
 %% @doc Creates the initial population
 %% Returns a list of digraphs
 %% RndsVertexList - The random vertex list
