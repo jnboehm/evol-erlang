@@ -168,6 +168,21 @@ ug_of(Graph, Parent, TempEdgeList, EdgeList, N) when N =< length(Parent) ->
   end, 
   ug_of(Graph, Parent, TempEdgeList, EdgeList, N + 1).
 
+%% @doc merges digraphs.  They need to be disjunct, meaning that they
+%% don't share any vertices or edges.  All graphs will be deleted,
+%% except the one that is returned (duh).
+merge_graphs(Graph1, Graph2) ->
+  G = digraph:new(),
+  lists:map(fun(V) -> digraph:add_vertex(G, V, V) end,
+            lists:usort(digraph:vertices(Graph1) ++ digraph:vertices(Graph2))),
+  io:format("G1 cyclic: ~p G2 cyclic: ~p~n", [Graph1#digraph.cyclic,Graph2#digraph.cyclic]),
+  InsertFun = fun({_,V1,V2,W}) -> digraph:add_edge(G,V1,V2,W) end,
+  lists:map(InsertFun, graph_utils:get_edge_list(Graph1)),
+  lists:map(InsertFun, graph_utils:get_edge_list(Graph2)),
+  %% digraph:delete(Graph1),
+  %% digraph:delete(Graph2),
+  G.
+
 %% @doc Creates a union graph of the given base graphs
 %% G1 - the first graph
 %% G2 - the second graph
