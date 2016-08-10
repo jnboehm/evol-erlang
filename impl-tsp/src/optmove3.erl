@@ -38,9 +38,22 @@
 %%
 %% Returns true if the tour has been improved, return false otherwise.
 optmove3(G, V1, V3, V5, CompleteGraph) ->
-  V2 = hd(digraph:out_neighbours(CompleteGraph, V1)),
-  V4 = hd(digraph:out_neighbours(CompleteGraph, V3)),
-  V6 = hd(digraph:out_neighbours(CompleteGraph, V5)),
+
+  case V1 =:= V5 of 
+    true ->
+      io:format("V1 = V5");
+    false ->
+      ok
+  end,
+
+ % io:format("V1,V3,V5: ~p~n", [[V1,V3,V5]]),
+
+  V2 = hd(digraph:out_neighbours(G, V1)),
+  V4 = hd(digraph:out_neighbours(G, V3)),
+  V6 = hd(digraph:out_neighbours(G, V5)),
+
+%  io:format("V2,V4,V6: ~p~n", [[V2,V4,V6]]),
+
 
   % weights before
   W_V1_V2 = graph_utils:get_weight(CompleteGraph, V1, V2),
@@ -52,16 +65,23 @@ optmove3(G, V1, V3, V5, CompleteGraph) ->
   W_V3_V6 = graph_utils:get_weight(CompleteGraph, V3, V6),
   W_V5_V2 = graph_utils:get_weight(CompleteGraph, V5, V2),
 
+  %io:format("Before: ~p~n", [(W_V1_V2 + W_V3_V4 + W_V5_V6)]),
+  %io:format("After: ~p~n", [(W_V1_V4 + W_V3_V6 + W_V5_V2)]),
+
   case (W_V1_V4 + W_V3_V6 + W_V5_V2) < (W_V1_V2 + W_V3_V4 + W_V5_V6) of
     true -> 
+      %io:format("Improvment with vertices ~p~n", [[V1,V3,V5]]),
+      %io:format("Old fitness: ~p~n", [graph_utils:get_fitness_graph(G)]),
       digraph:del_edge(G, hd(digraph:out_edges(G, V1))),
       digraph:del_edge(G, hd(digraph:out_edges(G, V3))),
       digraph:del_edge(G, hd(digraph:out_edges(G, V5))),
       digraph:add_edge(G, V1, V4, W_V1_V4),
       digraph:add_edge(G, V3, V6, W_V3_V6),
       digraph:add_edge(G, V5, V2, W_V5_V2),
+      %io:format("New fitness: ~p~n", [graph_utils:get_fitness_graph(G)]),
       true;
     false ->
+%      io:format(":-( No improvment with ~p~n", [[V1,V3,V5]]),
       false
   end.
 
@@ -93,7 +113,10 @@ optmove3_yes(G, V1, V3, V5, CompleteGraph) ->
 %% N - neighborhood size
 optmove3_run(G, CompleteGraph, N) ->
   BitList = [ {V, false} || V <- digraph:vertices(G) ],
-  optmove3_run(G, CompleteGraph, BitList, N).
+  io:format("Fitness before ls3opt: ~p~n", [graph_utils:get_fitness_graph(G)]),
+  R = optmove3_run(G, CompleteGraph, BitList, N),
+  io:format("Fitness after ls3opt: ~p~n", [graph_utils:get_fitness_graph(G)]),
+  R.
 
 optmove3_run(G, CompleteGraph, BitList, N) ->
   Members = [ X || {X,Y} <- BitList, Y =:= false],
@@ -102,27 +125,41 @@ optmove3_run(G, CompleteGraph, BitList, N) ->
       finished;
     true ->
       V1 = hd(Members),
+%      io:format("V1: ~p~n", [V1]),
       Neighborhood = optmove3_get_subneighborhood(G, [V1], N),
-      %io:format("~p~n", [BitList]),
-      %io:format("~p~n", [Neighborhood]),
-      %io:format("~p~n", [optmove3_next_triple(BitList, Neighborhood)]),
-      case optmove3_next_triple(BitList, Neighborhood) of
-        [V1,V3,V5] ->
-          case optmove3(G, V1, V3, V5, CompleteGraph) of
-            true ->
-              % V1, V3, V5 remain false in bitlist, tour is replaced
-              optmove3_run(G, CompleteGraph, BitList, N);
-            false ->
-              optmove3_run(G, CompleteGraph, optmove3_update_bitlist(BitList, [V1,V3,V5]), N)
-            % set V1, V3, V5 in bitlist to true, tour remains in state
-          end;
-        no_triple ->
-          optmove3_run(G, CompleteGraph, optmove3_update_bitlist(BitList, Neighborhood), N);
-        finished ->
-          G
+%      io:format("Bitlist: ~p~n", [BitList]),
+%      io:format("NH: ~p~n", [Neighborhood]),
+
+      Triples = optmove3_triples(BitList, Neighborhood),
+      %io:format("Triples: ~p~n, Neighborhood:~p~n ", [Triples, Neighborhood]),
+      case Triples of
+        [] -> finished;
+        _Triples ->
+          R = optmove3_loop(G, Triples, CompleteGraph),
+
+          case R of
+            no_improvment -> % no improvment at all
+%              io:format("Nope - "),
+              optmove3_run(G, CompleteGraph, optmove3_update_bitlist(BitList, [V1]), N);
+            improvment ->
+%              io:format("Ye) - "),
+              optmove3_run(G, CompleteGraph, BitList, N)
+          end
       end
   end.
 
+optmove3_loop(_G, [], _CompleteGraph) ->
+  no_improvment;
+optmove3_loop(G, [H|T], CompleteGraph) ->
+  [V1,V3,V5] = H,
+  R = optmove3(G,V1,V3,V5,CompleteGraph),
+
+  case R of
+    true -> 
+      improvment;
+    false ->
+      optmove3_loop(G, T, CompleteGraph)
+  end.
 %%
 %% @doc Returns the next valid 3-tupel of vertices which may be used to
 %% perform a 3-opt-move. This function respects the 3-opt-move variant
@@ -131,31 +168,10 @@ optmove3_run(G, CompleteGraph, BitList, N) ->
 %% Bitlist - The 2 tuple of [Vertex, true|false]
 %% Neighborhood - the neighborhood.
 %% V - the vertex to start looking for a triple
-optmove3_next_triple(BitList, Neighborhood) ->
-  optmove3_next_triple(BitList, Neighborhood, [], 3).
-
-optmove3_next_triple(_BitList, _Neighborhood, Triple, 0) ->
-  lists:reverse(Triple);
-
-optmove3_next_triple(BitList, Neighborhood, Triple, N) ->
-  case length([ X || {X,Y} <- BitList, lists:member(X, Neighborhood), Y =:= false ]) < 3 of
-    true ->
-      no_triple;
-    false ->
-      Neighbors = tl(Neighborhood),
-        case length(BitList) =:= length([ {X,Y} || {X,Y} <- BitList, Y =:= true ]) of
-          true -> finished;
-          false ->
-            NextCand = hd(Neighborhood),
-            {Cand, Flag} = hd([ {X,Y} || {X,Y} <- BitList, X =:= NextCand ]),
-          case Flag of
-            true ->
-              optmove3_next_triple(BitList, Neighbors, Triple, N);
-            false ->
-              optmove3_next_triple(BitList, Neighbors, [Cand|Triple], N-1)
-          end
-      end
-    end.
+optmove3_triples(BitList, Neighborhood) -> 
+  [ [V1,V2,V3] || [V1,V2,V3] <- combinations(Neighborhood),
+                  length([V1,V2,V3]) =:= 3,
+         not lists:member({V1, true}, BitList), V1 < V2, V2 < V3 ].
 
 %% @doc Sets the elements in the bitlist to true.
 %%
@@ -166,6 +182,7 @@ optmove3_update_bitlist(BitList, Elements) ->
   optmove3_update_bitlist(BitList, Elements, 1).
 
 optmove3_update_bitlist(BitList, Elements, N) when N > length(Elements) ->
+%  io:format("Strike: ~p~n", [Elements]),
   BitList;
 
 optmove3_update_bitlist(BitList, Elements, N) ->
@@ -181,9 +198,17 @@ optmove3_update_bitlist(BitList, Elements, N) ->
 %%
 %% G - the graph
 %% V - the V to to satisfy condition N(V) = V1
-optmove3_get_subneighborhood(_G, Neighborhood, 1) ->
-  lists:reverse(Neighborhood);
+optmove3_get_subneighborhood(_G, NH, 1)  ->
+  lists:reverse(NH);
+optmove3_get_subneighborhood(G, NH, NSize) ->
+  optmove3_get_subneighborhood(G,
+      [hd(digraph:out_neighbours(G, hd(NH)))|NH], NSize-1).  
 
-optmove3_get_subneighborhood(G, Neighborhood, N) ->
-  X = hd(digraph:out_neighbours(G, hd(Neighborhood))),
-  optmove3_get_subneighborhood(G, [X|Neighborhood], N-1).
+% 15 -> 4 -> 3
+
+combinations([]) ->
+    [];
+combinations([H | T]) ->
+    CT = combinations(T),
+    [[H]] ++ [[H | L] || L <- CT] ++ CT.
+
