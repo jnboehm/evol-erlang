@@ -185,3 +185,4 @@ evol_gapx run stuff
 ======
 B1 = evol_gapx:run().
 graph_utils:display_graph(B1).
+[] == [V || V <- digraph:vertices(G), digraph:out_degree(G, V) =/= 1] ++ [V || V <- digraph:vertices(G),  digraph:in_degree(G, V) =/= 1].
