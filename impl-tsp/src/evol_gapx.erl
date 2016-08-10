@@ -18,14 +18,17 @@
 %%
 %% Graph - the graph that the ghost node will be deleted from.
 %% V - the real node (I think it doesn't have to have a ghost node).
-reverse_ghost_node(Graph, V) ->
+reverse_ghost_node(Graph, V) when V > 0->
   GhostEdges = lists:map(fun(E) -> {_,_,EndV, W} =  digraph:edge(Graph, E), {EndV, W} end,
                          digraph:edges(Graph, -V)),
-  lists:map(fun({EndV, W}) -> io:format("Ghost: ~p, V: ~p, EndV: ~p, W: ~p~n",
-                                        [digraph:add_edge(Graph, V, EndV, W), V, EndV, W]) end, GhostEdges),
+  lists:map(fun({EndV, W}) -> digraph:add_edge(Graph, V, EndV, W) end, GhostEdges),
   digraph:del_vertex(Graph, -V),
   %% io:format("Got ~p edges from ghost node ~p, real one ~p~n", [GhostEdges, -V, V]),
-  Graph.
+  Graph;
+reverse_ghost_node(G, _) ->
+  G.
+
+
 
 %% @doc Creates the initial population
 %% Returns a list of digraphs
@@ -124,7 +127,7 @@ run(InitialRoundtrips, FileName) ->
   _X = crossover_loop(Graph, InitPop).
 
 run() ->
-  run(100, "../data/br17.atsp").
+  run(20, "../data/br17.atsp").
 
 %% -----------------------------
 %% Helper functions for the GA
