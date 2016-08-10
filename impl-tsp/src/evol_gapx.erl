@@ -78,13 +78,22 @@ crossover(CompleteGraph, ParentA, ParentB) ->
       no_offspring;
     CompMapping -> 
       F = fun({C,CA,CB,Simpl}) -> get_path_for_simple_graph(CompleteGraph,C,CA,CB,Simpl) end,
-      BestComps = lists:map(F, CompMapping),
-      BestCompsList = lists:map(fun(G) -> graph_utils:graph_to_list(G)
-                                end, BestComps),
+      [B1, B2] = _BestComps = lists:map(F, CompMapping),
+
+      %% _BestCompsList = lists:map(fun(G) -> graph_utils:graph_to_list(G)
+      %%                           end, BestComps),
+      %% io:format("~p~n", [_BestCompsList]),
       % a star to create shortest path
       %F = fun(X,Y) -> graph_utils:get_weight(EdgeList, X,Y) end,
       %{Cost, Path} = a_star:run(G1, 1, 11, F)
-      {P, BestCompsList}
+
+      B = graph_utils:merge_graphs(B1, B2),
+      LooseEnds = lists:zip(lists:filter(fun(V) -> digraph:out_degree(B, V) == 0 end, B),
+                            lists:filter(fun(V) -> digraph:in_degree(B, V) == 0 end, B)),
+      lists:map(fun({Start, End}) -> Weight = graph_utils:get_weight(CompleteGraph, Start, End),
+                                     digraph:add_edge(B, Start, End, Weight) end, LooseEnds),
+      lists:map(fun(V) -> reverse_ghost_node(B1, V) end, [V || V <- digraph:vertices(B1), V > 0]),
+      B
   end.
 
 %% @doc Selects one parent from the given population
