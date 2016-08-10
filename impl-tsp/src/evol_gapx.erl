@@ -55,13 +55,12 @@ crossover(CompleteGraph, ParentA, ParentB) ->
   CommonEdges = graph_utils:get_common_edges(MergedGraph),
   graph_utils:del_common_edges(MergedGraph),
   P = graph_utils:feasible_partition(MergedGraph, CommonEdges, 
-                                        ParentA, ParentB, GhostNodes),
+                                     ParentA, ParentB, GhostNodes),
+  digraph:delete(MergedGraph),                  % don't want to leak ets tables
   case P of
     false ->
-      digraph:delete(MergedGraph),
       no_offspring;
     CompMapping -> 
-      % [ {Comp, Simpl} ]
       F = fun({C,CA,CB,Simpl}) -> get_path_for_simple_graph(CompleteGraph,C,CA,CB,Simpl) end,
       BestComps = lists:map(F, CompMapping),
       BestCompsList = lists:map(fun(G) -> graph_utils:graph_to_list(G)
@@ -85,19 +84,19 @@ select_parent(FitnessPairs) ->
   S = random:uniform(),
   case S < 0.8 of
     true ->
-      {G,_} = lists:nth(1, X),
-      G;
+      {G,_} = lists:nth(1, X);
     false ->
-      {G,_} = lists:nth(2, X),
-      G
-  end.
+      {G,_} = lists:nth(2, X)
+  end,
+  G.
+
 
 run(InitialRoundtrips, FileName) ->
   {_Opts, Graph} = parse_tsp_file:make_atsp_graph(FileName),
   RndVertexList = get_rnd_vertexlist(digraph:vertices(Graph), InitialRoundtrips),
   InitPop = pop_init(RndVertexList, Graph, 17),
   random:seed(erlang:now()),
-  X = crossover_loop(Graph, InitPop).
+  _X = crossover_loop(Graph, InitPop).
 
 run() ->
   run(100, "../data/br17.atsp").
@@ -130,11 +129,12 @@ uniform_except(_N, Random, Exception) when Random =/= Exception ->
 uniform_except(N, Random, Exception) when Random =:= Exception ->
   uniform_except(N, random:uniform(N), Exception).
 
-get_path_for_simple_graph(CompleteGraph,_C,CA,CB,Simpl) ->
-  AStarFunc = fun(X,Y) -> graph_utils:get_weight(CompleteGraph,X,Y) end,
+%% @doc Returns the better subpath for the component
+get_path_for_simple_graph(_CompleteGraph,_C,CA,CB,_Simpl) ->
+  %% AStarFunc = fun(X,Y) -> graph_utils:get_weight(CompleteGraph,X,Y) end,
   FA = graph_utils:get_fitness_graph(CA),
   FB = graph_utils:get_fitness_graph(CB),
       
   if FA < FB -> CA;
-    FB =< FA -> CB
+     FB =< FA -> CB
   end.

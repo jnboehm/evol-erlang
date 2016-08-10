@@ -12,9 +12,9 @@
 
 %% copied from digraph.erl
 -record(digraph, {vtab = notable :: ets:tab(),
-		  etab = notable :: ets:tab(),
-		  ntab = notable :: ets:tab(),
-	          cyclic = true  :: boolean()}).
+                  etab = notable :: ets:tab(),
+                  ntab = notable :: ets:tab(),
+                  cyclic = true  :: boolean()}).
 
 %% @doc Returns the weight between two adjacent vertices.
 %% If no weight can be determined, which means that there is no
@@ -83,8 +83,8 @@ create_ghost_node(GU, _EdgeList, V) ->
   digraph:add_vertex(GU, -V, -V),
   Out = digraph:out_edges(GU, V),
 
-  [{_,_,VO,WO}, {_,_,V1,W1}] = lists:filter(fun({E, _V1, _V2, _W}) -> lists:member(E, Out) end, EdgeList),
-    
+  [{_,_,VO,WO}, {_,_,V1,W1}] = lists:map(fun(E) -> digraph:edge(GU, E) end, Out),
+
   digraph:add_edge(GU, -V, V1, W1), % E3
   digraph:add_edge(GU, -V, VO, WO), % E2
 
@@ -228,7 +228,7 @@ list_to_graph(L, CompleteGraph) ->
 %% Returns a unique list of neighbors for a given vertex in the
 %% specified graph.
 get_unique_neighbors(G, V) ->
-  sets:to_list(sets:from_list(digraph:out_neighbours(G, V) ++ digraph:in_neighbours(G,V))).
+  lists:usort(digraph:out_neighbours(G, V) ++ digraph:in_neighbours(G,V)).
 
 graph_to_list(G) ->
   Comps = digraph_utils:components(G),
@@ -243,35 +243,12 @@ graph_to_list(G) ->
       lists:map(fun({I,C}) -> graph_to_list(G, EdgeList, C, [I]) end, In0Map)
   end.
 
-graph_to_list(G, EdgeList, Comp, []) ->
+graph_to_list(_, _, _, []) ->
   []; 
 graph_to_list(G, EdgeList, Comp, I) ->
   V2 = [ V2 || {_,V1,V2,_} <- EdgeList, V1 =:= hd(I)],
   [hd(I) | graph_to_list(G, EdgeList, Comp, V2)].
 
-
-%% @doc Performs a 2-opt-move as described in 
-%% http://web.tuke.sk/fei-cit/butka/hop/htsp.pdf
-%%
-%% We assume, that for each V in G exists exactly one outgoing neighbor.
-%%
-%% G - the graph
-%% V1 - the first vertex
-%% V2 - the second vertex
-%% EdgeList - the edge list where the weights can be found
-%%optmove2(G,V1,V2,EdgeList) ->
-%%  V1OutNeighbor = hd(digraph:out_neighbours(G, V1)),
-%%  V2OutNeighbor = hd(digraph:out_neighbours(G, V2)),
-%%
-%%  digraph:add_edge(G, V1, V2, get_weight(EdgeList, V1, V2)),
-%%  digraph:add_edge(G, V1OutNeighbor, V2OutNeighbor, get_weight(EdgeList,
-%%                                                              V1OutNeighbor,
-%%                                                              V2OutNeighbor)),
-%%
-%% digraph:del_edge(G, hd(digraph:out_edges(G, V1))),
-%% digraph:del_edge(G, hd(digraph:out_edges(G, V2))).
-%%
-%%  % direction swap?
 
 %% @doc Returns the entry points for the specified sub graph, which is a
 %% component of a merged graph.
@@ -281,7 +258,7 @@ graph_to_list(G, EdgeList, Comp, I) ->
 get_entry_points(SubGraph, CommonEdges) ->
   Poison = get_poisoned_vertices(SubGraph, CommonEdges),
   [ X || X <- digraph:vertices(SubGraph),
-         length(digraph:in_neighbours(SubGraph, X)) =:= 0, 
+         digraph:in_degree(SubGraph, X) =:= 0,
          not lists:member(X, Poison) ].
 
 %% @doc Equivalent to get_entry_points/1 this function searches for exit
@@ -292,7 +269,7 @@ get_entry_points(SubGraph, CommonEdges) ->
 get_exit_points(SubGraph, CommonEdges) ->
   Poison = get_poisoned_vertices(SubGraph, CommonEdges),
   [ X || X <- digraph:vertices(SubGraph),
-         length(digraph:out_neighbours(SubGraph, X)) =:= 0, 
+         digraph:out_degree(SubGraph, X) =:= 0,
          not lists:member(X, Poison) ].
 
 %% @doc Checks if the merged graph with its common edges removed is a
