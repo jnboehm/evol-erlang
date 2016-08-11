@@ -101,7 +101,7 @@ create_ghost_node(GU, _EdgeList, V) ->
 create_ghost_node_run(G) ->
   EdgeListG = get_edge_list(G),
   lists:map(fun (Vertex) -> graph_utils:create_ghost_node(G, EdgeListG, Vertex) end, 
-            [ V || V <- digraph:vertices(G), graph_utils:has_deg_4(G, V) =:= true ]).
+            lists:filter(fun(V) -> graph_utils:has_deg_4(G, V) end, digraph:vertices(G))).
 
 
 %% @doc Identifies common edges in the given merged graph.
@@ -349,7 +349,7 @@ check_component(GM, Component, CommonEdges, ParentA, ParentB, GhostNodes) ->
         false ->
           Simpl = {hd(PathA), lists:last(PathA)},
           R = (hd(PathA) =:= hd(PathB)) and (lists:last(PathA) =:= lists:last(PathB)),
-          io:format("XX PathA: ~p, PathB: ~p, Result:~p~n", [hd(PathA),
+          io:format("XX hd A: ~p, last A: ~p, Result:~p~n", [hd(PathA),
                                                           lists:last(PathA),R]),
           {R, CompGraph, CompParA, CompParB, [Simpl]} % <- return
       end;
