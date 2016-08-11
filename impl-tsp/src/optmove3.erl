@@ -170,7 +170,7 @@ optmove3_loop(G, [H|T], CompleteGraph) ->
 %% Neighborhood - the neighborhood.
 %% V - the vertex to start looking for a triple
 optmove3_triples(BitList, Neighborhood) -> 
-  [ [V1,V2,V3] || {V1,V2,V3} <- combinations(Neighborhood),
+  [ [V1,V2,V3] || [V1,V2,V3] <- combinations(Neighborhood),
                   %% length([V1,V2,V3]) =:= 3,
          not lists:member({V1, true}, BitList)].
 
@@ -224,3 +224,6 @@ tuplify(L) ->
 tup_acc([], Res) -> Res;
 tup_acc([A,B,C| T], Res) ->
   tup_acc(T, [{A,B,C}|Res]).
+
+init() ->
+    ok = erlang:load_nif("./ls3opt_nif", 0).
