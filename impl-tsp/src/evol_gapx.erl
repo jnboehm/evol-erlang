@@ -168,17 +168,21 @@ run_loop(Population, _CompleteGraph, _BestKnown, 0, _NSize, _LastMutation) ->
 run_loop(Population, CompleteGraph, BestKnown, GenerationMax, NSize, LastMutation) ->
   {G, F} = hd(Population),
   PopLimit = length(Population),
-  io:format("Generation ~p~n", [GenerationMax]),
+  {WorstG, WorstF} = lists:last(Population),
+  io:format("Gen ~p~n  Best: Fitness ~p, Route: ~p~n Worst: Fitness ~p, Route: ~p~n",
+            [GenerationMax, F, graph_utils:roundtrip_to_list(G),
+             WorstF, graph_utils:roundtrip_to_list(WorstG)]),
   case F =< BestKnown of
     true ->
       io:format("Reached best known solution. Stop.~n"),
       {G, F};
     false ->
       Offsprings = create_offsprings(Population, CompleteGraph, [], 10),
-      NextPop = lists:sublist(Population ++
-                              get_fitness_pairs(Offsprings), PopLimit),
-      io:format("Offsprings: ~p~n", [Offsprings]),
-      NewLm = case hd(Population) > hd(NextPop) of
+      {NextPop, Dead} = lists:split(PopLimit,
+                            lists:keymerge(2, Population, get_fitness_pairs(Offsprings))),
+      lists:map(fun(DeadG) -> digraph:delete(DeadG) end, Dead), % free ets tables
+      {_, NextF} = hd(NextPop),
+      NewLm = case F > NextF of
                 true -> 0;
                 false -> LastMutation + 1
               end,
