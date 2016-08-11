@@ -169,9 +169,9 @@ optmove3_loop(G, [H|T], CompleteGraph) ->
 %% Neighborhood - the neighborhood.
 %% V - the vertex to start looking for a triple
 optmove3_triples(BitList, Neighborhood) -> 
-  [ [V1,V2,V3] || [V1,V2,V3] <- combinations(Neighborhood),
-                  length([V1,V2,V3]) =:= 3,
-         not lists:member({V1, true}, BitList), V1 < V2, V2 < V3 ].
+  [ [V1,V2,V3] || {V1,V2,V3} <- combinations(Neighborhood),
+                  %% length([V1,V2,V3]) =:= 3,
+         not lists:member({V1, true}, BitList)].
 
 %% @doc Sets the elements in the bitlist to true.
 %%
@@ -206,9 +206,20 @@ optmove3_get_subneighborhood(G, NH, NSize) ->
 
 % 15 -> 4 -> 3
 
-combinations([]) ->
-    [];
-combinations([H | T]) ->
-    CT = combinations(T),
-    [[H]] ++ [[H | L] || L <- CT] ++ CT.
+combinations(L) ->
+  %% DropFun = fun (L) -> lists:dropwhile(fun(Elem) -> El =/= Elem end, L),
+  Res = combinations(L, [], 3),
+  tuplify(lists:flatten(Res)).
 
+combinations(_L, Res, 0) ->
+  lists:reverse(Res);
+combinations(L, Res, N) ->
+  lists:map(fun (El) -> [H | T] = lists:dropwhile(fun(Elem) -> El =/= Elem end, L),
+                        combinations(T, [H| Res], N - 1) end, L).
+
+tuplify(L) ->
+  tup_acc(L, []).
+
+tup_acc([], Res) -> Res;
+tup_acc([A,B,C| T], Res) ->
+  tup_acc(T, [{A,B,C}|Res]).
