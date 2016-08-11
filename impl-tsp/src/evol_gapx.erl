@@ -98,7 +98,7 @@ crossover(CompleteGraph, ParentA, ParentB) ->
                                          W -> ok
                                        end
                 end, CommonEdges),
-,
+
       lists:map(fun(V) -> reverse_ghost_node(B, V) end, [V || V <- digraph:vertices(B), V > 0]),
       B
   end.
