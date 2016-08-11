@@ -62,7 +62,7 @@ crossover_loop(CompleteGraph, Population) ->
   Graphs = [ X || {X,_} <- Population ],
   {P1, P2} = selection(Population),
   case crossover(CompleteGraph, P1, P2) of
-    no_offspring -> crossover_loop(CompleteGraph, Graphs);
+    no_offspring -> crossover_loop(CompleteGraph, Population);
     Offspring ->
       {C, _} = hd(get_fitness_pairs([P1, P2, Offspring])),
       case C =:= Offspring of
@@ -153,7 +153,8 @@ init(InitialRoundtrips, FileName, ProcessesNum, NSize, GenerationMax) ->
 
 run_test() ->
   {Opts, Graph} = parse_tsp_file:make_atsp_graph('../data/ftv33.atsp'),
-  run(10, Graph, Opts, 1500, 10).
+  optmove3:init(),
+  run(30, Graph, Opts, 150, 10).
 
 run(InitialRoundtrips, Graph, Opts, GenerationMax, NSize) ->
   RndVertexList = get_rnd_vertexlist(digraph:vertices(Graph), InitialRoundtrips),
