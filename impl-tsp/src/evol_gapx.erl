@@ -5,7 +5,7 @@
 %%
 
 -module(evol_gapx).
--export([run/0, run/2]).
+-export([run/5, run_test/0, init/5]).
 -compile([export_all, {nowarn_deprecated_function, [{random,uniform,0},
                                                     {random,uniform,1},
                                                     {random,seed,   1},
@@ -49,8 +49,7 @@ pop_init(RndsVertexList, CompleteGraph, NSize) ->
 %% @doc Selects two parents from the given population
 %% Population - the input population
 selection(Population) ->
-  P = get_fitness_pairs(Population),
-  {P1,P2} = { select_parent(P), select_parent(P) },
+  {P1,P2} = { select_parent(Population), select_parent(Population) },
 
   case P1 =:= P2 of
     true ->
@@ -60,12 +59,24 @@ selection(Population) ->
   end.
 
 crossover_loop(CompleteGraph, Population) ->
+  Graphs = [ X || {X,_} <- Population ],
   {P1, P2} = selection(Population),
   case crossover(CompleteGraph, P1, P2) of
-    no_offspring -> crossover_loop(CompleteGraph, Population);
-    CompMapping ->
-      CompMapping
+    no_offspring -> crossover_loop(CompleteGraph, Graphs);
+    Offspring ->
+      {C, _} = hd(get_fitness_pairs([P1, P2, Offspring])),
+      case C =:= Offspring of
+        true ->
+          Offspring;
+        false ->
+          mutate(Offspring)
+      end
   end.
+
+%% Mutates a roundtrip
+%% G - the roundtrip to mutate
+mutate(G) ->
+  G.
 
 %%
 crossover(CompleteGraph, ParentA, ParentB) ->
@@ -110,8 +121,7 @@ select_parent(FitnessPairs) ->
   N = length(FitnessPairs),
   FirstRand = random:uniform(N),
   SecondRand = uniform_except(N, random:uniform(N), FirstRand),
-  X = lists:keysort(2, [lists:nth(FirstRand, FitnessPairs), 
-              lists:nth(SecondRand, FitnessPairs)]),
+  X = lists:keysort(2, [lists:nth(FirstRand, FitnessPairs), lists:nth(SecondRand, FitnessPairs)]),
 
   S = random:uniform(),
   case S < 0.8 of
@@ -123,15 +133,57 @@ select_parent(FitnessPairs) ->
   G.
 
 
-run(InitialRoundtrips, FileName) ->
-  {_Opts, Graph} = parse_tsp_file:make_atsp_graph(FileName),
-  RndVertexList = get_rnd_vertexlist(digraph:vertices(Graph), InitialRoundtrips),
-  InitPop = pop_init(RndVertexList, Graph, 17),
-  random:seed(erlang:now()),
-  _X = crossover_loop(Graph, InitPop).
+%% Create N offsprings from the given population, using tournament
+%% selection to select the parents.
+%% Population - the poluation to select from
+%% CompleteGraph - the complete graph
+%% N - how many offsprings should be produced
+create_offsprings(_Population, _CompleteGraph, Offsprings, 0) ->
+  Offsprings;
+create_offsprings(Population, CompleteGraph, Offsprings, N) ->
+  O = crossover_loop(CompleteGraph, Population),
+  create_offsprings(Population, CompleteGraph, [O|Offsprings], N-1).
 
-run() ->
-  run(20, "../data/br17.atsp").
+init(InitialRoundtrips, FileName, ProcessesNum, NSize, GenerationMax) ->
+  random:seed(erlang:now()),
+  {Opts, Graph} = parse_tsp_file:make_atsp_graph(FileName),
+  % spawn processes
+  ok.
+
+
+run_test() ->
+  {Opts, Graph} = parse_tsp_file:make_atsp_graph('../data/ftv33.atsp'),
+  run(10, Graph, Opts, 1500, 10).
+
+run(InitialRoundtrips, Graph, Opts, GenerationMax, NSize) ->
+  RndVertexList = get_rnd_vertexlist(digraph:vertices(Graph), InitialRoundtrips),
+  InitPop = get_fitness_pairs(pop_init(RndVertexList, Graph, NSize)),
+  run_loop(InitPop, Graph, hd(orddict:fetch(best, Opts)), GenerationMax, NSize, 0).
+
+run_loop(Population, _CompleteGraph, _BestKnown, 0, _NSize, _LastMutation) ->
+  io:format("Reached generation limit. Stop.~n"),
+  hd(Population);
+
+run_loop(Population, CompleteGraph, BestKnown, GenerationMax, NSize, LastMutation) ->
+  {G, F} = hd(Population),
+  PopLimit = length(Population),
+  io:format("Generation ~p~n", [GenerationMax]),
+  case F =< BestKnown of
+    true ->
+      io:format("Reached best known solution. Stop.~n"),
+      {G, F};
+    false ->
+      Offsprings = create_offsprings(Population, CompleteGraph, [], 10),
+      NextPop = lists:sublist(Population ++
+                              get_fitness_pairs(Offsprings), PopLimit),
+      io:format("Offsprings: ~p~n", [Offsprings]),
+      NewLm = case hd(Population) > hd(NextPop) of
+                true -> 0;
+                false -> LastMutation + 1
+              end,
+      run_loop(NextPop, CompleteGraph, BestKnown, GenerationMax-1,
+               NSize, NewLm)
+  end.
 
 %% -----------------------------
 %% Helper functions for the GA

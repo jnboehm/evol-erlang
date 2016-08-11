@@ -140,7 +140,8 @@ optmove3_run(G, CompleteGraph, BitList, N) ->
           case R of
             no_improvment -> % no improvment at all
 %              io:format("Nope - "),
-              optmove3_run(G, CompleteGraph, optmove3_update_bitlist(BitList, [V1]), N);
+              optmove3_run(G, CompleteGraph,
+                           optmove3_update_bitlist(BitList, [V1]), N);
             improvment ->
 %              io:format("Ye) - "),
               optmove3_run(G, CompleteGraph, BitList, N)
