@@ -37,7 +37,7 @@
 %% V5 - the third vertex
 %%
 %% Returns true if the tour has been improved, return false otherwise.
-optmove3(G, V1, V3, V5, CompleteGraph) ->
+optmove3(G, V1, V3, V5, EdgeList) ->
 
   case V1 =:= V5 of 
     true ->
@@ -56,14 +56,14 @@ optmove3(G, V1, V3, V5, CompleteGraph) ->
 
 
   % weights before
-  W_V1_V2 = graph_utils:get_weight(CompleteGraph, V1, V2),
-  W_V3_V4 = graph_utils:get_weight(CompleteGraph, V3, V4),
-  W_V5_V6 = graph_utils:get_weight(CompleteGraph, V5, V6),
+  W_V1_V2 = graph_utils:get_weight_el(EdgeList, V1, V2),
+  W_V3_V4 = graph_utils:get_weight_el(EdgeList, V3, V4),
+  W_V5_V6 = graph_utils:get_weight_el(EdgeList, V5, V6),
 
   % weights after
-  W_V1_V4 = graph_utils:get_weight(CompleteGraph, V1, V4),
-  W_V3_V6 = graph_utils:get_weight(CompleteGraph, V3, V6),
-  W_V5_V2 = graph_utils:get_weight(CompleteGraph, V5, V2),
+  W_V1_V4 = graph_utils:get_weight_el(EdgeList, V1, V4),
+  W_V3_V6 = graph_utils:get_weight_el(EdgeList, V3, V6),
+  W_V5_V2 = graph_utils:get_weight_el(EdgeList, V5, V2),
 
   %io:format("Before: ~p~n", [(W_V1_V2 + W_V3_V4 + W_V5_V6)]),
   %io:format("After: ~p~n", [(W_V1_V4 + W_V3_V6 + W_V5_V2)]),
@@ -86,15 +86,15 @@ optmove3(G, V1, V3, V5, CompleteGraph) ->
   end.
 
 
-optmove3_yes(G, V1, V3, V5, CompleteGraph) ->
-  V2 = hd(digraph:out_neighbours(CompleteGraph, V1)),
-  V4 = hd(digraph:out_neighbours(CompleteGraph, V3)),
-  V6 = hd(digraph:out_neighbours(CompleteGraph, V5)),
+optmove3_yes(G, V1, V3, V5, EdgeList) ->
+  V2 = hd(digraph:out_neighbours(G, V1)),
+  V4 = hd(digraph:out_neighbours(G, V3)),
+  V6 = hd(digraph:out_neighbours(G, V5)),
 
   % weights after
-  W_V1_V4 = graph_utils:get_weight(CompleteGraph, V1, V4),
-  W_V3_V6 = graph_utils:get_weight(CompleteGraph, V3, V6),
-  W_V5_V2 = graph_utils:get_weight(CompleteGraph, V5, V2),
+  W_V1_V4 = graph_utils:get_weight_el(EdgeList, V1, V4),
+  W_V3_V6 = graph_utils:get_weight_el(EdgeList, V3, V6),
+  W_V5_V2 = graph_utils:get_weight_el(EdgeList, V5, V2),
   
   digraph:del_edge(G, hd(digraph:out_edges(G, V1))),
   digraph:del_edge(G, hd(digraph:out_edges(G, V3))),
@@ -113,12 +113,13 @@ optmove3_yes(G, V1, V3, V5, CompleteGraph) ->
 %% N - neighborhood size
 optmove3_run(G, CompleteGraph, N) ->
   BitList = [ {V, false} || V <- digraph:vertices(G) ],
+  EdgeList = graph_utils:get_edge_list(CompleteGraph),
   io:format("Fitness before ls3opt: ~p~n", [graph_utils:get_fitness_graph(G)]),
-  R = optmove3_run(G, CompleteGraph, BitList, N),
+  R = optmove3_run(G, EdgeList, BitList, N),
   io:format("Fitness after ls3opt: ~p~n", [graph_utils:get_fitness_graph(G)]),
   R.
 
-optmove3_run(G, CompleteGraph, BitList, N) ->
+optmove3_run(G, EdgeList, BitList, N) ->
   Members = [ X || {X,Y} <- BitList, Y =:= false],
   case length(Members) >= 1 of
     false ->
@@ -135,31 +136,31 @@ optmove3_run(G, CompleteGraph, BitList, N) ->
       case Triples of
         [] -> finished;
         _Triples ->
-          R = optmove3_loop(G, Triples, CompleteGraph),
+          R = optmove3_loop(G, Triples, EdgeList),
 
           case R of
             no_improvment -> % no improvment at all
 %              io:format("Nope - "),
-              optmove3_run(G, CompleteGraph,
-                           optmove3_update_bitlist(BitList, [V1]), N);
+              optmove3_run(G, EdgeList,
+                           optmove3_update_bitlist(BitList, Neighborhood), N);
             improvment ->
 %              io:format("Ye) - "),
-              optmove3_run(G, CompleteGraph, BitList, N)
+              optmove3_run(G, EdgeList, BitList, N)
           end
       end
   end.
 
-optmove3_loop(_G, [], _CompleteGraph) ->
+optmove3_loop(_G, [], _EdgeList) ->
   no_improvment;
-optmove3_loop(G, [H|T], CompleteGraph) ->
+optmove3_loop(G, [H|T], EdgeList) ->
   [V1,V3,V5] = H,
-  R = optmove3(G,V1,V3,V5,CompleteGraph),
+  R = optmove3(G,V1,V3,V5,EdgeList),
 
   case R of
     true -> 
       improvment;
     false ->
-      optmove3_loop(G, T, CompleteGraph)
+      optmove3_loop(G, T, EdgeList)
   end.
 %%
 %% @doc Returns the next valid 3-tupel of vertices which may be used to

@@ -33,6 +33,13 @@ get_weight(G, E) ->
     WL -> hd(WL)
   end.
 
+get_weight_el(EdgeList, V1, V2) ->
+  WL = [ W || {_,X,Y,W} <- EdgeList, X =:= V1, Y =:= V2 ],
+  case WL of
+    [] -> undef;
+    WL -> hd(WL)
+  end.
+
 %% @doc Creates an edge list for the given graph.
 get_edge_list(Graph) ->
   ets:select(Graph#digraph.etab, [{{'$1','$2','$3','$4'},[],[{{'$1','$2','$3','$4'}}]}]).
