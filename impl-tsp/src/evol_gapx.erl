@@ -58,24 +58,25 @@ selection(Population) ->
       {P1,P2}
   end.
 
-crossover_loop(CompleteGraph, Population) ->
-  Graphs = [ X || {X,_} <- Population ],
+crossover_loop(CompleteGraph, Population, NSize) ->
+  _Graphs = [ X || {X,_} <- Population ],
   {P1, P2} = selection(Population),
   case crossover(CompleteGraph, P1, P2) of
-    no_offspring -> crossover_loop(CompleteGraph, Population);
+    no_offspring -> crossover_loop(CompleteGraph, Population, NSize);
     Offspring ->
       {C, _} = hd(get_fitness_pairs([P1, P2, Offspring])),
       case C =:= Offspring of
         true ->
           Offspring;
         false ->
-          mutate(Offspring)
+          mutate(Offspring ,CompleteGraph, NSize)
       end
   end.
 
 %% Mutates a roundtrip
 %% G - the roundtrip to mutate
-mutate(G) ->
+mutate(G, CompleteGraph, NSize) ->
+  optmove3:optmove3_run(G, CompleteGraph, NSize),
   G.
 
 %%
@@ -102,7 +103,7 @@ crossover(CompleteGraph, ParentA, ParentB) ->
       %{Cost, Path} = a_star:run(G1, 1, 11, F)
 
       B = graph_utils:merge_graphs(B1, B2),
-      io:format("~p~n", [CommonEdges]),
+      %% io:format("~p~n", [CommonEdges]),
       lists:map(fun({_, V1, V2, W}) -> case graph_utils:get_weight(B, V1, V2) of
                                          undef ->
                                            digraph:add_edge(B, V1, V2, W);
@@ -138,16 +139,16 @@ select_parent(FitnessPairs) ->
 %% Population - the poluation to select from
 %% CompleteGraph - the complete graph
 %% N - how many offsprings should be produced
-create_offsprings(_Population, _CompleteGraph, Offsprings, 0) ->
+create_offsprings(_Population, _CompleteGraph, Offsprings, _, 0) ->
   Offsprings;
-create_offsprings(Population, CompleteGraph, Offsprings, N) ->
-  O = crossover_loop(CompleteGraph, Population),
-  create_offsprings(Population, CompleteGraph, [O|Offsprings], N-1).
+create_offsprings(Population, CompleteGraph, Offsprings, NSize, N) ->
+  O = crossover_loop(CompleteGraph, Population, NSize),
+  create_offsprings(Population, CompleteGraph, [O|Offsprings], NSize, N-1).
 
-init(InitialRoundtrips, FileName, ProcessesNum, NSize, GenerationMax) ->
+init(_InitialRoundtrips, FileName, _ProcessesNum, _NSize, _GenerationMax) ->
   random:seed(erlang:now()),
-  {Opts, Graph} = parse_tsp_file:make_atsp_graph(FileName),
-  % spawn processes
+  {_Opts, _Graph} = parse_tsp_file:make_atsp_graph(FileName),
+  % spawn processes and run
   ok.
 
 
@@ -177,7 +178,7 @@ run_loop(Population, CompleteGraph, BestKnown, GenerationMax, NSize, LastMutatio
       io:format("Reached best known solution. Stop.~n"),
       {G, F};
     false ->
-      Offsprings = create_offsprings(Population, CompleteGraph, [], 10),
+      Offsprings = create_offsprings(Population, CompleteGraph, [], NSize, 10),
       {NextPop, Dead} = lists:split(PopLimit,
                             lists:keymerge(2, Population, get_fitness_pairs(Offsprings))),
       lists:map(fun(DeadG) -> digraph:delete(DeadG) end, Dead), % free ets tables
