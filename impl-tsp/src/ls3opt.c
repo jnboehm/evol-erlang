@@ -7,6 +7,7 @@ static ERL_NIF_TERM combinations_nif(ErlNifEnv* env, int argc, const ERL_NIF_TER
     ERL_NIF_TERM a_val, b_val, c_val, comb;
     ERL_NIF_TERM *comb_lis;
     int lis_len, ret;
+    int i, a, b, c;
     int* lis;
     unsigned size, jj = 0;
     if (!enif_get_list_length(env, argv[0], &lis_len)) {
@@ -15,18 +16,19 @@ static ERL_NIF_TERM combinations_nif(ErlNifEnv* env, int argc, const ERL_NIF_TER
 
     lis = enif_alloc(sizeof(unsigned) * lis_len);
     /* printf("lis_len: %d, ", lis_len); */
-    for (int i = 0; i < lis_len; ++i) {
+    for (i = 0; i < lis_len; ++i) {
         enif_get_list_cell(env, tail, &head, &tail);
         enif_get_int(env, head, (&lis[i]));
     }
 
-    // we know that there are only this many options
+    // we know that there are only this many options (actually we only
+    // need 1/3 of that)
     size = lis_len * (lis_len - 1) * (lis_len - 2) >> 1;
     /* printf("size: %u, ", size); */
     comb_lis = enif_alloc(sizeof(ERL_NIF_TERM) * size);
-    for (int a = 0; a < lis_len; a++)
-        for (int b = a + 1; b < lis_len; b++)
-            for (int c = b + 1; c < lis_len; c++) {
+    for (a = 0; a < lis_len; a++)
+        for (b = a + 1; b < lis_len; b++)
+            for (c = b + 1; c < lis_len; c++) {
                 a_val = enif_make_int(env, lis[a]);
                 b_val = enif_make_int(env, lis[b]);
                 c_val = enif_make_int(env, lis[c]);
