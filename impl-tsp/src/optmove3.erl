@@ -114,9 +114,9 @@ optmove3_yes(G, V1, V3, V5, EdgeList) ->
 optmove3_run(G, CompleteGraph, N) ->
   BitList = [ {V, false} || V <- digraph:vertices(G) ],
   EdgeList = graph_utils:get_edge_list(CompleteGraph),
-  io:format("Fitness before ls3opt: ~p~n", [graph_utils:get_fitness_graph(G)]),
+  io:format("ls3opt: before ~p,", [graph_utils:get_fitness_graph(G)]),
   R = optmove3_run(G, EdgeList, BitList, N),
-  io:format("Fitness after ls3opt: ~p~n", [graph_utils:get_fitness_graph(G)]),
+  io:format(" after ~p~n", [graph_utils:get_fitness_graph(G)]),
   R.
 
 optmove3_run(G, EdgeList, BitList, N) ->

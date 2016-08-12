@@ -1,5 +1,5 @@
 #include <erl_nif.h>
-#include <stdio.h>
+/* #include <stdio.h> */
 
 static ERL_NIF_TERM combinations_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
