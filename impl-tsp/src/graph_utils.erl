@@ -249,6 +249,16 @@ graph_to_list(G, EdgeList, Comp, I) ->
   V2 = [ V2 || {_,V1,V2,_} <- EdgeList, V1 =:= hd(I)],
   [hd(I) | graph_to_list(G, EdgeList, Comp, V2)].
 
+roundtrip_to_list(G) ->
+  EdgeList = get_edge_list(G),
+  [V2] = [V2 || {_,1,V2,_} <- EdgeList],
+  [1 | roundtrip_to_list(EdgeList, V2)].
+
+roundtrip_to_list(_, 1) ->
+  [];
+roundtrip_to_list(EdgeList, V) ->
+  [V2] = [V2 || {_,V1,V2,_} <- EdgeList, V1 =:= V],
+  [V | roundtrip_to_list(EdgeList, V2)].
 
 %% @doc Returns the entry points for the specified sub graph, which is a
 %% component of a merged graph.
