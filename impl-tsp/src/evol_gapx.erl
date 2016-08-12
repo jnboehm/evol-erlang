@@ -181,7 +181,7 @@ run_loop(Population, CompleteGraph, BestKnown, GenerationMax, NSize, LastMutatio
       Offsprings = create_offsprings(Population, CompleteGraph, [], NSize, 10),
       {NextPop, Dead} = lists:split(PopLimit,
                             lists:keymerge(2, Population, get_fitness_pairs(Offsprings))),
-      lists:map(fun(DeadG) -> digraph:delete(DeadG) end, Dead), % free ets tables
+      lists:map(fun({DeadG, _}) -> digraph:delete(DeadG) end, Dead),
       {_, NextF} = hd(NextPop),
       NewLm = case F > NextF of
                 true -> 0;
