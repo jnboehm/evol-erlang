@@ -170,8 +170,11 @@ run_loop(Population, CompleteGraph, BestKnown, GenerationMax, NSize, LastMutatio
   {G, F} = hd(Population),
   PopLimit = length(Population),
   {WorstG, WorstF} = lists:last(Population),
-  io:format("Gen ~p~n  Best: Fitness ~p, Route: ~p~n Worst: Fitness ~p, Route: ~p~n",
-            [GenerationMax, F, graph_utils:roundtrip_to_list(G),
+  io:format("Gen: ~p, NSize: ~p, LastMut: ~p~n\
+             Best: Fitness ~p, Route: ~p~n\
+             Worst: Fitness ~p, Route: ~p~n",
+            [GenerationMax, NSize, LastMutation,
+             F, graph_utils:roundtrip_to_list(G),
              WorstF, graph_utils:roundtrip_to_list(WorstG)]),
   case F =< BestKnown of
     true ->
@@ -183,10 +186,10 @@ run_loop(Population, CompleteGraph, BestKnown, GenerationMax, NSize, LastMutatio
                             lists:keymerge(2, Population, get_fitness_pairs(Offsprings))),
       lists:map(fun({DeadG, _}) -> digraph:delete(DeadG) end, Dead),
       {_, NextF} = hd(NextPop),
-      NewLm = case F > NextF of
-                true -> 0;
-                false -> LastMutation + 1
+      NewLm = if NextF < F -> 0;                % We did improve
+                 NextF >= F -> LastMutation + 1
               end,
+      lists:map(fun({El,_}) -> io:format("~p~n", [graph_utils:roundtrip_to_list(El)]) end, NextPop),
       run_loop(NextPop, CompleteGraph, BestKnown, GenerationMax-1,
                NSize, NewLm)
   end.
@@ -195,7 +198,7 @@ run_loop(Population, CompleteGraph, BestKnown, GenerationMax, NSize, LastMutatio
 %% Helper functions for the GA
 %% -----------------------------
 
-%% @doc Entry point for get_r)d_vertexlist/3
+%% @doc Entry point for get_rnd_vertexlist/3
 get_rnd_vertexlist(Vertices, N) ->
   get_rnd_vertexlist(Vertices, N, []).
 
