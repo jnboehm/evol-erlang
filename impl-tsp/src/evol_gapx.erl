@@ -59,7 +59,6 @@ selection(Population) ->
   end.
 
 crossover_loop(CompleteGraph, Population, NSize) ->
-  _Graphs = [ X || {X,_} <- Population ],
   {P1, P2} = selection(Population),
   case crossover(CompleteGraph, P1, P2) of
     no_offspring -> crossover_loop(CompleteGraph, Population, NSize);
@@ -68,8 +67,14 @@ crossover_loop(CompleteGraph, Population, NSize) ->
       case C =:= Offspring of
         true ->
           Offspring;
-        false ->
-          mutate(Offspring ,CompleteGraph, NSize)
+        false ->                                % we may have produced a duplicate
+          O = mutate(Offspring, CompleteGraph, NSize),
+          case verify_graph(Population, {O, graph_utils:get_fitness_graph(O)}) of
+            unique -> O;
+            duplicate ->
+              digraph:delete(O),
+              crossover_loop(CompleteGraph, Population, NSize)
+          end
       end
   end.
 
@@ -142,15 +147,21 @@ select_parent(FitnessPairs) ->
 create_offsprings(_Population, _CompleteGraph, Offsprings, _, 0) ->
   Offsprings;
 create_offsprings(Population, CompleteGraph, Offsprings, NSize, N) ->
+  io:format("Trying to create offspring no# ~p~n", [N]),
   O = crossover_loop(CompleteGraph, Population, NSize),
-  create_offsprings(Population, CompleteGraph, [O|Offsprings], NSize, N-1).
+  case verify_graph(get_fitness_pairs(Offsprings), O) of
+    unique ->
+      create_offsprings(Population, CompleteGraph, [O|Offsprings], NSize, N-1);
+    duplicate ->
+      digraph:delete(O),
+      create_offsprings(Population, CompleteGraph, Offsprings, NSize, N)
+  end.
 
 init(_InitialRoundtrips, FileName, _ProcessesNum, _NSize, _GenerationMax) ->
   random:seed(erlang:now()),
   {_Opts, _Graph} = parse_tsp_file:make_atsp_graph(FileName),
   % spawn processes and run
   ok.
-
 
 run_test() ->
   {Opts, Graph} = parse_tsp_file:make_atsp_graph('../data/ftv33.atsp'),
@@ -172,7 +183,7 @@ run_loop(Population, CompleteGraph, BestKnown, GenerationMax, NSize, LastMutatio
   {WorstG, WorstF} = lists:last(Population),
   io:format("Gen: ~p, NSize: ~p, LastMut: ~p~n\
              Best: Fitness ~p, Route: ~p~n\
-             Worst: Fitness ~p, Route: ~p~n",
+            Worst: Fitness ~p, Route: ~p~n",
             [GenerationMax, NSize, LastMutation,
              F, graph_utils:roundtrip_to_list(G),
              WorstF, graph_utils:roundtrip_to_list(WorstG)]),
@@ -230,4 +241,36 @@ get_path_for_simple_graph(_CompleteGraph,_C,CA,CB,_Simpl) ->
       
   if FA < FB -> CA;
      FB =< FA -> CB
+  end.
+
+verify_graph(Pop, G = {digraph,_,_,_,true}) ->
+  verify_graph(Pop, {G, graph_utils:get_fitness_graph(G)});
+verify_graph(Pop, {G1, F1}) ->
+  try lists:map(fun(El) -> throw_compare(El, G1, F1) end, Pop) of
+      [] -> unique;          % we don't have anythong to compare it to
+      [skip|T] when is_list(T) -> unique
+  catch
+    unique -> unique;
+    duplicate -> duplicate
+  end.
+
+compare_graph(G1, G2) ->
+  L1 = graph_utils:get_edge_list(G1),
+  L2 = graph_utils:get_edge_list(G2),
+  Len = length([V1a || {_, V1a, V1b, _} <- L1, {_, V2a, V2b, _} <- L2, V1a == V2a, V1b == V2b]),
+  if Len == length(L1) -> throw(duplicate);
+     Len =/= length(L1) -> unique
+  end.
+
+throw_compare({Graph, Fitness}, G1, F1) ->
+  if F1 > Fitness ->
+      skip;
+     F1 < Fitness ->
+      throw(unique);
+     F1 =:= Fitness ->
+      case compare_graph(G1, Graph) of
+        unique ->
+          skip;
+        _ -> throw(duplicate)
+      end
   end.
