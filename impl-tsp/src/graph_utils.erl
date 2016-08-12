@@ -175,7 +175,7 @@ merge_graphs(Graph1, Graph2) ->
   G = digraph:new(),
   lists:map(fun(V) -> digraph:add_vertex(G, V, V) end,
             lists:usort(digraph:vertices(Graph1) ++ digraph:vertices(Graph2))),
-  io:format("G1 cyclic: ~p G2 cyclic: ~p~n", [Graph1#digraph.cyclic,Graph2#digraph.cyclic]),
+  %% io:format("G1 cyclic: ~p G2 cyclic: ~p~n", [Graph1#digraph.cyclic,Graph2#digraph.cyclic]),
   InsertFun = fun({_,V1,V2,W}) -> digraph:add_edge(G,V1,V2,W) end,
   lists:map(InsertFun, graph_utils:get_edge_list(Graph1)),
   lists:map(InsertFun, graph_utils:get_edge_list(Graph2)),
@@ -294,7 +294,7 @@ feasible_partition(GM, CommonEdges, ParentA, ParentB, GhostNodes) ->
       CompList = lists:map(F, Components),
       %io:format("CompList: ~p~n", [CompList]),
       R = lists:foldl(fun(A,B) -> A and B end, true, [ X || {X,_,_,_,_} <- CompList]),
-      io:format("Feasible partition: ~p~n", [R]),
+      %% io:format("Feasible partition: ~p~n", [R]),
       case R of
         true ->
           [ {C,CA,CB,SimplGraphs} || {_,C,CA,CB,SimplGraphs} <- CompList ];
@@ -349,8 +349,8 @@ check_component(GM, Component, CommonEdges, ParentA, ParentB, GhostNodes) ->
         false ->
           Simpl = {hd(PathA), lists:last(PathA)},
           R = (hd(PathA) =:= hd(PathB)) and (lists:last(PathA) =:= lists:last(PathB)),
-          io:format("XX hd A: ~p, last A: ~p, Result:~p~n", [hd(PathA),
-                                                          lists:last(PathA),R]),
+          %% io:format("XX hd A: ~p, last A: ~p, Result:~p~n", [hd(PathA),
+                                                          %% lists:last(PathA),R]),
           {R, CompGraph, CompParA, CompParB, [Simpl]} % <- return
       end;
     false -> % N entry points and N exit points
@@ -371,8 +371,8 @@ check_component(GM, Component, CommonEdges, ParentA, ParentB, GhostNodes) ->
           A1Simpl = lists:map(fun(E) -> {hd(E),lists:last(E)} end, A1),
           B1Simpl = lists:map(fun(E) -> {hd(E),lists:last(E)} end, B1),
           R = (A1Simpl =:= B1Simpl),
-          io:format("ZZ PathsA: ~p, PathB: ~p, Result:~p~n", [A1Simpl,
-                                                          B1Simpl,R]),
+          %% io:format("ZZ PathsA: ~p, PathB: ~p, Result:~p~n", [A1Simpl,
+                                                          %% B1Simpl,R]),
           {R, CompGraph, CompParA, CompParB, A1Simpl } % <- return
         end
   end.
