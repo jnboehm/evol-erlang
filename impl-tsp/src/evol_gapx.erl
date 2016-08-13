@@ -98,7 +98,7 @@ crossover(CompleteGraph, ParentA, ParentB) ->
       no_offspring;
     CompMapping -> 
       F = fun({C,CA,CB,Simpl}) -> get_path_for_simple_graph(CompleteGraph,C,CA,CB,Simpl) end,
-      [B1, B2] = _BestComps = lists:map(F, CompMapping),
+      [B1, B2 | _] = _BestComps = lists:map(F, CompMapping),
 
       %% _BestCompsList = lists:map(fun(G) -> graph_utils:graph_to_list(G)
       %%                           end, BestComps),
