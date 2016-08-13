@@ -8,6 +8,35 @@
 -export([]).
 -compile(export_all).
 
+
+optmove2(G, V1, V3, CompleteGraph) ->
+  EdgeList = graph_utils:get_edge_list(G),
+  CompleteEL = graph_utils:get_edge_list(CompleteGraph),
+  V2 = hd(digraph:out_neighbours(G, V1)),
+  V4 = hd(digraph:out_neighbours(G, V3)),
+
+  % delete old edges
+  digraph:del_edge(G, hd(digraph:out_edges(G, V1))),
+  digraph:del_edge(G, hd(digraph:out_edges(G, V3))),
+
+  % swap subpath
+  Comps = digraph_utils:components(G),
+  SwapVertices = hd([ A || A <- Comps, not lists:member(V1, A) ]),
+  L = [ {E,X,Y} || {E,X,Y,_} <- EdgeList, lists:member(X, SwapVertices), X =/= V3 ],
+
+  DelFu = fun(E) -> digraph:del_edge(G, E) end,
+  AddFu = fun({X,Y}) -> digraph:add_edge(G, X, Y, 
+              graph_utils:get_weight_el(CompleteEL, X, Y)) end,
+
+  lists:foreach(DelFu, [ E || {E,_,_} <- L ]),
+  lists:foreach(AddFu, [ {X,Y} || {_,Y,X} <- L ]),
+
+  % add new edges
+  digraph:add_edge(G, V1, V3, graph_utils:get_weight_el(CompleteEL, V1, V3)),
+  digraph:add_edge(G, V2, V4, graph_utils:get_weight_el(CompleteEL, V2, V4)),
+
+  ok.
+
 %% Performs a 3-opt move iff it improves the roundtrip.
 %%
 %% For the three nodes, assuming that V1 > V3 > V5 is
@@ -16,7 +45,7 @@
 %%
 %% Before:
 %%
-%% ... -> [V1] -> [V2] -> [V3] -> [V4] -> [V5] -> [V6] -> ...
+%% ... ->)[V1] -> [V2] -> [V3] -> [V4] -> [V5] -> [V6] -> ...
 %%
 %%
 %% After:

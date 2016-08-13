@@ -83,6 +83,14 @@ crossover_loop(CompleteGraph, Population, NSize) ->
 %% Mutates a roundtrip
 %% G - the roundtrip to mutate
 mutate(G, CompleteGraph, NSize) ->
+  N = digraph:no_vertices(G),
+  FirstRand = random:uniform(N),
+  SecondRand = uniform_except(N, random:uniform(N), FirstRand),
+  
+  % optmove2 with direction change in subpath
+  optmove3:optmove2(G, FirstRand, SecondRand, CompleteGraph),
+  
+  % optmove3
   optmove3:optmove3_run(G, CompleteGraph, NSize),
   G.
 
