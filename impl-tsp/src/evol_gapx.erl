@@ -98,7 +98,7 @@ crossover(CompleteGraph, ParentA, ParentB) ->
       no_offspring;
     CompMapping -> 
       F = fun({C,CA,CB,Simpl}) -> get_path_for_simple_graph(CompleteGraph,C,CA,CB,Simpl) end,
-      [B1, B2 | _] = _BestComps = lists:map(F, CompMapping),
+      BL = _BestComps = lists:map(F, CompMapping),
 
       %% _BestCompsList = lists:map(fun(G) -> graph_utils:graph_to_list(G)
       %%                           end, BestComps),
@@ -107,7 +107,7 @@ crossover(CompleteGraph, ParentA, ParentB) ->
       %F = fun(X,Y) -> graph_utils:get_weight(EdgeList, X,Y) end,
       %{Cost, Path} = a_star:run(G1, 1, 11, F)
 
-      B = graph_utils:merge_graphs(B1, B2),
+      B = foldl1(fun graph_utils:merge_graphs/2, BL),
       %% io:format("~p~n", [CommonEdges]),
       lists:map(fun({_, V1, V2, W}) -> case graph_utils:get_weight(B, V1, V2) of
                                          undef ->
@@ -276,6 +276,9 @@ throw_compare({Graph, Fitness}, G1, F1) ->
         _ -> throw(duplicate)
       end
   end.
+
+foldl1(Fun, [H|L]) when is_function(Fun, 2), is_list(L) ->
+  lists:foldl(Fun, H, L).
 
 free_compmapping({C,CA,CB,_}) ->
   digraph:delete(C),
