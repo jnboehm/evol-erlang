@@ -59,6 +59,7 @@ selection(Population) ->
   end.
 
 crossover_loop(CompleteGraph, Population, NSize) ->
+  io:format(".", []),
   {P1, P2} = selection(Population),
   case crossover(CompleteGraph, P1, P2) of
     no_offspring -> crossover_loop(CompleteGraph, Population, NSize);
@@ -70,7 +71,8 @@ crossover_loop(CompleteGraph, Population, NSize) ->
         false ->                                % we may have produced a duplicate
           O = mutate(Offspring, CompleteGraph, NSize),
           case verify_graph(Population, {O, graph_utils:get_fitness_graph(O)}) of
-            unique -> O;
+            unique ->   io:format("~n", []),
+                        O;
             duplicate ->
               digraph:delete(O),
               crossover_loop(CompleteGraph, Population, NSize)
