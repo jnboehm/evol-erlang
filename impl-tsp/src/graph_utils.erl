@@ -267,10 +267,10 @@ roundtrip_to_list(EdgeList, V) ->
   D = [V2 || {_,V1,V2,_} <- EdgeList, V1 =:= V],
   case D of
     [] -> io:format("the bloody vertex is ~p, EL ~p~n", [V, EdgeList]),
-          [];
-    D -> [Vnext] = D,
-         [V | roundtrip_to_list(EdgeList, Vnext)]
-  end.
+          Vnext = [];
+    D -> [Vnext] = D
+  end,
+  [V | roundtrip_to_list(EdgeList, Vnext)].
 
 %% @doc Returns the entry points for the specified sub graph, which is a
 %% component of a merged graph.
