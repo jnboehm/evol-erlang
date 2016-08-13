@@ -153,7 +153,7 @@ del_common_edges(G) ->
 
 %% @doc Creates an union graph of the two parent elements
 %% ParentA - list of a roundtrip
-%% ParentB - list of the second roundtr)p
+%% ParentB - list of the second roundtrip
 %% EdgeList - the edgeList for the weights and edges
 ug_of(ParentA, ParentB, EdgeList) ->
   G = parse_tsp_file:set_up_vertices(length(ParentA)),
@@ -264,8 +264,13 @@ roundtrip_to_list(G) ->
 roundtrip_to_list(_, 1) ->
   [];
 roundtrip_to_list(EdgeList, V) ->
-  [V2] = [V2 || {_,V1,V2,_} <- EdgeList, V1 =:= V],
-  [V | roundtrip_to_list(EdgeList, V2)].
+  D = [V2 || {_,V1,V2,_} <- EdgeList, V1 =:= V],
+  case D of
+    [] -> io:format("the bloody vertex is ~p, EL ~p~n", [V, EdgeList]),
+          Vnext = [];
+    D -> [Vnext] = D
+  end,
+  [V | roundtrip_to_list(EdgeList, Vnext)].
 
 %% @doc Returns the entry points for the specified sub graph, which is a
 %% component of a merged graph.
