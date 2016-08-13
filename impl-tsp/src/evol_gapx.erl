@@ -117,6 +117,7 @@ crossover(CompleteGraph, ParentA, ParentB) ->
                 end, CommonEdges),
 
       lists:map(fun(V) -> reverse_ghost_node(B, V) end, [V || V <- digraph:vertices(B), V > 0]),
+      lists:foreach(fun(M) -> free_compmapping(M) end, CompMapping),
       B
   end.
 
@@ -275,3 +276,10 @@ throw_compare({Graph, Fitness}, G1, F1) ->
         _ -> throw(duplicate)
       end
   end.
+
+free_compmapping({C,CA,CB,_}) ->
+  digraph:delete(C),
+  digraph:delete(CA),
+  digraph:delete(CB),
+  ok.
+
