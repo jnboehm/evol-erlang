@@ -272,6 +272,29 @@ roundtrip_to_list(EdgeList, V) ->
   end,
   [V | roundtrip_to_list(EdgeList, Vnext)].
 
+%% @doc Performs a 2-opt-move as described in 
+%% http://web.tuke.sk/fei-cit/butka/hop/htsp.pdf
+%%
+%% We assume, that for each V in G exists exactly one outgoing neighbor.
+%%
+%% G - the graph
+%% V1 - the first vertex
+%% V2 - the second vertex
+%% EdgeList - the edge list where the weights can be found
+%%optmove2(G,V1,V2,EdgeList) ->
+%%  V1OutNeighbor = hd(digraph:out_neighbours(G, V1)),
+%%  V2OutNeighbor = hd(digraph:out_neighbours(G, V2)),
+%%
+%%  digraph:add_edge(G, V1, V2, get_weight(EdgeList, V1, V2)),
+%%  digraph:add_edge(G, V1OutNeighbor, V2OutNeighbor, get_weight(EdgeList,
+%%                                                              V1OutNeighbor,
+%%                                                              V2OutNeighbor)),
+%%
+%% digraph:del_edge(G, hd(digraph:out_edges(G, V1))),
+%% digraph:del_edge(G, hd(digraph:out_edges(G, V2))).
+%%
+%%  % direction swap?
+
 %% @doc Returns the entry points for the specified sub graph, which is a
 %% component of a merged graph.
 %%
