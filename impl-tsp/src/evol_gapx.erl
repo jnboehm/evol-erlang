@@ -291,8 +291,7 @@ foldl1(Fun, [H|L]) when is_function(Fun, 2), is_list(L) ->
   lists:foldl(Fun, H, L).
 
 free_compmapping({C,CA,CB,_}) ->
-  digraph:delete(C),
-  digraph:delete(CA),
-  digraph:delete(CB),
+  catch digraph:delete(C),
+  catch digraph:delete(CA),
+  catch digraph:delete(CB),
   ok.
-

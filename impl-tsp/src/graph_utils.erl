@@ -186,8 +186,8 @@ merge_graphs(Graph1, Graph2) ->
   InsertFun = fun({_,V1,V2,W}) -> digraph:add_edge(G,V1,V2,W) end,
   lists:map(InsertFun, graph_utils:get_edge_list(Graph1)),
   lists:map(InsertFun, graph_utils:get_edge_list(Graph2)),
-  %% digraph:delete(Graph1),
-  %% digraph:delete(Graph2),
+  digraph:delete(Graph1),
+  digraph:delete(Graph2),
   G.
 
 %% @doc Creates a union graph of the given base graphs
@@ -344,7 +344,9 @@ feasible_partition(GM, CommonEdges, ParentA, ParentB, GhostNodes) ->
         true ->
           [ {C,CA,CB,SimplGraphs} || {_,C,CA,CB,SimplGraphs} <- CompList ];
         false ->
+          lists:foreach(fun({_,C,CA,CB,SimplGraphs}) -> evol_gapx:free_compmapping({C,CA,CB,SimplGraphs}) end, CompList),
           false
+
       end
     end.
 
