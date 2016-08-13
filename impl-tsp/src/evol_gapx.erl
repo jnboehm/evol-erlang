@@ -114,7 +114,7 @@ crossover(CompleteGraph, ParentA, ParentB) ->
       no_offspring;
     CompMapping -> 
       F = fun({C,CA,CB,Simpl}) -> get_path_for_simple_graph(CompleteGraph,C,CA,CB,Simpl) end,
-      BL = _BestComps = lists:map(F, CompMapping),
+      BL = lists:map(F, CompMapping),
 
       %% _BestCompsList = lists:map(fun(G) -> graph_utils:graph_to_list(G)
       %%                           end, BestComps),
@@ -164,7 +164,7 @@ select_parent(FitnessPairs) ->
 create_offsprings(_Population, _CompleteGraph, Offsprings, _, 0) ->
   Offsprings;
 create_offsprings(Population, CompleteGraph, Offsprings, NSize, N) ->
-  io:format("Trying to create offspring no# ~p~n", [N]),
+  io:format("~p ets tables. Trying to create offspring no# ~p~n", [length(ets:all()), N]),
   O = crossover_loop(CompleteGraph, Population, NSize),
   case verify_graph(get_fitness_pairs(Offsprings), O) of
     unique ->
