@@ -64,18 +64,24 @@ crossover_loop(CompleteGraph, Population, NSize) ->
   case crossover(CompleteGraph, P1, P2) of
     no_offspring -> crossover_loop(CompleteGraph, Population, NSize);
     Offspring ->
-      {C, _} = hd(get_fitness_pairs([P1, P2, Offspring])),
-      case C =:= Offspring of
-        true ->
-          Offspring;
-        false ->                                % we may have produced a duplicate
-          O = mutate(Offspring, CompleteGraph, NSize),
-          case verify_graph(Population, {O, graph_utils:get_fitness_graph(O)}) of
-            unique ->   io:format("~n", []),
-                        O;
-            duplicate ->
-              digraph:delete(O),
-              crossover_loop(CompleteGraph, Population, NSize)
+      case digraph_utils:is_acyclic(Offspring) of
+        true -> digraph:delete(Offspring),
+                %% no_offspring,
+                crossover_loop(CompleteGraph, Population, NSize);
+        false ->
+          {C, _} = hd(get_fitness_pairs([P1, P2, Offspring])),
+          case C =:= Offspring of
+            true ->
+              Offspring;
+            false ->                                % we may have produced a duplicate
+              O = mutate(Offspring, CompleteGraph, NSize),
+              case verify_graph(Population, {O, graph_utils:get_fitness_graph(O)}) of
+                unique -> io:format("~n", []),
+                          O;
+                duplicate ->
+                  digraph:delete(O),
+                  crossover_loop(CompleteGraph, Population, NSize)
+              end
           end
       end
   end.
