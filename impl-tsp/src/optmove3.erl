@@ -255,5 +255,5 @@ tup_acc([], Res) -> Res;
 tup_acc([A,B,C| T], Res) ->
   tup_acc(T, [{A,B,C}|Res]).
 
-init() ->
+init_nif() ->
     ok = erlang:load_nif("./ls3opt_nif", 0).
