@@ -2,7 +2,7 @@
 -compile(export_all).
 
 init() ->
-  Pid = spawn(ets_gc, handle, []),
+  Pid = spawn(ets_gc, handle, [dict:new()]),
   register(ets_gc, Pid),
   {ok, Pid}.
 
