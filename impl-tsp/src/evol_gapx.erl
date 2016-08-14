@@ -227,16 +227,29 @@ run(InitialRoundtrips, Graph, Opts, GenerationMax, NSize) ->
   RndVertexList = get_rnd_vertexlist(digraph:vertices(Graph), InitialRoundtrips),
   InitPop = get_fitness_pairs(pop_init(RndVertexList, Graph, NSize)),
   %% lists:map(fun({El, _}) -> io:format("~w~n", [graph_utils:roundtrip_to_list(El)]) end, InitPop),
-  run_loop(InitPop, Graph, hd(orddict:fetch(best, Opts)), GenerationMax, NSize, 0).
+  run_loop(InitPop, Graph, hd(orddict:fetch(best, Opts)), GenerationMax, NSize, pid, 0).
 
-run_loop(Population, _CompleteGraph, _BestKnown, 0, _NSize, _LastMutation) ->
+run_loop(Population, _CompleteGraph, _BestKnown, 0, _NSize, _, _LastMutation) ->
   io:format("Reached generation limit. Stop.~n"),
   hd(Population);
 
-run_loop(Population, CompleteGraph, BestKnown, GenerationMax, NSize, LastMutation) ->
+run_loop(Population, CompleteGraph, BestKnown, GenerationMax, NSize, Pid, LastMutation) ->
   {G, F} = hd(Population),
-  PopLimit = length(Population),
   {WorstG, WorstF} = lists:last(Population),
+  receive
+    {_Pid, graph, {RecvG, RecvF}} ->
+      if RecvF =< WorstF -> NewPop = lists:keysort(2, Population ++ [{RecvG, RecvF}]),
+                            run_loop(NewPop, CompleteGraph, BestKnown, GenerationMax,
+                                     NSize, Pid, LastMutation);
+         RecvF > WorstF -> dont_use
+  end;
+    {graph_query, Pid} -> Pid ! {self(), graph, {G, F}};
+    stop -> Pid ! stop,
+            exit({stopped, {G, F}})
+  after 0 ->
+      nothing_happened
+  end,
+  PopLimit = length(Population),
   io:format("Gen: ~p, NSize: ~p, LastMut: ~p~n\
              Best: Fitness ~p, Route: ~p~n\
             Worst: Fitness ~p, Route: ~p~n",
@@ -252,13 +265,14 @@ run_loop(Population, CompleteGraph, BestKnown, GenerationMax, NSize, LastMutatio
       {NextPop, Dead} = lists:split(PopLimit,
                             lists:keymerge(2, Population, get_fitness_pairs(Offsprings))),
       lists:map(fun({DeadG, _}) -> digraph:delete(DeadG) end, Dead),
-      {_, NextF} = hd(NextPop),
-      NewLm = if NextF < F -> 0;                % We did improve
+      {NextG, NextF} = hd(NextPop),
+      NewLm = if NextF < F -> Pid ! {self(), graph, {NextG, NextF}},
+                              0;                % We did improve
                  NextF >= F -> LastMutation + 1
               end,
       lists:map(fun({El,_}) -> io:format("~w~n", [graph_utils:roundtrip_to_list(El)]) end, NextPop),
       run_loop(NextPop, CompleteGraph, BestKnown, GenerationMax-1,
-               NSize, NewLm)
+               NSize, Pid, NewLm)
   end.
 
 %% -----------------------------
