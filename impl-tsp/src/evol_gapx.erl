@@ -211,6 +211,18 @@ run_test() ->
   optmove3:init(),
   run(30, Graph, Opts, 150, 10).
 
+run(Graph, Opts) ->
+  RndVertexList = get_rnd_vertexlist(digraph:vertices(Graph),
+                                     orddict:fetch(generations_num, Opts)),
+  InitPop = get_fitness_pairs(pop_init(RndVertexList, Graph,
+                                       orddict:fetch(initial_neigh_size, Opts))),
+  run_loop(InitPop, Graph,
+           hd(orddict:fetch(best, Opts)),
+           orddict:fetch(generations_num, Opts),
+           orddict:fetch(initial_neigh_size, Opts),
+           orddict:fetch(pid, Opts), 0).
+
+
 run(InitialRoundtrips, Graph, Opts, GenerationMax, NSize) ->
   RndVertexList = get_rnd_vertexlist(digraph:vertices(Graph), InitialRoundtrips),
   InitPop = get_fitness_pairs(pop_init(RndVertexList, Graph, NSize)),
