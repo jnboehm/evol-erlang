@@ -11,7 +11,7 @@ handle(GraphDict) ->
     {del, Graph} ->
       G = dict:find(Graph, GraphDict),
       case G of
-        error -> digraph:delete(Graph),
+        error -> catch digraph:delete(Graph),
                  NewD = GraphDict;           % noone uses this graph
         {ok, Val} -> if Val > 1 -> NewD = dict:update_counter(Graph, -1, GraphDict);
                         Val =< 1  -> digraph:delete(Graph),
