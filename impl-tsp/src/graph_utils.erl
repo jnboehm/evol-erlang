@@ -34,11 +34,24 @@ get_weight(G, E) ->
   end.
 
 get_weight_el(EdgeList, V1, V2) ->
-  WL = [ W || {_,X,Y,W} <- EdgeList, X =:= V1, Y =:= V2 ],
-  case WL of
-    [] -> undef;
-    WL -> hd(WL)
+  try get_weight_el1(EdgeList, V1, V2) of
+      undef -> undef
+  catch
+    W -> W
   end.
+  %% WL = [ W || {_,X,Y,W} <- EdgeList, X =:= V1, Y =:= V2 ],
+  %% case WL of
+  %%   [] -> undef;
+  %%   WL -> hd(WL)
+  %% end.
+
+get_weight_el1([], _, _) ->
+  undef;
+get_weight_el1([{_, V1, V2, W} | _], V1, V2) ->
+  throw(W);
+get_weight_el1([_|EdgeList], V1, V2) ->
+  get_weight_el1(EdgeList, V1, V2).
+
 
 %% @doc Creates an edge list for the given graph.
 get_edge_list(Graph) ->
