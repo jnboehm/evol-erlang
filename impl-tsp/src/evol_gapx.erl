@@ -5,7 +5,7 @@
 %%
 
 -module(evol_gapx).
--export([run/5, run_test/0, init/5]).
+-export([run/5, run_test/0, init/6]).
 -compile([export_all, {nowarn_deprecated_function, [{random,uniform,0},
                                                     {random,uniform,1},
                                                     {random,seed,   1},
@@ -196,11 +196,15 @@ create_offsprings(Population, CompleteGraph, Offsprings, NSize, N) ->
       create_offsprings(Population, CompleteGraph, Offsprings, NSize, N)
   end.
 
-init(_InitialRoundtrips, FileName, _ProcessesNum, _NSize, _GenerationMax) ->
+init(FileName, PopSize, OffspringSize, ProcessesNum, NSize, GenerationMax) ->
   random:seed(erlang:now()),
-  {_Opts, _Graph} = parse_tsp_file:make_atsp_graph(FileName),
+  {GraphOpts, Graph} = parse_tsp_file:make_atsp_graph(FileName),
+  OptList = [{pop_size, PopSize}, {offspring_size, OffspringSize},
+             {generations_num, GenerationMax}, {initial_neigh_size, NSize},
+             {proc_num, ProcessesNum}],
+  Opts = orddict:merge(fun(_,_,_) -> ok end, GraphOpts, orddict:from_list(OptList)),
+  msg:master_spawn(Graph, Opts).
   % spawn processes and run
-  ok.
 
 run_test() ->
   {Opts, Graph} = parse_tsp_file:make_atsp_graph('../data/ftv33.atsp'),
