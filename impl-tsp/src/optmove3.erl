@@ -171,7 +171,7 @@ optmove3_run(G, EdgeList, BitList, N) ->
             no_improvment -> % no improvment at all
 %              io:format("Nope - "),
               optmove3_run(G, EdgeList,
-                           optmove3_update_bitlist(BitList, Neighborhood), N);
+                           optmove3_update_bitlist(BitList, [V1]), N);
             improvment ->
 %              io:format("Ye) - "),
               optmove3_run(G, EdgeList, BitList, N)
