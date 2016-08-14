@@ -198,6 +198,8 @@ create_offsprings(Population, CompleteGraph, Offsprings, NSize, N) ->
 
 init(FileName, PopSize, OffspringSize, ProcessesNum, NSize, GenerationMax) ->
   random:seed(erlang:now()),
+  optmove3:init_nif(),
+  ets_gc:init(),
   {GraphOpts, Graph} = parse_tsp_file:make_atsp_graph(FileName),
   OptList = [{pop_size, PopSize}, {offspring_size, OffspringSize},
              {generations_num, GenerationMax}, {initial_neigh_size, NSize},
@@ -208,7 +210,7 @@ init(FileName, PopSize, OffspringSize, ProcessesNum, NSize, GenerationMax) ->
 
 run_test() ->
   {Opts, Graph} = parse_tsp_file:make_atsp_graph('../data/ftv33.atsp'),
-  optmove3:init(),
+  optmove3:init_nif(),
   run(30, Graph, Opts, 150, 10).
 
 run(Graph, Opts) ->
@@ -239,6 +241,7 @@ run_loop(Population, CompleteGraph, BestKnown, GenerationMax, NSize, Pid, LastMu
   receive
     {_Pid, graph, {RecvG, RecvF}} ->
       if RecvF =< WorstF -> NewPop = lists:keysort(2, Population ++ [{RecvG, RecvF}]),
+                            ets_gc ! {use, RecvG},
                             run_loop(NewPop, CompleteGraph, BestKnown, GenerationMax,
                                      NSize, Pid, LastMutation);
          RecvF > WorstF -> dont_use
@@ -264,7 +267,7 @@ run_loop(Population, CompleteGraph, BestKnown, GenerationMax, NSize, Pid, LastMu
       Offsprings = create_offsprings(Population, CompleteGraph, [], NSize, 10),
       {NextPop, Dead} = lists:split(PopLimit,
                             lists:keymerge(2, Population, get_fitness_pairs(Offsprings))),
-      lists:map(fun({DeadG, _}) -> digraph:delete(DeadG) end, Dead),
+      lists:foreach(fun({DeadG, _}) -> ets_gc ! {del, DeadG} end, Dead),
       {NextG, NextF} = hd(NextPop),
       NewLm = if NextF < F -> Pid ! {self(), graph, {NextG, NextF}},
                               0;                % We did improve
