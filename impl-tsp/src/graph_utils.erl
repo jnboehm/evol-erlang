@@ -447,7 +447,15 @@ check_component(GM, Component, CommonEdges, ParentA, ParentB, GhostNodes) ->
 %%              (after removing the common edges
 %% Vertices - the vertices to insert in the subgraph
 subgraph_comp(G, GhostNodes, EntryVertices, GM, Vertices) ->
-  Comp = digraph_utils:subgraph(G, Vertices),
+  Comp = digraph:new(),
+  
+  % add vertices
+  lists:foreach(fun(V) -> digraph:add_vertex(Comp, V, V) end, [ V || V <- Vertices, V > 0]),
+
+  % add edges
+  InsertFu = fun({_,V1,V2,W}) -> digraph:add_edge(Comp, V1,V2,W) end,
+  lists:foreach(InsertFu, graph_utils:get_edge_list(G)),
+
   EdgeListGM = get_edge_list(GM),
   GhostInCand = [ {E,V1,V2,W} || {E,V1,V2,W} <- EdgeListGM, 
                              lists:member(V1, EntryVertices) and 
@@ -455,10 +463,12 @@ subgraph_comp(G, GhostNodes, EntryVertices, GM, Vertices) ->
                              lists:member(V2, Vertices)
             ],
   
+  %io:format("GhostInCand: ~p~n", [GhostInCand]),
   %% Here we somehow reverse the ghost node in order to get a complete subgraph
   %% of the given base graph with the ghost node inserted.
   GhostIn = [ {V1,V2,W} || {_,V1,V2,W} <- GhostInCand, lists:member({V1,V2}, 
     [ {X1 * (-1), X2} || {_,X1,X2,_} <- get_edge_list(G)]) ],
+  %io:format("GhostIn: ~p~n", [GhostInCand]),
   
   %% Note: Only realised for ghost nodes which flow is "incoming",
   %% ghostnodes with outgoing flow direction is probably not possible.
@@ -466,6 +476,7 @@ subgraph_comp(G, GhostNodes, EntryVertices, GM, Vertices) ->
 
   lists:map(fun (Vertex) -> digraph:add_vertex(Comp, Vertex) end, GhostToAdd),
   lists:map(fun ({V1,V2,W}) -> digraph:add_edge(Comp,V1,V2,W) end, GhostIn),
+  
   Comp.
 
 %% @doc Displays a graph in a very unconventional way. :-)

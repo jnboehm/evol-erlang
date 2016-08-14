@@ -58,33 +58,55 @@ selection(Population) ->
       {P1,P2}
   end.
 
-crossover_loop(CompleteGraph, Population, NSize) ->
-  io:format(".", []),
+crossover_loop(CompleteGraph, Population, NSize, CR) ->
+  case CR rem 80 =:= 0 of
+    true -> 
+      io:format("~n");
+    false ->
+      ok
+  end,
+  io:format("."),
   {P1, P2} = selection(Population),
   case crossover(CompleteGraph, P1, P2) of
-    no_offspring -> crossover_loop(CompleteGraph, Population, NSize);
+    no_offspring -> crossover_loop(CompleteGraph, Population, NSize, CR+1);
     Offspring ->
       case digraph_utils:is_acyclic(Offspring) of
-        true -> digraph:delete(Offspring),
+        true -> 
+                io:format("Asyclic offspring tour.~n"),
+                io:format("ParentA: ~p~n", [graph_utils:roundtrip_to_list(P1)]),
+                io:format("ParentB: ~p~n", [graph_utils:roundtrip_to_list(P2)]),
+                graph_utils:display_graph(Offspring),
+                digraph:delete(Offspring),
                 %% no_offspring,
-                crossover_loop(CompleteGraph, Population, NSize);
+                crossover_loop(CompleteGraph, Population, NSize, CR+1);
         false ->
           {C, _} = hd(get_fitness_pairs([P1, P2, Offspring])),
           case C =:= Offspring of
             true ->
+              io:format("~n"),
               Offspring;
             false ->                                % we may have produced a duplicate
-              O = mutate(Offspring, CompleteGraph, NSize),
+              io:format("~n"),
+              O = mutate_loop(Offspring, CompleteGraph, NSize),
               case verify_graph(Population, {O, graph_utils:get_fitness_graph(O)}) of
                 unique -> io:format("~n", []),
                           O;
                 duplicate ->
                   digraph:delete(O),
-                  crossover_loop(CompleteGraph, Population, NSize)
+                  crossover_loop(CompleteGraph, Population, NSize, CR+1)
               end
           end
       end
   end.
+
+mutate_loop(G, CompleteGraph, NSize) ->
+  mutate_loop(G, CompleteGraph, NSize, random:uniform(10)).
+
+mutate_loop(G, _CompleteGraph, _NSize, 0) ->
+  G;
+mutate_loop(G, CompleteGraph, NSize, N) ->
+  mutate(G, CompleteGraph, NSize),
+  mutate_loop(G, CompleteGraph, NSize, N-1).
 
 %% Mutates a roundtrip
 %% G - the roundtrip to mutate
@@ -165,7 +187,7 @@ create_offsprings(_Population, _CompleteGraph, Offsprings, _, 0) ->
   Offsprings;
 create_offsprings(Population, CompleteGraph, Offsprings, NSize, N) ->
   io:format("~p ets tables. Trying to create offspring no# ~p~n", [length(ets:all()), N]),
-  O = crossover_loop(CompleteGraph, Population, NSize),
+  O = crossover_loop(CompleteGraph, Population, NSize, 0),
   case verify_graph(get_fitness_pairs(Offsprings), O) of
     unique ->
       create_offsprings(Population, CompleteGraph, [O|Offsprings], NSize, N-1);
