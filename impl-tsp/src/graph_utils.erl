@@ -205,7 +205,7 @@ merge_graphs(Graph1, Graph2) ->
   G = digraph:new(),
   lists:map(fun(V) -> digraph:add_vertex(G, V, V) end,
             lists:usort(digraph:vertices(Graph1) ++ digraph:vertices(Graph2))),
-  %% io:format("G1 cyclic: ~p G2 cyclic: ~p~n", [Graph1#digraph.cyclic,Graph2#digraph.cyclic]),
+
   InsertFun = fun({_,V1,V2,W}) -> digraph:add_edge(G,V1,V2,W) end,
   lists:map(InsertFun, graph_utils:get_edge_list(Graph1)),
   lists:map(InsertFun, graph_utils:get_edge_list(Graph2)),
@@ -297,8 +297,7 @@ roundtrip_to_list(_, 1) ->
 roundtrip_to_list(EdgeList, V) ->
   D = [V2 || {_,V1,V2,_} <- EdgeList, V1 =:= V],
   case D of
-    [] -> io:format("the bloody vertex is ~p, EL ~p~n", [V, EdgeList]),
-          Vnext = [];
+    [] -> Vnext = [];
     D -> [Vnext] = D
   end,
   [V | roundtrip_to_list(EdgeList, Vnext)].
@@ -336,18 +335,14 @@ get_exit_points(SubGraph, CommonEdges) ->
 %%              and partition the graph GM
 feasible_partition(GM, CommonEdges, ParentA, ParentB, GhostNodes) ->
   Components = digraph_utils:components(GM),
-  %io:format("Components: ~p~n", [Components]),
   case length(Components) > 1 of
     false ->
-      %io:format("Not feasible. Components == 1~n"),
       false;
     true ->
       F = fun(Component) -> check_component(GM, Component, CommonEdges,
                                         ParentA, ParentB, GhostNodes) end,
       CompList = lists:map(F, Components),
-      %io:format("CompList: ~p~n", [CompList]),
       R = lists:foldl(fun(A,B) -> A and B end, true, [ X || {X,_,_,_,_} <- CompList]),
-      %% io:format("Feasible partition: ~p~n", [R]),
       case R of
         true ->
           [ {C,CA,CB,SimplGraphs} || {_,C,CA,CB,SimplGraphs} <- CompList ];

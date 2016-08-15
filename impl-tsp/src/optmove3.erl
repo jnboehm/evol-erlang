@@ -73,22 +73,9 @@ optmove2(G, V1, V3, CompleteGraph) ->
 %%
 %% Returns true if the tour has been improved, return false otherwise.
 optmove3(G, V1, V3, V5, EdgeList) ->
-
-  case V1 =:= V5 of 
-    true ->
-      io:format("V1 = V5");
-    false ->
-      ok
-  end,
-
- % io:format("V1,V3,V5: ~p~n", [[V1,V3,V5]]),
-
   V2 = hd(digraph:out_neighbours(G, V1)),
   V4 = hd(digraph:out_neighbours(G, V3)),
   V6 = hd(digraph:out_neighbours(G, V5)),
-
-%  io:format("V2,V4,V6: ~p~n", [[V2,V4,V6]]),
-
 
   % weights before
   W_V1_V2 = graph_utils:get_weight_el(EdgeList, V1, V2),
@@ -100,23 +87,16 @@ optmove3(G, V1, V3, V5, EdgeList) ->
   W_V3_V6 = graph_utils:get_weight_el(EdgeList, V3, V6),
   W_V5_V2 = graph_utils:get_weight_el(EdgeList, V5, V2),
 
-  %io:format("Before: ~p~n", [(W_V1_V2 + W_V3_V4 + W_V5_V6)]),
-  %io:format("After: ~p~n", [(W_V1_V4 + W_V3_V6 + W_V5_V2)]),
-
   case (W_V1_V4 + W_V3_V6 + W_V5_V2) < (W_V1_V2 + W_V3_V4 + W_V5_V6) of
     true -> 
-      %io:format("Improvment with vertices ~p~n", [[V1,V3,V5]]),
-      %io:format("Old fitness: ~p~n", [graph_utils:get_fitness_graph(G)]),
       digraph:del_edge(G, hd(digraph:out_edges(G, V1))),
       digraph:del_edge(G, hd(digraph:out_edges(G, V3))),
       digraph:del_edge(G, hd(digraph:out_edges(G, V5))),
       digraph:add_edge(G, V1, V4, W_V1_V4),
       digraph:add_edge(G, V3, V6, W_V3_V6),
       digraph:add_edge(G, V5, V2, W_V5_V2),
-      %io:format("New fitness: ~p~n", [graph_utils:get_fitness_graph(G)]),
       true;
     false ->
-%      io:format(":-( No improvment with ~p~n", [[V1,V3,V5]]),
       false
   end.
 
@@ -150,9 +130,7 @@ optmove3_yes(G, V1, V3, V5, EdgeList) ->
 optmove3_run(G, CompleteGraph, N) ->
   BitList = [ {V, false} || V <- digraph:vertices(G) ],
   EdgeList = graph_utils:get_edge_list(CompleteGraph),
-  io:format("ls3opt: before ~p,", [graph_utils:get_fitness_graph(G)]),
   R = optmove3_run(G, EdgeList, BitList, N),
-  io:format(" after ~p~n", [graph_utils:get_fitness_graph(G)]),
   R.
 
 optmove3_run(G, EdgeList, BitList, N) ->

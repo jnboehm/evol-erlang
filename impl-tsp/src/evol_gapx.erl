@@ -23,12 +23,9 @@ reverse_ghost_node(Graph, V) when V > 0->
                          digraph:edges(Graph, -V)),
   lists:map(fun({EndV, W}) -> digraph:add_edge(Graph, V, EndV, W) end, GhostEdges),
   digraph:del_vertex(Graph, -V),
-  %% io:format("Got ~p edges from ghost node ~p, real one ~p~n", [GhostEdges, -V, V]),
   Graph;
 reverse_ghost_node(G, _) ->
   G.
-
-
 
 %% @doc Creates the initial population
 %% Returns a list of digraphs
@@ -47,6 +44,7 @@ pop_init(RndsVertexList, CompleteGraph, NSize) ->
   RndGraphs.
 
 %% @doc Selects two parents from the given population
+%%
 %% Population - the input population
 selection(Population) ->
   {P1,P2} = { select_parent(Population), select_parent(Population) },
@@ -58,42 +56,34 @@ selection(Population) ->
       {P1,P2}
   end.
 
-crossover_loop(CompleteGraph, Population, NSize, CR) ->
-  case CR rem 80 =:= 0 of
-    true -> 
-      io:format("~n");
-    false ->
-      ok
-  end,
-  io:format("."),
+%% @doc Indefinitely tries to create an offspring.
+%%
+%% CompleteGraph - the complete graph
+%% Population - the population to create an offspring from
+%% NSize - the ls3opt neighborhood size
+crossover_loop(CompleteGraph, Population, NSize) ->
   {P1, P2} = selection(Population),
   case crossover(CompleteGraph, P1, P2) of
-    no_offspring -> crossover_loop(CompleteGraph, Population, NSize, CR+1);
+    no_offspring -> crossover_loop(CompleteGraph, Population, NSize);
     Offspring ->
       case digraph_utils:is_acyclic(Offspring) of
         true -> 
-                io:format("Asyclic offspring tour.~n"),
-                io:format("ParentA: ~p~n", [graph_utils:roundtrip_to_list(P1)]),
-                io:format("ParentB: ~p~n", [graph_utils:roundtrip_to_list(P2)]),
                 graph_utils:display_graph(Offspring),
                 digraph:delete(Offspring),
                 %% no_offspring,
-                crossover_loop(CompleteGraph, Population, NSize, CR+1);
+                crossover_loop(CompleteGraph, Population, NSize);
         false ->
           {C, _} = hd(get_fitness_pairs([P1, P2, Offspring])),
           case C =:= Offspring of
             true ->
-              io:format("~n"),
               Offspring;
             false ->                                % we may have produced a duplicate
-              io:format("~n"),
               O = mutate_loop(Offspring, CompleteGraph, NSize),
               case verify_graph(Population, {O, graph_utils:get_fitness_graph(O)}) of
-                unique -> io:format("~n", []),
-                          O;
+                unique -> O;
                 duplicate ->
                   digraph:delete(O),
-                  crossover_loop(CompleteGraph, Population, NSize, CR+1)
+                  crossover_loop(CompleteGraph, Population, NSize)
               end
           end
       end
@@ -138,15 +128,7 @@ crossover(CompleteGraph, ParentA, ParentB) ->
       F = fun({C,CA,CB,Simpl}) -> get_path_for_simple_graph(CompleteGraph,C,CA,CB,Simpl) end,
       BL = lists:map(F, CompMapping),
 
-      %% _BestCompsList = lists:map(fun(G) -> graph_utils:graph_to_list(G)
-      %%                           end, BestComps),
-      %% io:format("~p~n", [_BestCompsList]),
-      % a star to create shortest path
-      %F = fun(X,Y) -> graph_utils:get_weight(EdgeList, X,Y) end,
-      %{Cost, Path} = a_star:run(G1, 1, 11, F)
-
       B = foldl1(fun graph_utils:merge_graphs/2, BL),
-      %% io:format("~p~n", [CommonEdges]),
       lists:map(fun({_, V1, V2, W}) -> case graph_utils:get_weight(B, V1, V2) of
                                          undef ->
                                            digraph:add_edge(B, V1, V2, W);
@@ -186,8 +168,8 @@ select_parent(FitnessPairs) ->
 create_offsprings(_Population, _CompleteGraph, Offsprings, _, 0) ->
   Offsprings;
 create_offsprings(Population, CompleteGraph, Offsprings, NSize, N) ->
-  io:format("~p ets tables. Trying to create offspring no# ~p~n", [length(ets:all()), N]),
-  O = crossover_loop(CompleteGraph, Population, NSize, 0),
+  io:format("ETS: ~p~n", [length(ets:all())]),
+  O = crossover_loop(CompleteGraph, Population, NSize),
   case verify_graph(get_fitness_pairs(Offsprings), O) of
     unique ->
       create_offsprings(Population, CompleteGraph, [O|Offsprings], NSize, N-1);
@@ -226,22 +208,20 @@ run(Graph, Opts) ->
 run(InitialRoundtrips, Graph, Opts, GenerationMax, NSize) ->
   RndVertexList = get_rnd_vertexlist(digraph:vertices(Graph), InitialRoundtrips),
   InitPop = get_fitness_pairs(pop_init(RndVertexList, Graph, NSize)),
-  %% lists:map(fun({El, _}) -> io:format("~w~n", [graph_utils:roundtrip_to_list(El)]) end, InitPop),
   run_loop(InitPop, Graph, hd(orddict:fetch(best, Opts)), GenerationMax, NSize, pid, 0).
 
 run_loop(Population, _CompleteGraph, _BestKnown, 0, _NSize, _, _LastMutation) ->
-  io:format("Reached generation limit. Stop.~n"),
   hd(Population);
 
 run_loop(Population, CompleteGraph, BestKnown, GenerationMax, NSize, Pid, LastMutation) ->
   {G, F} = hd(Population),
-  {WorstG, WorstF} = lists:last(Population),
+  {_, WorstF} = lists:last(Population),
+  PopLimit = length(Population),
   receive
     {_Pid, graph, {RecvG, RecvF}} ->
-      if RecvF =< WorstF -> NewPop = lists:keysort(2, Population ++ [{RecvG, RecvF}]),
-                            ets_gc ! {use, RecvG},
+      if RecvF =< WorstF -> NewPop = update_population(Population, [{RecvG, RecvF}], PopLimit),
                             run_loop(NewPop, CompleteGraph, BestKnown, GenerationMax,
-                                     NSize, Pid, LastMutation);
+                                      NSize, Pid, LastMutation);
          RecvF > WorstF -> dont_use
   end;
     {graph_query, Pid} -> Pid ! {self(), graph, {G, F}};
@@ -250,29 +230,19 @@ run_loop(Population, CompleteGraph, BestKnown, GenerationMax, NSize, Pid, LastMu
   after 0 ->
       nothing_happened
   end,
-  PopLimit = length(Population),
-  io:format("Gen: ~p, NSize: ~p, LastMut: ~p~n\
-             Best: Fitness ~p, Route: ~p~n\
-            Worst: Fitness ~p, Route: ~p~n",
-            [GenerationMax, NSize, LastMutation,
-             F, graph_utils:roundtrip_to_list(G),
-             WorstF, graph_utils:roundtrip_to_list(WorstG)]),
   case F =< BestKnown of
     true ->
-      io:format("Reached best known solution. Stop.~n"),
       {G, F};
     false ->
       Offsprings = create_offsprings(Population, CompleteGraph, [], NSize, 10),
-      {NextPop, Dead} = lists:split(PopLimit,
-                            lists:keymerge(2, Population, get_fitness_pairs(Offsprings))),
-      lists:foreach(fun({DeadG, _}) -> ets_gc ! {del, DeadG} end, Dead),
+      NextPop = update_population(Population, Offsprings, PopLimit),
+
       {NextG, NextF} = hd(NextPop),
       NewLm = if NextF < F -> Pid ! {self(), graph, {NextG, NextF}},
                               0;                % We did improve
                  NextF >= F -> LastMutation + 1
               end,
 
-      lists:map(fun({El,_}) -> io:format("~w~n", [graph_utils:roundtrip_to_list(El)]) end, NextPop),
       if (NewLm >= 20) -> 
            run_loop(NextPop, CompleteGraph, BestKnown, GenerationMax-1,
                     NSize, Pid, NewLm);
@@ -360,3 +330,16 @@ free_compmapping({C,CA,CB,_}) ->
   catch digraph:delete(CA),
   catch digraph:delete(CB),
   ok.
+
+%% @doc Updates the new population, and frees unneeded roundtrips
+%%
+%% Population - the current population
+%% Offsprings - the new offsprings
+%% PopLimit - max population
+%%
+%% Returns the new population
+update_population(Population, Offsprings, PopLimit) ->
+  {NextPop, Dead} = lists:split(PopLimit,
+      lists:keymerge(2, Population, get_fitness_pairs(Offsprings))),
+  lists:foreach(fun({DeadG, _}) -> ets_gc ! {del, DeadG} end, Dead),
+  NextPop.
