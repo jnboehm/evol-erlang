@@ -6,7 +6,7 @@ init(FileName, Nodes, PopSize, ProcessNum, NSize) ->
   random:seed(erlang:now()),
   optmove3:init_nif(),
   {GraphOpts, Graph} = parse_tsp_file:make_atsp_graph(FileName),
-  OptList = [{pop_size, PopSize}, {initial_neigh_size, NSize},
+  OptList = [{pop_size, PopSize}, {neigh_size, NSize},
              {proc_num, ProcessNum}],
   Opts = orddict:merge(fun(_,_,_) -> ok end, GraphOpts, orddict:from_list(OptList)),
   PidL = spawn_slaves(ProcessNum),
@@ -28,11 +28,11 @@ master_proc(Graph, Opts, Pids) ->
   RndVertexList = evol_gapx:get_rnd_vertexlist(digraph:vertices(Graph),
                                                orddict:fetch(pop_size, Opts)),
   InitPop = evol_gapx:get_fitness_pairs(evol_gapx:pop_init(RndVertexList, Graph,
-                                                           orddict:fetch(initial_neigh_size, Opts))),
+                                                           orddict:fetch(neigh_size, Opts))),
   F = fun(Pid) -> Pid ! {make_offspring, self(),
-                         {Graph, InitPop, orddict:fetch(initial_neigh_size, Opts)}} end,
+                         {Graph, InitPop, orddict:fetch(neigh_size, Opts)}} end,
   lists:foreach(F, Pids),
-  master_loop(Graph, Opts, Pids, length(Pids), 1, InitPop, []).
+  master_loop(Graph, Opts, Pids, length(Pids), 1, 0, InitPop, []).
 
 %% @doc the workers.  They create a roundtrip and send it back to the
 %% master process.  The tables which the graph is made of have to have
@@ -48,33 +48,48 @@ slave_handle() ->
     stop -> ok
   end.
 
-master_loop(Graph, Opts, Pids, 0, Gen, Pop, Offsprings) ->
+master_loop(Graph, Opts, Pids, 0, Gen, LastMut, [{_, PopF} | _] = Pop, Offsprings) ->
   NewPop = evol_gapx:update_population(Pop, Offsprings, length(Pop)),
   lists:foreach(fun(Node) -> {G, _} = hd(NewPop), L = graph_utils:roundtrip_to_list(G),
                              {evol_master, Node} ! {other_node, L} end, nodes()),
   lists:foreach(fun(Pid) -> Pid ! {make_offspring, self(),
-                             {Graph, NewPop, orddict:fetch(initial_neigh_size, Opts)}} end, Pids),
-  master_loop(Graph, Opts, Pids, length(Pids), Gen + 1, NewPop, []);
-master_loop(Graph, Opts, Pids, N, Gen, Pop, Offsprings) ->
+                             {Graph, NewPop, orddict:fetch(neigh_size, Opts)}} end, Pids),
+  if LastMut >= 20 -> NewOpts = orddict:update_counter(neigh_sizr, 1, Opts);
+     LastMut < 20 -> NewOpts = Opts
+  end,
+  {_, NewPopF} = hd(NewPop),
+  NewLM = if NewPopF < PopF -> 0;
+              NewPopF >= PopF -> LastMut + 1
+           end,
+  master_loop(Graph, NewOpts, Pids, length(Pids), Gen + 1, NewLM, NewPop, []);
+master_loop(Graph, Opts, Pids, N, Gen, LastMut, Pop, Offsprings) ->
   receive
     {other_node, OList} ->
       NodeGraph = graph_utils:list_to_graph(OList, Graph),
-      case evol_gapx:verify_graph(Offsprings, NodeGraph) of
-        unique -> O = {NodeGraph, graph_utils:get_fitness_graph(NodeGraph)},
-                  master_loop(Graph, Opts, Pids, N, Gen, Pop, [O | Offsprings]);
+      case evol_gapx:verify_graph(Pop, NodeGraph) of
+        unique ->
+          case evol_gapx:verify_graph(Offsprings, NodeGraph) of
+            unique ->
+              O = {NodeGraph, graph_utils:get_fitness_graph(NodeGraph)},
+              master_loop(Graph, Opts, Pids, N, Gen, LastMut, Pop, [O | Offsprings]);
+            duplicate -> digraph:delete(NodeGraph),
+                     master_loop(Graph, Opts, Pids, N, Gen, LastMut, Pop, Offsprings)
+          end;
         duplicate -> digraph:delete(NodeGraph),
-                     master_loop(Graph, Opts, Pids, N, Gen, Pop, Offsprings)
+                     master_loop(Graph, Opts, Pids, N, Gen, LastMut, Pop, Offsprings)
       end;
     {offspring, {G, _} = O} ->
       case evol_gapx:verify_graph(Offsprings, O) of
-        unique -> master_loop(Graph, Opts, Pids, N - 1, Gen, Pop, [O | Offsprings]);
+        unique -> master_loop(Graph, Opts, Pids, N - 1, Gen, LastMut, Pop, [O | Offsprings]);
         duplicate -> digraph:delete(G),
-                     master_loop(Graph, Opts, Pids, N - 1, Gen, Pop, Offsprings)
+                     master_loop(Graph, Opts, Pids, N - 1, Gen, LastMut, Pop, Offsprings)
       end;
     {Pid, info} -> Pid ! {ok, {Gen, hd(Pop), lists:last(Pop)}},
-                   master_loop(Graph, Opts, Pids, N, Gen, Pop, Offsprings);
+                   master_loop(Graph, Opts, Pids, N, Gen, LastMut, Pop, Offsprings);
+    {Pid, population} -> Pid ! {ok, Pop},
+                         master_loop(Graph, Opts, Pids, N, Gen, LastMut, Pop, Offsprings);
     {'ETS-TRANSFER',_,_,ok} ->                  % do nothing
-      master_loop(Graph, Opts, Pids, N, Gen, Pop, Offsprings);
+      master_loop(Graph, Opts, Pids, N, Gen, LastMut, Pop, Offsprings);
     {Pid, stop} -> lists:foreach(fun(P) -> P ! stop end, Pids),
                    Pid ! {ok, {Gen, hd(Pop), lists:last(Pop)}}
   end.
