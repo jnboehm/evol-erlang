@@ -187,3 +187,9 @@ G = evol_gapx:run(20, '../data/br17.atsp').
 graph_utils:get_fitness_graph(G).
 [] == [V || V <- digraph:vertices(G), digraph:out_degree(G, V) =/= 1] ++ [V || V <- digraph:vertices(G),  digraph:in_degree(G, V) =/= 1].
 graph_utils:display_graph(B1).
+
+{O, G} = evol:init().
+EL = graph_utils:get_edge_list(G).
+graph_utils:get_weight_el(EL, 6,6).
+graph_utils:init_nif().
+graph_utils:get_weight_el(EL, 6,6).
