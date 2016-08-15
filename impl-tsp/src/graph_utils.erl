@@ -19,10 +19,12 @@
 init_nif() ->
   ok = erlang:load_nif("./graph_utils_nif", 0).
 
-
 %% @doc Returns the weight between two adjacent vertices.
 %% If no weight can be determined, which means that there is no
 %% connection between V1 -> V2, the atom undef is returned.
+%% G - the graph
+%% V1 - from vertex
+%% V2 - to vertex
 get_weight(G, V1, V2) ->
   WL = ets:select(G#digraph.etab, [{{'_',V1,V2,'$1'},[],['$1']}]),
   case WL of
@@ -30,6 +32,12 @@ get_weight(G, V1, V2) ->
     WL -> hd(WL)
   end.
 
+%% @doc Returns the weight for the specified edge
+%% If no weight can be determined, which mens that there is no
+%% connection between V1 -> V2, the atom undef is returned.
+%%
+%% G - the graph
+%% E - the edge
 get_weight(G, E) ->
   WL = ets:select(G#digraph.etab, [{{E,'_','_','$1'},[],['$1']}]),
   case WL of
@@ -37,6 +45,13 @@ get_weight(G, E) ->
     WL -> hd(WL)
   end.
 
+%% @doc Returns the weight between two adjacent vertices.
+%% If no weight can be determined, which means that there is no
+%% connection between V1 -> V2, the atom undef is returned.
+%%
+%% EdgeList - the graphs edge list
+%% V1 - from vertex
+%% V2 - to vertex
 get_weight_el(EdgeList, V1, V2) ->
   try get_weight_el1(EdgeList, V1, V2) of
       undef -> undef
@@ -49,6 +64,8 @@ get_weight_el(EdgeList, V1, V2) ->
   %%   WL -> hd(WL)
   %% end.
 
+%% @doc called from get_weight_el/3 to cancel the loop if the
+%% weight is found.
 get_weight_el1([], _, _) ->
   undef;
 get_weight_el1([{_, V1, V2, W} | _], V1, V2) ->
@@ -58,6 +75,7 @@ get_weight_el1([_|EdgeList], V1, V2) ->
 
 
 %% @doc Creates an edge list for the given graph.
+%% Graph - the graph
 get_edge_list(Graph) ->
   ets:select(Graph#digraph.etab, [{{'$1','$2','$3','$4'},[],[{{'$1','$2','$3','$4'}}]}]).
 
@@ -79,7 +97,7 @@ get_fitness_graph(G) ->
   Weights = [ get_weight(G, X) || X <- digraph:edges(G) ],
   sum(Weights).
 
-%% Returns true iff the given vertex has a degree of 4. Returns false
+%% @doc Returns true iff the given vertex has a degree of 4. Returns false
 %% otherwise.
 %% G - the graph
 %% V - the vertex to check
@@ -87,7 +105,7 @@ has_deg_4(G, V) ->
   length(get_unique_neighbors(G, V)) =:= 4.
 
 
-%% Creates a ghost node for the given Node V in the given graph.
+%% @doc Creates a ghost node for the given Node V in the given graph.
 %% Note: Ghost nodes can only be created if the degree of the node is
 %% exactly 4.
 %%
@@ -103,6 +121,9 @@ has_deg_4(G, V) ->
 %%
 %% The name of the ghost node is V * (-1).
 %%
+%% GU - the merged graph of two parents
+%% EdgeList - the edge list
+%% V - the vertex with deg(V) = 4
 create_ghost_node(GU, _EdgeList, V) ->
   digraph:add_vertex(GU, -V, -V),
   Out = digraph:out_edges(GU, V),
@@ -120,7 +141,8 @@ create_ghost_node(GU, _EdgeList, V) ->
   digraph:add_edge(GU, V, -V, 0),
   -V.
 
-%% Creates all the ghost nodes for a merged graph G
+%% @doc Creates all the ghost nodes for a merged graph G
+%%
 %% G - the merged graph of two parents
 create_ghost_node_run(G) ->
   EdgeListG = get_edge_list(G),
@@ -130,6 +152,8 @@ create_ghost_node_run(G) ->
 
 %% @doc Identifies common edges in the given merged graph.
 %% Returns the edges in a list.
+%%
+%% G - the merged graph with its created ghost nodes
 get_common_edges(G) ->
   EdgeList = get_edge_list(G),
   Common = [ {E,V1,V2,W} || {E,V1,V2,W} <- EdgeList, 
@@ -155,6 +179,9 @@ get_common_edges(G) ->
 %%
 %% Result: Since there was a common edge between 15 and -15 and both
 %% vertices are inside this component: 15 and -15 are poisoned vertices.
+%%
+%% SubGraph - the part of the graph
+%% CommonEdgeList - all common edges
 get_poisoned_vertices(SubGraph, CommonEdgeList) ->
   P = [ {X, Y} || {_,X,Y,_} <- CommonEdgeList, lists:member(X, digraph:vertices(SubGraph)), 
               lists:member(Y, digraph:vertices(SubGraph)) ],
@@ -162,39 +189,18 @@ get_poisoned_vertices(SubGraph, CommonEdgeList) ->
 
 
 %% @doc Deletes common edges in the given graph.
+%%
 %% G - the graph
 del_common_edges(G) ->
   CommonEdges = get_common_edges(G),
   [ digraph:del_edge(G, E) || {E,_,_,_} <- CommonEdges ].
 
-
-%% @doc Creates an union graph of the two parent elements
-%% ParentA - list of a roundtrip
-%% ParentB - list of the second roundtrip
-%% EdgeList - the edgeList for the weights and edges
-ug_of(ParentA, ParentB, EdgeList) ->
-  G = parse_tsp_file:set_up_vertices(length(ParentA)),
-  ug_of(G, ParentA, [], EdgeList, 1),
-  ug_of(G, ParentB, graph_utils:get_edge_list(G), EdgeList, 1).
-
-ug_of(Graph, Parent, _TempEdgeList, _EdgeList, N) when N > length(Parent) ->
-  Graph;
-ug_of(Graph, Parent, TempEdgeList, EdgeList, N) when N =< length(Parent) ->
-  V1 = nth(N, Parent), 
-  V2 = nth((N rem length(Parent)) + 1, Parent),
-  
-  % Add the edge if there isn't an edge describing the
-  % connection between V1 and V2 with the same flow direction.
-  case graph_utils:get_weight(TempEdgeList, V1, V2) of
-    undef -> digraph:add_edge(Graph, V1, V2, 
-                            graph_utils:get_weight(EdgeList, V1, V2));
-    _ -> ok
-  end, 
-  ug_of(Graph, Parent, TempEdgeList, EdgeList, N + 1).
-
 %% @doc merges digraphs.  They need to be disjunct, meaning that they
 %% don't share any vertices or edges.  All graphs will be deleted,
-%% except the one that is returned (duh).
+%% except the one that is returned.
+%%
+%% Graph1 - the first graph
+%% Graph2 - the second graph
 merge_graphs(Graph1, Graph2) ->
   G = digraph:new(),
   lists:map(fun(V) -> digraph:add_vertex(G, V, V) end,
@@ -240,7 +246,8 @@ get_merged_graph_of(G1, G2) ->
   GM.  
 
 %% @doc Transforms a given list into a graph
-%% G - the graph to transform
+%%
+%% L - the list of the roundtrip
 %% CompleteGraph - The complete graph created by parse_tsp_file
 list_to_graph(L, CompleteGraph) ->
   G = parse_tsp_file:set_up_vertices(length(L)),
@@ -249,11 +256,16 @@ list_to_graph(L, CompleteGraph) ->
       || N <- lists:seq(1, length(L)) ],
   G.
 
-%% Returns a unique list of neighbors for a given vertex in the
+%% @doc Returns a unique list of neighbors for a given vertex in the
 %% specified graph.
+%% G - the graph
+%% V - the vertex
 get_unique_neighbors(G, V) ->
   lists:usort(digraph:out_neighbours(G, V) ++ digraph:in_neighbours(G,V)).
 
+%% @doc Reconnect a graphs components
+%% 
+%% G - the graph 
 graph_to_list(G) ->
   Comps = digraph_utils:components(G),
   EdgeList = get_edge_list(G),
@@ -273,11 +285,13 @@ graph_to_list(G, EdgeList, Comp, I) ->
   V2 = [ V2 || {_,V1,V2,_} <- EdgeList, V1 =:= hd(I)],
   [hd(I) | graph_to_list(G, EdgeList, Comp, V2)].
 
+%% @doc Creates a list from the given EdgeList and the specific start
+%% value
+%% G - the graph
 roundtrip_to_list(G) ->
   EdgeList = get_edge_list(G),
   [V2] = [V2 || {_,1,V2,_} <- EdgeList],
   [1 | roundtrip_to_list(EdgeList, V2)].
-
 roundtrip_to_list(_, 1) ->
   [];
 roundtrip_to_list(EdgeList, V) ->
@@ -288,29 +302,6 @@ roundtrip_to_list(EdgeList, V) ->
     D -> [Vnext] = D
   end,
   [V | roundtrip_to_list(EdgeList, Vnext)].
-
-%% @doc Performs a 2-opt-move as described in 
-%% http://web.tuke.sk/fei-cit/butka/hop/htsp.pdf
-%%
-%% We assume, that for each V in G exists exactly one outgoing neighbor.
-%%
-%% G - the graph
-%% V1 - the first vertex
-%% V2 - the second vertex
-%% EdgeList - the edge list where the weights can be found
-%%optmove2(G,V1,V2,EdgeList) ->
-%%  V1OutNeighbor = hd(digraph:out_neighbours(G, V1)),
-%%  V2OutNeighbor = hd(digraph:out_neighbours(G, V2)),
-%%
-%%  digraph:add_edge(G, V1, V2, get_weight(EdgeList, V1, V2)),
-%%  digraph:add_edge(G, V1OutNeighbor, V2OutNeighbor, get_weight(EdgeList,
-%%                                                              V1OutNeighbor,
-%%                                                              V2OutNeighbor)),
-%%
-%% digraph:del_edge(G, hd(digraph:out_edges(G, V1))),
-%% digraph:del_edge(G, hd(digraph:out_edges(G, V2))).
-%%
-%%  % direction swap?
 
 %% @doc Returns the entry points for the specified sub graph, which is a
 %% component of a merged graph.
@@ -388,23 +379,13 @@ check_component(GM, Component, CommonEdges, ParentA, ParentB, GhostNodes) ->
   CompParB = subgraph_comp(ParentB, GhostNodes, EntryPoints, 
                              GM, Component),
 
-  %graph_utils:display_graph(CompParA),
-  %graph_utils:display_graph(CompParB),
-
-  %io:format("EdgeList A: ~p~n", [get_edge_list(CompParA)]),
-  %io:format("EdgeList B: ~p~n", [get_edge_list(CompParB)]),
-  %io:format("Entry Points: ~p~n", [EntryPoints]),
-  %io:format("Exit Points: ~p~n", [ExitPoints]),
-  
   case length(EntryPoints) =:= 1 of
     true -> % Only one entry and one exit 
       PathA = digraph:get_path(CompParA, hd(EntryPoints),
                                hd(ExitPoints)),
-      %io:format("Path A: ~p~n", [PathA]),
 
       PathB = digraph:get_path(CompParB, hd(EntryPoints),
                                hd(ExitPoints)),
-      %io:format("Path B: ~p~n", [PathB]),
       
       case (PathA =:= false) or (PathB =:= false) of
         true -> 
@@ -413,16 +394,12 @@ check_component(GM, Component, CommonEdges, ParentA, ParentB, GhostNodes) ->
         false ->
           Simpl = {hd(PathA), lists:last(PathA)},
           R = (hd(PathA) =:= hd(PathB)) and (lists:last(PathA) =:= lists:last(PathB)),
-          %% io:format("XX hd A: ~p, last A: ~p, Result:~p~n", [hd(PathA),
-                                                          %% lists:last(PathA),R]),
           {R, CompGraph, CompParA, CompParB, [Simpl]} % <- return
       end;
     false -> % N entry points and N exit points
       Combs = [{X,Y} || X <- EntryPoints, Y <- ExitPoints],
       PathsA = lists:map(fun({E,X}) -> digraph:get_path(CompParA, E,X) end, Combs),
-      %io:format("Paths A: ~p~n", [PathsA]),
       PathsB = lists:map(fun({E,X}) -> digraph:get_path(CompParB, E,X) end, Combs),
-      %io:format("Paths B: ~p~n", [PathsA]),
 
       A1 = lists:filter(fun(E) -> E =/= false end, PathsA),
       B1 = lists:filter(fun(E) -> E =/= false end, PathsB),
@@ -435,8 +412,7 @@ check_component(GM, Component, CommonEdges, ParentA, ParentB, GhostNodes) ->
           A1Simpl = lists:map(fun(E) -> {hd(E),lists:last(E)} end, A1),
           B1Simpl = lists:map(fun(E) -> {hd(E),lists:last(E)} end, B1),
           R = (A1Simpl =:= B1Simpl),
-          %% io:format("ZZ PathsA: ~p, PathB: ~p, Result:~p~n", [A1Simpl,
-                                                          %% B1Simpl,R]),
+
           {R, CompGraph, CompParA, CompParB, A1Simpl } % <- return
         end
   end.
@@ -467,12 +443,10 @@ subgraph_comp(G, GhostNodes, EntryVertices, GM, Vertices) ->
                              lists:member(V2, Vertices)
             ],
   
-  %io:format("GhostInCand: ~p~n", [GhostInCand]),
   %% Here we somehow reverse the ghost node in order to get a complete subgraph
   %% of the given base graph with the ghost node inserted.
   GhostIn = [ {V1,V2,W} || {_,V1,V2,W} <- GhostInCand, lists:member({V1,V2}, 
     [ {X1 * (-1), X2} || {_,X1,X2,_} <- get_edge_list(G)]) ],
-  %io:format("GhostIn: ~p~n", [GhostInCand]),
   
   %% Note: Only realised for ghost nodes which flow is "incoming",
   %% ghostnodes with outgoing flow direction is probably not possible.
@@ -485,6 +459,8 @@ subgraph_comp(G, GhostNodes, EntryVertices, GM, Vertices) ->
 
 %% @doc Displays a graph in a very unconventional way. :-)
 %% It uses fdp for graph rendering.
+%%
+%% G - the graph to render
 display_graph(G) ->
   EdgeList = graph_utils:get_edge_list(G),
   CommandStr = io_lib:format("~p", [ [{V1, V2} || {_, V1,V2,_} <- EdgeList]]),
