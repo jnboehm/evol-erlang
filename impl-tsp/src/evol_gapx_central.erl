@@ -25,15 +25,16 @@ master_proc(Graph, Opts, Pids) ->
                                                orddict:fetch(pop_size, Opts)),
   InitPop = evol_gapx:get_fitness_pairs(evol_gapx:pop_init(RndVertexList, Graph,
                                                            orddict:fetch(initial_neigh_size, Opts))),
-  F = fun(Pid) -> Pid ! {make_offspring,
+  F = fun(Pid) -> Pid ! {make_offspring, self(),
                          {Graph, InitPop, orddict:fetch(initial_neigh_size, Opts)}} end,
   lists:foreach(F, Pids),
   master_loop(Graph, Opts, Pids, length(Pids), 1, InitPop, []).
 
 slave_handle() ->
   receive
-    {make_offspring, {Graph, Pop, NSize}} ->
-      Offspring = evol_gapx:crossover_loop(Graph, Pop, NSize),
+    {make_offspring, Recipient, {Graph, Pop, NSize}} ->
+      {{digraph, V, E, N, _}, _} = Offspring = evol_gapx:crossover_loop(Graph, Pop, NSize),
+      lists:foreach(fun(Tid) -> ets:give_away(Tid, Recipient, ok) end, [V, E, N]),
       evol_master ! {offspring, Offspring},
       slave_handle();
     stop -> ok
@@ -43,7 +44,7 @@ master_loop(Graph, Opts, Pids, 0, Gen, Pop, Offsprings) ->
   NewPop = evol_gapx:update_population(Pop, Offsprings, length(Pop)),
   lists:foreach(fun(Node) -> {G, _} = hd(NewPop), L = graph_utils:roundtrip_to_list(G),
                              {evol_master, Node} ! {other_node, L} end, nodes()),
-  lists:foreach(fun(Pid) -> Pid ! {make_offspring,
+  lists:foreach(fun(Pid) -> Pid ! {make_offspring, self(),
                              {Graph, NewPop, orddict:fetch(initial_neigh_size, Opts)}} end, Pids),
   master_loop(Graph, Opts, Pids, length(Pids), Gen + 1, NewPop, []);
 master_loop(Graph, Opts, Pids, N, Gen, Pop, Offsprings) ->
@@ -62,6 +63,8 @@ master_loop(Graph, Opts, Pids, N, Gen, Pop, Offsprings) ->
       end;
     {Pid, info} -> Pid ! {ok, {Gen, hd(Pop), lists:last(Pop)}},
                    master_loop(Graph, Opts, Pids, N, Gen, Pop, Offsprings)
+    {'ETS-TRANSFER',_,_,ok} ->                  % do nothing
+      master_loop(Graph, Opts, Pids, N, Gen, Pop, Offsprings);
   end.
 
 get_info() ->
