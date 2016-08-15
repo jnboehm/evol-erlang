@@ -273,9 +273,13 @@ run_loop(Population, CompleteGraph, BestKnown, GenerationMax, NSize, Pid, LastMu
                               0;                % We did improve
                  NextF >= F -> LastMutation + 1
               end,
+
       lists:map(fun({El,_}) -> io:format("~w~n", [graph_utils:roundtrip_to_list(El)]) end, NextPop),
-      run_loop(NextPop, CompleteGraph, BestKnown, GenerationMax-1,
-               NSize, Pid, NewLm)
+      if (NewLm >= 20) -> 
+           run_loop(NextPop, CompleteGraph, BestKnown, GenerationMax-1, NSize, NewLm);
+         NewLm < 20 ->
+            run_loop(NextPop, CompleteGraph, BestKnown, GenerationMax-1, NSize, NewLm)
+      end
   end.
 
 %% -----------------------------

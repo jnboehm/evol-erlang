@@ -207,3 +207,33 @@ evol_gapx:init('../data/br17.atsp', 50, 10, 5, 10, 150).
 evol_gapx:init('../data/ftv33.atsp', 50, 10, 5, 10, 2).
 
 evol_gapx:init('../data/ftv33.atsp',100,15,24,10,150).
+=======
+evol_gapx:run().
+
+# eine Edge fehlt
+{O, G} = evol:init(10, '../data/ftv33.atsp').
+G1 = graph_utils:list_to_graph([1,2,34,30,20,14,3,4,25,24,32,19,18,12,11,33,13,28,29,26,17,31,27,23,21,22,9,6,7,5,8,10,15,16], G).
+G2 = graph_utils:list_to_graph([1,3,31,29,30,26,25,24,20,23,27,28,34,17,13,4,7,10,9,8,5,6,33,14,15,16,2,19,11,12,32,22,21,18], G).
+GM = graph_utils:get_merged_graph_of(G1, G2).
+GhostNodes = graph_utils:create_ghost_node_run(GM).
+CommonEdges = graph_utils:get_common_edges(GM).
+graph_utils:del_common_edges(GM).
+M = graph_utils:feasible_partition(GM, CommonEdges, G1,G2, GhostNodes).
+
+
+
+# mit zwei Komponenten
+{O, G} = evol:init(10, '../data/ftv33.atsp').
+G1 = graph_utils:list_to_graph([1,25,24,20,19,12,32,21,22,28,29,4,2,31,9,33,5,3,13,15,26,34,30,27,23,18,11,10,8,6,7,17,16,14], G).
+G2 = graph_utils:list_to_graph([1,24,22,32,21,27,28,31,34,3,5,7,6,10,33,8,9,2,4,26,29,30,23,25,20,19,18,12,11,13,16,17,15,14], G).
+GM = graph_utils:get_merged_graph_of(G1, G2).
+GhostNodes = graph_utils:create_ghost_node_run(GM).
+CommonEdges = graph_utils:get_common_edges(GM).
+graph_utils:del_common_edges(GM).
+M = graph_utils:feasible_partition(GM, CommonEdges, G1,G2, GhostNodes).
+F = fun({C,CA,CB,Simpl}) -> evol_gapx:get_path_for_simple_graph(G,C,CA,CB,Simpl) end.
+BL = lists:map(F, M).
+B = evol_gapx:foldl1(fun graph_utils:merge_graphs/2, BL).
+lists:map(fun({_, V1, V2, W}) -> case graph_utils:get_weight(B, V1, V2) of undef -> digraph:add_edge(B, V1, V2, W); W -> ok end end, CommonEdges).
+lists:map(fun(V) -> evol_gapx:reverse_ghost_node(B, V) end, [V || V <- digraph:vertices(B), V > 0]).
+
