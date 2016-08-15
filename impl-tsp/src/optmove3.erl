@@ -238,4 +238,4 @@ tup_acc([A,B,C| T], Res) ->
   tup_acc(T, [{A,B,C}|Res]).
 
 init_nif() ->
-    ok = erlang:load_nif("./ls3opt_nif", 0).
+  ok = erlang:load_nif("./ls3opt_nif", 0).

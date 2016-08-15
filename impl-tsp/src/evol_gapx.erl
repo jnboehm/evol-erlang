@@ -208,7 +208,9 @@ run(Graph, Opts) ->
 run(InitialRoundtrips, Graph, Opts, GenerationMax, NSize) ->
   RndVertexList = get_rnd_vertexlist(digraph:vertices(Graph), InitialRoundtrips),
   InitPop = get_fitness_pairs(pop_init(RndVertexList, Graph, NSize)),
-  run_loop(InitPop, Graph, hd(orddict:fetch(best, Opts)), GenerationMax, NSize, pid, 0).
+  Pid = spawn(fun(_) -> ok end),
+  run_loop(InitPop, Graph, hd(orddict:fetch(best, Opts)), GenerationMax, NSize, Pid, 0).
+
 
 run_loop(Population, _CompleteGraph, _BestKnown, 0, _NSize, _, _LastMutation) ->
   hd(Population);
@@ -239,6 +241,7 @@ run_loop(Population, CompleteGraph, BestKnown, GenerationMax, NSize, Pid, LastMu
 
       {NextG, NextF} = hd(NextPop),
       NewLm = if NextF < F -> Pid ! {self(), graph, {NextG, NextF}},
+                              evol_master ! {self(), graph, {NextG, NextF}},
                               0;                % We did improve
                  NextF >= F -> LastMutation + 1
               end,

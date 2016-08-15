@@ -1,21 +1,16 @@
 -module(msg).
 -compile(export_all).
 
-master_spawn() ->
-  master_spawn("../data/br17.atsp", 10).
-
-%% How many calls to spawn/3?  where can I look up cores or something
-%% like that?  Would benchmarking it work?
-
 %% Spawns all the processes and then returns the first and last pid of
 %% the created ones.  The processes each have the pid of the one they
 %% spawn and the last one gets the pid of the first process.
 master_spawn(Graph, Opts) ->
   Firstpid = spawn(?MODULE, slave_spawn, [self(), Opts, Graph, orddict:fetch(proc_num, Opts)]),
+  register(evol_master, self()),
   receive
-    {procs_spawned, Pid} -> Pid ! {firstpid, Firstpid},	% complete the circle
-                            {Firstpid, Pid}
-  end.
+    {procs_spawned, Pid} -> Pid ! {firstpid, Firstpid}	% complete the circle
+  end,
+  spawn(?MODULE, handle, []).
 
 slave_spawn(MasterPid, Opts, Graph, 0) ->
   MasterPid ! {procs_spawned, self()},
