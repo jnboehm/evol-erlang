@@ -54,17 +54,21 @@ master_loop(Graph, Opts, Pids, N, Gen, Pop, Offsprings) ->
       case evol_gapx:verify_graph(Offsprings, NodeGraph) of
         unique -> O = {NodeGraph, graph_utils:get_fitness_graph(NodeGraph)},
                   master_loop(Graph, Opts, Pids, N, Gen, Pop, [O | Offsprings]);
-        duplicate -> master_loop(Graph, Opts, Pids, N, Gen, Pop, Offsprings)
+        duplicate -> digraph:delete(NodeGraph),
+                     master_loop(Graph, Opts, Pids, N, Gen, Pop, Offsprings)
       end;
-    {offspring, O} ->
+    {offspring, {G, _} = O} ->
       case evol_gapx:verify_graph(Offsprings, O) of
         unique -> master_loop(Graph, Opts, Pids, N - 1, Gen, Pop, [O | Offsprings]);
-        duplicate -> master_loop(Graph, Opts, Pids, N - 1, Gen, Pop, Offsprings)
+        duplicate -> digraph:delete(G),
+                     master_loop(Graph, Opts, Pids, N - 1, Gen, Pop, Offsprings)
       end;
     {Pid, info} -> Pid ! {ok, {Gen, hd(Pop), lists:last(Pop)}},
-                   master_loop(Graph, Opts, Pids, N, Gen, Pop, Offsprings)
+                   master_loop(Graph, Opts, Pids, N, Gen, Pop, Offsprings);
     {'ETS-TRANSFER',_,_,ok} ->                  % do nothing
       master_loop(Graph, Opts, Pids, N, Gen, Pop, Offsprings);
+    {Pid, stop} -> lists:foreach(fun(P) -> P ! stop end, Pids),
+                   Pid ! {ok, {Gen, hd(Pop), lists:last(Pop)}}
   end.
 
 get_info() ->
