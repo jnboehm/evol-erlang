@@ -41,15 +41,17 @@ slave_handle() ->
 
 master_loop(Graph, Opts, Pids, 0, Gen, Pop, Offsprings) ->
   NewPop = evol_gapx:update_population(Pop, Offsprings, length(Pop)),
-  lists:foreach(fun(Node) -> {evol_master, Node} ! {other_node, hd(NewPop)} end, nodes()),
+  lists:foreach(fun(Node) -> {G, _} = hd(NewPop), L = graph_utils:roundtrip_to_list(G),
+                             {evol_master, Node} ! {other_node, L} end, nodes()),
   lists:foreach(fun(Pid) -> Pid ! {make_offspring,
-                             {Graph, Pop, orddict:fetch(initial_neigh_size, Opts)}} end, Pids),
+                             {Graph, NewPop, orddict:fetch(initial_neigh_size, Opts)}} end, Pids),
   master_loop(Graph, Opts, Pids, length(Pids), Gen + 1, NewPop, []);
 master_loop(Graph, Opts, Pids, N, Gen, Pop, Offsprings) ->
   receive
     {other_node, O} ->
-      case evol_gapx:verify_graph(Offsprings, O) of
-        unique -> master_loop(Graph, Opts, Pids, N, Gen, Pop, [O | Offsprings]);
+      NodeGraph = graph_utils:list_to_graph(O, Graph),
+      case evol_gapx:verify_graph(Offsprings, NodeGraph) of
+        unique -> master_loop(Graph, Opts, Pids, N, Gen, Pop, [NodeGraph | Offsprings]);
         duplicate -> master_loop(Graph, Opts, Pids, N, Gen, Pop, Offsprings)
       end;
     {offspring, O} ->

@@ -343,6 +343,6 @@ free_compmapping({C,CA,CB,_}) ->
 %% Returns the new population
 update_population(Population, Offsprings, PopLimit) ->
   {NextPop, Dead} = lists:split(PopLimit,
-      lists:keymerge(2, Population, get_fitness_pairs(Offsprings))),
-  lists:foreach(fun({DeadG, _}) -> ets_gc ! {del, DeadG} end, Dead),
+      lists:keymerge(2, Population, Offsprings)),
+  lists:foreach(fun({DeadG, _}) -> digraph:delete(DeadG) end, Dead),
   NextPop.
