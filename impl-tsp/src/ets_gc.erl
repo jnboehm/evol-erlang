@@ -22,7 +22,7 @@ handle(GraphDict) ->
     {use, Graph} ->
       G = dict:find(Graph, GraphDict),
       case G of
-        error -> NewD = dict:store(Graph, 1, GraphDict);
+        error -> NewD = dict:store(Graph, 2, GraphDict);
         {ok, _} ->  NewD = dict:update_counter(Graph, 1, GraphDict)
       end,
       handle(NewD);
