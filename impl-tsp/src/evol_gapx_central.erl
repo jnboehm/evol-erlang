@@ -48,10 +48,11 @@ master_loop(Graph, Opts, Pids, 0, Gen, Pop, Offsprings) ->
   master_loop(Graph, Opts, Pids, length(Pids), Gen + 1, NewPop, []);
 master_loop(Graph, Opts, Pids, N, Gen, Pop, Offsprings) ->
   receive
-    {other_node, O} ->
-      NodeGraph = graph_utils:list_to_graph(O, Graph),
+    {other_node, OList} ->
+      NodeGraph = graph_utils:list_to_graph(OList, Graph),
       case evol_gapx:verify_graph(Offsprings, NodeGraph) of
-        unique -> master_loop(Graph, Opts, Pids, N, Gen, Pop, [NodeGraph | Offsprings]);
+        unique -> O = {NodeGraph, graph_utils:get_fitness_graph(NodeGraph)},
+                  master_loop(Graph, Opts, Pids, N, Gen, Pop, [O | Offsprings]);
         duplicate -> master_loop(Graph, Opts, Pids, N, Gen, Pop, Offsprings)
       end;
     {offspring, O} ->
