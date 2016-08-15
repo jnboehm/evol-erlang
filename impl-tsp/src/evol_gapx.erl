@@ -76,11 +76,11 @@ crossover_loop(CompleteGraph, Population, NSize) ->
           {C, _} = hd(get_fitness_pairs([P1, P2, Offspring])),
           case C =:= Offspring of
             true ->
-              Offspring;
+              {Offspring, graph_utils:get_fitness_graph(Offspring)};
             false ->                                % we may have produced a duplicate
               O = mutate_loop(Offspring, CompleteGraph, NSize),
               case verify_graph(Population, {O, graph_utils:get_fitness_graph(O)}) of
-                unique -> O;
+                unique -> {O, graph_utils:get_fitness_graph(O)};
                 duplicate ->
                   digraph:delete(O),
                   crossover_loop(CompleteGraph, Population, NSize)
