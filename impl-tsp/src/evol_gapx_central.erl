@@ -40,13 +40,14 @@ slave_handle() ->
   end.
 
 master_loop(Graph, Opts, Pids, 0, Gen, Pop, Offsprings) ->
-  NewPop = lists:keymerge(2, Pop, lists:keysort(2, Offsprings)),
+  NewPop = evol_gapx:update_population(Pop, Offsprings, length(Pop)),
   lists:foreach(fun(Node) -> {evol_master, Node} ! {other_node, hd(NewPop)} end, nodes()),
+  lists:foreach(fun(Pid) -> Pid ! {make_offspring,
+                             {Graph, Pop, orddict:fetch(initial_neigh_size, Opts)}} end, Pids),
   master_loop(Graph, Opts, Pids, length(Pids), Gen + 1, NewPop, []);
 master_loop(Graph, Opts, Pids, N, Gen, Pop, Offsprings) ->
   receive
     {other_node, O} ->
-      io:format("got smthing~n", []),
       case evol_gapx:verify_graph(Offsprings, O) of
         unique -> master_loop(Graph, Opts, Pids, N, Gen, Pop, [O | Offsprings]);
         duplicate -> master_loop(Graph, Opts, Pids, N, Gen, Pop, Offsprings)
