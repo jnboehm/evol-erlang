@@ -13,12 +13,16 @@ init(FileName, Nodes, PopSize, ProcessNum, NSize) ->
   lists:foreach(fun(Node) -> net_adm:ping(Node) end, Nodes),
   spawn(?MODULE, master_proc, [Graph, Opts, PidL]).
 
+%% @doc Spawns N workers and creates a list containing the pid for
+%% each of them.
 spawn_slaves(1) ->
   [spawn(?MODULE, slave_handle, [])];
 spawn_slaves(N) ->
   Pid = spawn(?MODULE, slave_handle, []),
   [Pid | spawn_slaves(N - 1)].
 
+%% @doc this function registers the main process, initializes the
+%% population and sends the workers the first call to action.
 master_proc(Graph, Opts, Pids) ->
   register(evol_master, self()),
   RndVertexList = evol_gapx:get_rnd_vertexlist(digraph:vertices(Graph),
@@ -30,6 +34,10 @@ master_proc(Graph, Opts, Pids) ->
   lists:foreach(F, Pids),
   master_loop(Graph, Opts, Pids, length(Pids), 1, InitPop, []).
 
+%% @doc the workers.  They create a roundtrip and send it back to the
+%% master process.  The tables which the graph is made of have to have
+%% their ownership transferred to the master so he can actually free
+%% them (else it would error out).
 slave_handle() ->
   receive
     {make_offspring, Recipient, {Graph, Pop, NSize}} ->
