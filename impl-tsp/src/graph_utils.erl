@@ -16,6 +16,10 @@
                   ntab = notable :: ets:tab(),
                   cyclic = true  :: boolean()}).
 
+init_nif() ->
+  ok = erlang:load_nif("./graph_utils_nif", 0).
+
+
 %% @doc Returns the weight between two adjacent vertices.
 %% If no weight can be determined, which means that there is no
 %% connection between V1 -> V2, the atom undef is returned.
