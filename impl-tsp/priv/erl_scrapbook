@@ -193,3 +193,17 @@ EL = graph_utils:get_edge_list(G).
 graph_utils:get_weight_el(EL, 6,6).
 graph_utils:init_nif().
 graph_utils:get_weight_el(EL, 6,6).
+
+eprof:start().
+eprof:start_profiling([self()]).
+evol_gapx:run_test().
+eprof:stop_profiling().
+eprof:analyze(total).
+
+graph_utils:init_nif().
+
+evol_gapx:init('../data/br17.atsp', 50, 10, 5, 10, 150).
+
+evol_gapx:init('../data/ftv33.atsp', 50, 10, 5, 10, 2).
+
+evol_gapx:init('../data/ftv33.atsp',100,15,24,10,150).
