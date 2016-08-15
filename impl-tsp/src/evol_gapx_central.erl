@@ -88,6 +88,8 @@ master_loop(Graph, Opts, Pids, N, Gen, LastMut, Pop, Offsprings) ->
                    master_loop(Graph, Opts, Pids, N, Gen, LastMut, Pop, Offsprings);
     {Pid, population} -> Pid ! {ok, Pop},
                          master_loop(Graph, Opts, Pids, N, Gen, LastMut, Pop, Offsprings);
+    {Pid, misc} -> Pid ! {ok, Opts, Pids, Gen, LastMut},
+                   master_loop(Graph, Opts, Pids, N, Gen, LastMut, Pop, Offsprings);
     {'ETS-TRANSFER',_,_,ok} ->                  % do nothing
       master_loop(Graph, Opts, Pids, N, Gen, LastMut, Pop, Offsprings);
     {Pid, stop} -> lists:foreach(fun(P) -> P ! stop end, Pids),
