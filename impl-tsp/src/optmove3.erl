@@ -9,6 +9,12 @@
 -compile(export_all).
 
 
+%% @doc Performs a 2-opt move with the given two vertices.
+%%
+%% G - the graph to perform the optmove2
+%% V1 - the first vertex
+%% V3 - the second vertex
+%% CompleteGraph - the complete graph with all weights and edges
 optmove2(G, V1, V3, CompleteGraph) ->
   EdgeList = graph_utils:get_edge_list(G),
   CompleteEL = graph_utils:get_edge_list(CompleteGraph),
@@ -37,7 +43,7 @@ optmove2(G, V1, V3, CompleteGraph) ->
 
   ok.
 
-%% Performs a 3-opt move iff it improves the roundtrip.
+%% @doc Performs a 3-opt move iff it improves the roundtrip.
 %%
 %% For the three nodes, assuming that V1 > V3 > V5 is
 %% the order in the roundtrip. Further we assume that for each V in G
@@ -114,7 +120,8 @@ optmove3(G, V1, V3, V5, EdgeList) ->
       false
   end.
 
-
+%% @doc Same as optmove3/5 but changes the edges regardless if it improves
+%% the roundtrip
 optmove3_yes(G, V1, V3, V5, EdgeList) ->
   V2 = hd(digraph:out_neighbours(G, V1)),
   V4 = hd(digraph:out_neighbours(G, V3)),
@@ -155,13 +162,9 @@ optmove3_run(G, EdgeList, BitList, N) ->
       finished;
     true ->
       V1 = hd(Members),
-%      io:format("V1: ~p~n", [V1]),
       Neighborhood = optmove3_get_subneighborhood(G, [V1], N),
-%      io:format("Bitlist: ~p~n", [BitList]),
-%      io:format("NH: ~p~n", [Neighborhood]),
 
       Triples = optmove3_triples(BitList, Neighborhood),
-      %io:format("Triples: ~p~n, Neighborhood:~p~n ", [Triples, Neighborhood]),
       case Triples of
         [] -> finished;
         _Triples ->
@@ -169,16 +172,21 @@ optmove3_run(G, EdgeList, BitList, N) ->
 
           case R of
             no_improvment -> % no improvment at all
-%              io:format("Nope - "),
               optmove3_run(G, EdgeList,
                            optmove3_update_bitlist(BitList, [V1]), N);
             improvment ->
-%              io:format("Ye) - "),
               optmove3_run(G, EdgeList, BitList, N)
           end
       end
   end.
 
+%% @doc Loop through all triple combinations and try to improve the
+%% roundtrip. If an improvment is found, return the atom improvment.
+%% Return no_improvment otherwise.
+%%
+%% G - the graph
+%% [H|T] - the list with combinations
+%% EdgeList - the edge list with alle the weights
 optmove3_loop(_G, [], _EdgeList) ->
   no_improvment;
 optmove3_loop(G, [H|T], EdgeList) ->
@@ -191,6 +199,7 @@ optmove3_loop(G, [H|T], EdgeList) ->
     false ->
       optmove3_loop(G, T, EdgeList)
   end.
+
 %%
 %% @doc Returns the next valid 3-tupel of vertices which may be used to
 %% perform a 3-opt-move. This function respects the 3-opt-move variant
@@ -213,14 +222,12 @@ optmove3_update_bitlist(BitList, Elements) ->
   optmove3_update_bitlist(BitList, Elements, 1).
 
 optmove3_update_bitlist(BitList, Elements, N) when N > length(Elements) ->
-%  io:format("Strike: ~p~n", [Elements]),
   BitList;
 
 optmove3_update_bitlist(BitList, Elements, N) ->
   X = lists:nth(N, Elements),
   optmove3_update_bitlist(lists:keyreplace(X, 1, BitList, {X, true}),
                           Elements, N+1).
-
 
 %% @doc For a given V in G return the subneighborhood as described in
 %% "A new genetic algorithm for the asymmetric TSP"
@@ -235,10 +242,7 @@ optmove3_get_subneighborhood(G, NH, NSize) ->
   optmove3_get_subneighborhood(G,
       [hd(digraph:out_neighbours(G, hd(NH)))|NH], NSize-1).  
 
-% 15 -> 4 -> 3
-
 combinations(L) ->
-  %% DropFun = fun (L) -> lists:dropwhile(fun(Elem) -> El =/= Elem end, L),
   Res = combinations(L, [], 3),
   tuplify(lists:flatten(Res)).
 
