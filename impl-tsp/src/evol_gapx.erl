@@ -209,9 +209,7 @@ init(FileName, PopSize, OffspringSize, ProcessesNum, NSize, GenerationMax) ->
   % spawn processes and run
 
 run_test() ->
-  {Opts, Graph} = parse_tsp_file:make_atsp_graph('../data/ftv33.atsp'),
-  optmove3:init_nif(),
-  run(30, Graph, Opts, 150, 10).
+  init('../data/ftv33.atsp', 30, 10, 1, 10, 150).
 
 run(Graph, Opts) ->
   RndVertexList = get_rnd_vertexlist(digraph:vertices(Graph),
