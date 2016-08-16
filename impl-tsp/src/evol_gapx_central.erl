@@ -57,8 +57,8 @@ master_loop(Graph, Opts, Pids, 0, Gen, [{_, PopF} | _] = Pop, Offsprings) ->
                              {Graph, NewPop, orddict:fetch(neigh_size, Opts)}} end, Pids),
   {_, NewPopF} = hd(Offsprings),
   NewOpts = if LastMut >= 20 -> 
-                orddict:update(last_mut, 0, orddict:update_counter(neigh_size, 1, Opts));
-               LastMut < 20 -> if NewPopF < PopF -> orddict:update(last_mut, 0, Opts);
+                orddict:update(last_mut, fun(_) -> 0 end, orddict:update_counter(neigh_size, 1, Opts));
+               LastMut < 20 -> if NewPopF < PopF -> orddict:update(last_mut, fun(_) -> 0 end, Opts);
                                              NewPopF >= PopF -> orddict:update_counter(last_mut, 1, Opts)
                                end;
                         NewPopF >= PopF -> orddict:update_counter(last_mut, 1, Opts)
