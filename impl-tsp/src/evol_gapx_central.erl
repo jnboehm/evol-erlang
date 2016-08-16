@@ -1,13 +1,17 @@
 -module(evol_gapx_central).
 -compile(export_all).
 
+-compile({nowarn_deprecated_function, [{random,seed,   1},
+                                       {erlang,now,    0}]}).
+
 
 init(FileName, Nodes, PopSize, ProcessNum, NSize) ->
   random:seed(erlang:now()),
   optmove3:init_nif(),
   {GraphOpts, Graph} = parse_tsp_file:make_atsp_graph(FileName),
   OptList = [{pop_size, PopSize}, {neigh_size, NSize},
-             {proc_num, ProcessNum}, {last_mut, 0}],
+             {proc_num, ProcessNum}, {last_mut, 0},
+             {start_time, erlang:now()}],
   Opts = orddict:merge(fun(_,_,_) -> ok end, GraphOpts, orddict:from_list(OptList)),
   PidL = spawn_slaves(ProcessNum),
   lists:foreach(fun(Node) -> net_adm:ping(Node) end, Nodes),
