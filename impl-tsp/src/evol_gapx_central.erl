@@ -94,7 +94,7 @@ master_loop(Graph, Opts, Pids, N, Gen, Pop, Offsprings) ->
                    master_loop(Graph, Opts, Pids, N, Gen, Pop, Offsprings);
     {Pid, population} -> Pid ! {ok, Pop},
                          master_loop(Graph, Opts, Pids, N, Gen, Pop, Offsprings);
-    {Pid, misc} -> Pid ! {ok, Opts, Pids, Gen},
+    {Pid, misc} -> Pid ! {ok, {Opts, Gen, Pids}},
                    master_loop(Graph, Opts, Pids, N, Gen, Pop, Offsprings);
     {'ETS-TRANSFER',_,_,ok} ->                  % do nothing
       master_loop(Graph, Opts, Pids, N, Gen, Pop, Offsprings);
@@ -107,6 +107,15 @@ get_info() ->
   evol_master ! {self(), info},
   receive
       {ok, Msg} -> Msg
+  after 60000 -> {error, no_answer}
+  end.
+
+get_misc() ->
+  evol_master ! {self(), misc},
+  receive
+      {ok, Msg} -> Msg
+  after 60000 -> {error, no_answer}
+  end.
 
 wait_for_slaves(0) ->
   ok;
