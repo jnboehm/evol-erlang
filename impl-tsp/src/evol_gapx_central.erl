@@ -45,7 +45,7 @@ slave_handle() ->
       lists:foreach(fun(Tid) -> ets:give_away(Tid, Recipient, ok) end, [V, E, N]),
       evol_master ! {offspring, Offspring},
       slave_handle();
-    stop -> ok
+    stop -> stopped
   end.
 
 master_loop(Graph, Opts, Pids, 0, Gen, [{_, PopF} | _] = Pop, Offsprings) ->
@@ -95,11 +95,19 @@ master_loop(Graph, Opts, Pids, N, Gen, Pop, Offsprings) ->
     {'ETS-TRANSFER',_,_,ok} ->                  % do nothing
       master_loop(Graph, Opts, Pids, N, Gen, Pop, Offsprings);
     {Pid, stop} -> lists:foreach(fun(P) -> P ! stop end, Pids),
-                   Pid ! {ok, {Gen, hd(Pop), lists:last(Pop)}}
+                   Pid ! {ok, {Gen, hd(Pop), lists:last(Pop)}},
+                   wait_for_slaves(length(Pids))
   end.
 
 get_info() ->
   evol_master ! {self(), info},
   receive
       {ok, Msg} -> Msg
+
+wait_for_slaves(0) ->
+  ok;
+wait_for_slaves(N) ->
+  receive
+    stopped ->
+      wait_for_slaves(N - 1)
   end.
