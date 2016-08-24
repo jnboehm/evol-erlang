@@ -1,5 +1,5 @@
 \chapter{Einführung}
-\section{„Asymmetrisches Traveling Salesman“ Problem}
+\section{„Asymmetrisches Traveling Salesman“ (ATSP) Problem}
 Das Problem des Handlungsreisenden ist ein
 \textbf{NP-hartes} kombinatorisches Problem, bei dem versucht wird in
 einem vollständigen gerichtetem Graphen die kürzeste Rundreise zu finden. Jeder
@@ -14,7 +14,7 @@ Die Komplexität zum Herausfinden der kürzesten Rundreise in einem
 vollständigen Graphen ist $\mathcal{O}(n!)$. 
 \end{theorem}
 
-\begin{proof}
+\begin{proof}[Beweis]
 Sei $G=(V,E)$, wobei $V = \{ v_0, v_1, \dotsc, v_n\}$, $E= ?$ ein
 vollständiger gerichteter Graph, das bedeutet, von einem
 beliebigen Knoten $v_j$ mit $j \leq n$ sind alle anderen Knoten $v_0, v_1, \dotsc, v_n$
@@ -43,3 +43,9 @@ vorgestellt, wie man gute Lösungen mit einem sogenannten „evolutionären
 Algorithmus“ heuristisch findet. Ebenfalls wird eine in der
 Programmiersprache Erlang entwickelte Implementierung des Algorithmus 
 vorgestellt.
+
+In der Ausarbeitung wird beschrieben wie der Rekombinationsoperator
+„Generalized Asymmetric Partition Crossover“ funktioniert und
+implementiert wurde.
+Ein weiterer notwendiger Teil der Implementierung ist die lokale Suche
+mit einem modifiziertem 3-opt-Verfahren.
