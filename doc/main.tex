@@ -12,12 +12,17 @@
 % put all the other packages here:
 \usepackage{amsmath}
 \usepackage{amsthm}
+\usepackage{algorithm}
+\usepackage{varwidth}
+\usepackage[noend]{algpseudocode}
+\usepackage{tikz}
+\usetikzlibrary{shapes,shapes.geometric,arrows,fit,calc,positioning,automata}
 
 \newtheorem{theorem}{Satz}
 \newtheorem{bem}{Bemerkung}
 
 \usepackage{style}
-
+\algblockdefx[Foreach]{Foreach}{EndForeach}[1]{\textbf{foreach} #1 \textbf{do}}{\textbf{end foreach}}
 \begin{document}
 
 \input{./tex/title.tex}
