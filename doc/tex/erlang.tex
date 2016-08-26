@@ -29,15 +29,12 @@ Erlang hat sich hervorragend geeignet, das Programm nebenläufig zu
 machen.  Deshalb fiel unsere Wahl überhaupt erst auf die Sprache.
 
 Das Versenden und Empfangen von Nachrichten ist extrem einfach durch
-das „pattern matching“ von Erlang.  Da wir das Modul
-% Darstellung von Graphen
-\lstinline{digraph} für unsere Datenstruktur verwenden, wurden diese
-als Tupel \lstinline!{digraph, V, E, N, true}!  dargestellt.
-\lstinline!V!, \lstinline!E! und \lstinline!N! werden intern als
-Datenbanktabellen gehalten, auf die jeder Prozess in einer Node
-zugreifen kann, %was ist ein proz. und node?
-deshalb war es extrem einfach, einen Graphen zu versenden, da der
-Empfänger nur die Referenz auf die Tabellen braucht.
+das „pattern matching“ von Erlang.  In dem Modul \lstinline!digraph!
+werden Graphen als Tupel \lstinline!{digraph, V, E, N, true}!
+dargestellt.  \lstinline!V!, \lstinline!E! und \lstinline!N! werden
+intern als Datenbanktabellen gehalten, auf die jeder Prozess in einer
+Node zugreifen kann, weshalb nur die Referenz auf die Tabellen
+versendet werden muss.
 \section{Nachteile}
 Für rechenintensive Aufgaben ist Elang schlicht ungeeignet.
 Dynamische Sprachen haben generell das Problem, dass sie
