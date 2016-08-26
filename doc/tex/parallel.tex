@@ -1,5 +1,8 @@
 \chapter{Parallelisierung}
-\begin{figure}[ht]
+\label{chp:para}
+
+\begin{SCfigure}
+  \centering
   \begin{tikzpicture}
     [place/.style={circle,
       inner sep=0pt,minimum size=2mm}]
@@ -20,7 +23,12 @@
     \draw[->, >=latex, dashed] (master) -- (1);
     \draw[->, >=latex, dashed] (\n) -- (master);
   \end{tikzpicture}
-  \hfill
+  \caption{\label{fig:mult-subpop}Es werden mehrere Subpopulationen
+    erzeugt, die dem jeweils nächsten Prozess dann Teile aus der
+    eigenen Population zusenden.  }
+\end{SCfigure}
+
+\begin{SCfigure}
   \begin{tikzpicture}
     [place/.style={circle,
       inner sep=0pt,minimum size=2mm}]
@@ -39,11 +47,8 @@
     \draw[->, >=latex, dashed] (master) -- (1);
     \draw[->, >=latex, dashed] (\n) -- (master);
   \end{tikzpicture}
-  \caption{\label{fig:topology} Links das initiale Konzept für die
-    Parallelisierung: Der „master“-Prozess erzeugt mehrere
-    Subpopulationen, die dem jeweils nächsten dann Teile aus der
-    eigenen Population zusenden.  Rechts die finale Topologie: Die
+  \caption{\label{fig:topology-central} Die
     Kindprozesse erzeugen einzelne Rundreisen und schicken diese an
-    dem „master“ zurück.  Dieser muss die Rundreisen dann in die
+    den „master“ zurück.  Dieser muss die Rundreisen dann in die
     eigene Population einsortieren.}
-\end{figure}
+\end{SCfigure}
