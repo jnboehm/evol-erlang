@@ -35,6 +35,13 @@ dargestellt.  \lstinline!V!, \lstinline!E! und \lstinline!N! werden
 intern als Datenbanktabellen gehalten, auf die jeder Prozess in einer
 Node zugreifen kann, weshalb nur die Referenz auf die Tabellen
 versendet werden muss.
+
+Auch kann man durch Nachrichten ein Interface für den Benutzer
+erstellen, in dem man an dem Hauptprozess eine Nachricht schickt und
+er darauf antwortet.  Darüber hinaus gibt es Profiler wie
+\lstinline!eprof!, welche einem die Flaschenhälse aufzeigen, an denen
+man noch Optimierungen vornehmen kann.
+
 \section{Nachteile}
 Für rechenintensive Aufgaben ist Elang schlicht ungeeignet.
 Dynamische Sprachen haben generell das Problem, dass sie
