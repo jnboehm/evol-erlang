@@ -12,6 +12,18 @@ seinem Ergebnis ersetzt werden, ohne die Korrektheit des Programms zu
 ändern“ – in Einzelfällen gebrochen, damit das Ergebnis von
 \lstinline!now()! überhaupt sinnvoll sein kann.
 
+Da Erlangs Prozesse initial deutlich weniger Speicher benötigen, sind
+sie deutlich leichter als ein Systemprozess.  Die Nebenläufigkeit wird
+in Erlang mittels threads realisiert, deren Scheduling von der Erlang
+Runtime selber betrieben wird.  Der Unterschied zu vielen anderen
+Sprachen ist dabei, dass das Scheduling „preemptive“ ist, dem
+rechnenden Prozess also der Kern entzogen werden kann.
+
+Ein Erlang Prozess entspricht ungefähr einer Node.  Diese kann nach
+einmaliger Verbindung mit anderen Nodes kommunizieren, was ebenfalls
+mit Erlangs „message passing“ funktioniert.  Für mehr Details dazu
+siehe \cite[Kapitel~„Distribunomicon“]{lyse}.
+
 \section{Vorteile}
 Erlang hat sich hervorragend geeignet, das Programm nebenläufig zu
 machen.  Deshalb fiel unsere Wahl überhaupt erst auf die Sprache.
