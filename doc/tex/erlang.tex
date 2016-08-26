@@ -1,5 +1,5 @@
 \chapter{Erlang}
-Da wir den Algorithmus durch „message-passing“ parallelisieren wollten
+Da wir den Algorithmus durch „message passing“ parallelisieren wollten
 haben wir uns für Erlang als unsere Programmiersprache verwendet.  Die
 Sprache wurde im „Ericsson Computer Science Laboratory“ entwickelt um
 vor allem Telekommunikationsanwendungen zu entwickeln, wo viel Wert
@@ -9,13 +9,12 @@ Erlang ist eine funktionale Programmiersprache, obwohl einzelne
 Prinzipien gebrochen werden, wenn praktische Probleme dies gebieten.
 Zum Beispiel wird referenzielle Transparenz – „Ein Ausdruck kann mit
 seinem Ergebnis ersetzt werden, ohne die Korrektheit des Programms zu
-ändern“ – gebrochen, damit das Ergebnis von \texttt{now()} überhaupt
-sinnvoll sein kann.
+ändern“ – in Einzelfällen gebrochen, damit das Ergebnis von
+\lstinline!now()! überhaupt sinnvoll sein kann.
 
 \section{Vorteile}
 Erlang hat sich hervorragend geeignet, das Programm nebenläufig zu
-machen.  Das war auch der Hauptgrund, warum wir uns für diese Sprache
-entschieden haben.
+machen.  Deshalb fiel unsere Wahl überhaupt erst auf die Sprache.
 
 Das Versenden und Empfangen von Nachrichten ist extrem einfach durch
 das „pattern matching“ von Erlang.  Da wir das Modul
