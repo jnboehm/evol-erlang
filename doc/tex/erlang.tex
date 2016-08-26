@@ -16,6 +16,17 @@ sinnvoll sein kann.
 Erlang hat sich hervorragend geeignet, das Programm nebenläufig zu
 machen.  Das war auch der Hauptgrund, warum wir uns für diese Sprache
 entschieden haben.
+
+Das Versenden und Empfangen von Nachrichten ist extrem einfach durch
+das „pattern matching“ von Erlang.  Da wir das Modul
+% Darstellung von Graphen
+\lstinline{digraph} für unsere Datenstruktur verwenden, wurden diese
+als Tupel \lstinline!{digraph, V, E, N, true}!  dargestellt.
+\lstinline!V!, \lstinline!E! und \lstinline!N! werden intern als
+Datenbanktabellen gehalten, auf die jeder Prozess in einer Node
+zugreifen kann, %was ist ein proz. und node?
+deshalb war es extrem einfach, einen Graphen zu versenden, da der
+Empfänger nur die Referenz auf die Tabellen braucht.
 \section{Nachteile}
 Für rechenintensive Aufgaben ist Elang schlicht ungeeignet.
 Dynamische Sprachen haben generell das Problem, dass sie
@@ -25,3 +36,6 @@ weniger Optimierungen vornehmen kann.
 Generell wird davon abgeraten, die Sprache für solche Zwecke zu
 benutzen, da Erlang dafür nicht konzipiert wurde.
 \cite[Kapitel~3]{lyse}
+
+Das wird im Detail in Kapitel \ref{chp:para}
+behandelt.
