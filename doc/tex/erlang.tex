@@ -54,6 +54,36 @@ Generell wird davon abgeraten, die Sprache für solche Zwecke zu
 benutzen, da Erlang dafür nicht konzipiert wurde
 \cite[Kapitel~3]{lyse}.
 
+\subsection{\gtwght}
+\label{subsec:get-weight}
 
-Das wird im Detail in Kapitel \ref{chp:para}
-behandelt.
+Die Funktion \gtwght\ hat uns das Gewicht zwischen zwei Knoten in dem
+Graphen zurückgegeben.  Als wir unseren Profiler benutzt haben,
+stellte sich heraus, dass über 90\% der Aufrufe, und damit auch ein
+Großteil der Zeit, dieser Funktion zufallen.  Deshalb hatten wir
+versucht \gtwght\ zu optimieren, da die Anzahl der Aufrufe nicht
+reduzieren werden konnte.
+
+Zu erst wurde die Funktion so geschrieben, dass \gtwght\ den Graphen
+selbst übergeben bekommt und dann auf dessen Tabellen eine
+Datenbankabfrage macht.  Obwohl die In-Memory-Datenbank, in Erlang
+wird diese ets genannt, einen konstanten Zeitaufwand für Lese- und
+Schreiboperationen hat, war die konstante Zeit zu hoch.  Deshalb haben
+wir vorher eine Liste mit allen Kanten erstellt aus denen wir mit
+Hilfe von „pattern matching“ direkt den gefundenen Wert zurückgeben
+konnten.  Das hatte uns eine durchschnittliche Zeit von 0,13 Sekunden
+pro Aufruf erbracht.
+
+Da immer noch die Laufzeit von \gtwght\ dominiert wurde, hatten wir
+weiterhin versucht durch eine „Native Implemented Function“ (NIF) in C
+die Zeit pro Aufruf zu reduzieren.  Das Resultat hat die Zeit pro
+Aufruf leider verschlechtert, da die Makros für die Datenkonvertierung
+(von Erlangs dynamischen Termen zu C-Typen) zu viel Zeit beansprucht.
+
+Das war einer der Punkte, der im Nachhinein die Laufzeit drastisch
+verschlechtert hat.  Es gibt in Erlang zwar auch Arrays, diese sind
+allerdings funktional und bieten vor allem keinen wahlfreien
+Speicherzugriff \cite[Kapitel~11]{lyse}.  Dieser Teil wäre in einer
+Sprache wie C schnell und intuitiv gewesen, da einfach nur ein Zugriff
+auf ein zweidimensionales Array an den übergebenen Indizes nötig
+gewesen wäre.
