@@ -23,7 +23,7 @@ partitionieren und daraus das neue Kind $G_o$ zu erzeugen.
 
 \section{Funktionsweise}
 Seien $G_1$ und $G_2$ beliebige Rundreisen, beide erzeugt aus einem
-vollständigen Graphen $G_c$. Zunächst werden $G_1$ und $G_2$ in einem
+vollständigen Graphen $G$. Zunächst werden $G_1$ und $G_2$ in einem
 gemeinsamen Graphen $G_u$ zusammengeführt. Den Graph $G_u = G_1 \cup
 G_2$ nennen wir auch Vereinigungsgraph von $G_1$ und $G_2$.
 \newpage
@@ -253,7 +253,7 @@ auto
 }
 \end{tabular}
 \caption[Beispiel Einfügung von Ghost-Knoten]{Links: Ein Graph $G_u$ vor der Einführung von
-Ghostknoten. Rechts: Der Graph mit dem eingefügten Ghostknoten $6'$.
+Ghostknoten. Rechts: Der Graph $G_u'$ mit dem eingefügten Ghostknoten $6'$.
 Blaue Linie: $G_1$, erstes Elternteil; rote, gestrichelte Linie: $G_2$,
 zweites Elternteil}
 \end{figure}
@@ -264,7 +264,7 @@ Ghost-Knoten $v'$ eingefügt werden muss, oder nicht.
 \end{bem}
 \newpage
 Nachdem alle Ghost-Knoten eingefügt wurden müssen Kanten mit einer
-bestimmten Eigenschaft aus $G_u'$ entfernt werden um eine Paritionierung
+bestimmten Eigenschaft aus $G_u'$ entfernt werden, um eine Paritionierung
 des Graphen vorzunehmen. In $G_u'$ müssen genau jene Kanten entfernt
 werden, die sowohl in $G_1$ \textbf{und} $G_2$ vorkommen. Zusätzlich
 müssen die Kanten entfernt werden, die bei der Generierung der
@@ -276,7 +276,7 @@ Menge $E_c$ wird nun in die Kantenmenge von $G_o$ (dem Offspring)
 eingefügt.
 \begin{figure}[hb]
 \centering
-\resizebox{120pt}{170pt}{
+\resizebox{100pt}{140pt}{
 \begin{tikzpicture}[%
 >=stealth,
 node distance=1.9cm,
@@ -435,38 +435,38 @@ auto
 
 \end{tabular}
 \caption[Partitionierung von $G_u'$ nach Löschen von $E_c$]{Der Graph
-$G_u$ nach Löschen der gemeinsamen Kanten $E_c$. Die Teile des
+$G_u'$ nach Löschen der gemeinsamen Kanten $E_c$. Die Teile des
 partitionierten Graphen werden Komponenten genannt.}
 \end{figure}
 
-Jede Komponente wird als Teilgraph $G_{p_k}$ gekennzeichnet, wobei $k
-\leq $Anzahl der Komponenten in $G_u'$.  
+Jede Komponente wird als Teilgraph $G_{c_k}$ gekennzeichnet, wobei $k
+\leq $Anzahl der Komponenten in $G_u'$. 
 
 \begin{bem}
-  In Abbildung 2.4 ist $G_{p_1}$ ist der Teilgraph mit den Knoten $1,2,3,4,5,6$, $G_{p_2}$ ist der Teilgraph
+  In Abbildung 2.4 ist $G_{p_1}$ der Teilgraph mit den Knoten $1,2,3,4,5,6$, $G_{p_2}$ ist der Teilgraph
   mit den Knoten
   $11,9,10,7,8,6'$
 \end{bem}
-Für alle Komponenten $G_{p_k}$ muss als nächstes die Menge der Eingangs- und
+Für alle Komponenten $G_{c_k}$ muss als nächstes die Menge der Eingangs- und
 Ausgangsknoten festgestellt werden. Hierfür werden zwei Funktionen
 definiert:
 \begin{itemize}
-  \item $comp_{in}(G_{p_k}, E_c)$ - ermittelt die Menge der
-    Eingangsknoten von $G_{p_k}$ 
-  \item $comp_{out}(G_{p_k}, E_c)$ - ermittelt die Menge der
-    Ausgangsknoten von $G_{p_k}$ 
+  \item $comp_{in}(G_{c_k}, E_c)$ - ermittelt die Menge der
+    Eingangsknoten von $G_{c_k}$ 
+  \item $comp_{out}(G_{c_k}, E_c)$ - ermittelt die Menge der
+    Ausgangsknoten von $G_{c_k}$ 
 \end{itemize}
 \newpage
 \begin{algorithm}
-  \caption{Ermittlung Eingangsknoten in $G_{p_k}$}\label{alg:comp_in}
+  \caption{Ermittlung Eingangsknoten in $G_{c_k}$}\label{alg:comp_in}
 \begin{algorithmic}[1]
-  \Procedure{$comp_{in}$}{$G_{p_k}, E_c$}
-    \State $V \gets vertices(G_{p_k})$
+  \Procedure{$comp_{in}$}{$G_{c_k}, E_c$}
+    \State $V \gets vertices(G_{c_k})$
     \State $Entry \gets list()$
     \Foreach{$v \in V$}
-      \State $g = has\_ghostnode\_in\_comp(G_{p_k}, v)$
-      \If {$\neg g \land in\_degree(G_{p_k}, v) = 0$}
-      \Comment{// In-Degree}    
+      \State $g = has\_ghostnode\_in\_comp(G_{c_k}, v)$
+      \If {$\neg g \land in\_degree(G_{c_k}, v) = 0$}
+      \Comment{In-Degree}    
         \State $Entry \gets append(Entry, v)$
       \EndIf
     \EndForeach
@@ -475,22 +475,27 @@ definiert:
 \end{algorithmic}
 \end{algorithm}
 \begin{algorithm}
-\caption{Ermittlung Ausgangsknoten in $G_{p_k}$}\label{alg:comp_out}
+\caption{Ermittlung Ausgangsknoten in $G_{c_k}$}\label{alg:comp_out}
 \begin{algorithmic}[1]
-  \Procedure{$comp_{out}$}{$G_{p_k}, E_c$}
-    \State $V \gets vertices(G_{p_k})$
-    \State $Entry \gets list()$
+  \Procedure{$comp_{out}$}{$G_{c_k}, E_c$}
+    \State $V \gets vertices(G_{c_k})$
+    \State $Exit \gets list()$
     \Foreach{$v \in V$}
-      \State $g = has\_ghostnode\_in\_comp(G_{p_k}, v)$
-      \If {$\neg g \land out\_degree(G_{p_k}, v) = 0$}
-      \Comment{// Out-Degree} 
-        \State $Entry \gets append(Entry, v)$
+      \State $g = has\_ghostnode\_in\_comp(G_{c_k}, v)$
+      \If {$\neg g \land out\_degree(G_{c_k}, v) = 0$}
+      \Comment{Out-Degree} 
+        \State $Exit \gets append(Exit, v)$
       \EndIf
     \EndForeach
-    \State \textbf{return} $Entry$
+    \State \textbf{return} $Exit$
   \EndProcedure
 \end{algorithmic}
 \end{algorithm}
+Die prinzipielle Vorgehensweise der beiden Funktionen ist das Anschauen
+der eingehenden beziehungsweise ausgehenden Kanten. Ein Knoten $v$ kommt
+nur als Eingangspunkt in Frage, wenn keine eingehenden Kanten für $v$
+existieren. Ein ausgehender Knoten kann hingegen keine ausgehende Kanten
+besitzen.
 \begin{bem}
   Es können Komponenten existieren welche nicht nur einen Eingangs- und
   einen Ausgangsknoten haben. Tatsächlich gibt es sehr häufig
@@ -499,11 +504,225 @@ definiert:
   diesen Umstand.
 \end{bem}
 \begin{bem}
-  Die Funktion $has\_ghostnode\_in\_comp(G_{p_k}, v)$ ist hier nicht
+  Die Funktion $has\_ghostnode\_in\_comp(G_{c_k}, v)$ ist hier nicht
   ausführlich erläutert. Sie überprüft, ob für einen Knoten $v$ ein
   entsprechender Ghost-Knoten $v'$ eingefügt wurde, der sich ebenfalls
-  innerhalb der Komponente $G_{p_k}$ befindet. Ist dies der Fall, gibt
-  die Funktion den Wert true zurück. 
+  innerhalb der Komponente $G_{c_k}$ befindet. Ist dies der Fall, gibt
+  die Funktion den Wert true zurück. Knoten, für die ein entsprechender
+  Ghost-Knoten innerhalb der Komponente existiert können nicht als
+  Eingangs- oder Ausgangspunkt verwendet werden, da sie die Komponente
+  in weitere Teile aufspalten würde.
 \end{bem}
+Mit den Informationen über Eingangs- und Ausgangsknoten ist der „Fluss“ 
+einer Komponente bekannt. Man startet in einem Eingangsknoten und endet
+in einem Ausgangsknoten. Dieser Fluss innerhalb der Komponente muss nun
+näher untersucht werden, da nicht immer eine gültige Partitionierung des
+Graphen erfolgt.
+Für alle Komponenten $G_{c_k}$ muss überprüft werden,
+ob für beide Elternteile ($G_1$, $G_2$) ein Weg vom Eingangsknoten zum
+Ausgangsknoten führt. Der Weg muss zudem durch alle Knoten der
+Komponente führen. Nur dann ist die Partitionierung gültig. 
+Dieser Vorgang ist in Abbildung 2.5 an einem Beispiel demonstriert.
+
+Als letzter Schritt von GAPX muss für jede Komponente $G_{c_k}$ berechnet werden,
+ob der Weg von $G_1$, der vom Eingangsknoten zum Ausgangsknoten führt,
+günstiger ist als der von $G_2$. Der kürzere Teilweg, beziehungsweise die
+Kanten, die diesen Weg repräsentieren, werden in den Offspring $G_o$
+übernommen. 
+
+\begin{figure}
+\centering
+\begin{tabular}{l|c|c}
+ & $G_1$ & $G_2$ \\
+\hline
+\rule{0pt}{15.5ex}
+$G_{c_1}$ &
+
+\resizebox{120pt}{80pt}{
+\begin{tikzpicture}[%
+>=stealth,
+node distance=1.9cm,
+on grid,
+auto
+]
+\node[state] (1){1};
+\node[state] (3) [above right of=1]{3};
+\node[state] (2) [below right of=1]{2};
+\node[state] (4) [right of=3]{4};
+\node[state] (5) [right of=2]{5};
+\node[state] (6) [above right of=5] {6};
+
+% solid: parent 1
+\path[->] (1) edge [blue, bend left=0] node  {} (3);
+\path[->] (3) edge [blue, bend left=0] node  {} (2);
+\path[->] (2) edge [blue, bend left=0] node  {} (5);
+\path[->] (5) edge [blue, bend left=0] node  {} (4);
+\path[->] (4) edge [blue, bend left=0] node  {} (6);
+
+\end{tikzpicture}
+}
+
+  &
+\resizebox{120pt}{80pt}{
+\begin{tikzpicture}[%
+>=stealth,
+node distance=1.9cm,
+on grid,
+auto
+]
+\node[state] (1){1};
+\node[state] (3) [above right of=1]{3};
+\node[state] (2) [below right of=1]{2};
+\node[state] (4) [right of=3]{4};
+\node[state] (5) [right of=2]{5};
+\node[state] (6) [above right of=5] {6};
+
+% solid: parent 1
+\path[->] (1) edge [red, dashed, bend left=0] node  {} (2);
+\path[->] (2) edge [red, dashed, bend left=0] node  {} (3);
+\path[->] (3) edge [red, dashed, bend left=0] node  {} (4);
+\path[->] (4) edge [red, dashed, bend left=0] node  {} (5);
+\path[->] (5) edge [red, dashed, bend left=0] node  {} (6);
+\end{tikzpicture}
+}
+\\
+\hline
+\rule{0pt}{15.5ex}
+  $G_{c_2}$ &
+\resizebox{120pt}{80pt}{
+\begin{tikzpicture}[%
+>=stealth,
+node distance=1.9cm,
+on grid,
+auto
+]
+\node[state] (11){11};
+\node[state] (10) [above right of=11]{10};
+\node[state] (9) [below right of=11]{9};
+\node[state] (7) [right of=10]{7};
+\node[state] (8) [right of=9]{8};
+\node[state] (6') [above right of=8] {6'};
+
+% solid: parent 1
+\path[->] (6') edge [blue, bend left=0] node  {} (8);
+\path[->] (8) edge [blue, bend left=0] node  {} (7);
+\path[->] (7) edge [blue, bend left=0] node  {} (10);
+\path[->] (10) edge [blue, bend left=0] node  {} (9);
+\path[->] (9) edge [blue, bend left=0] node  {} (11);
+\end{tikzpicture}
+}
+  &
+\resizebox{120pt}{80pt}{
+\begin{tikzpicture}[%
+>=stealth,
+node distance=1.9cm,
+on grid,
+auto
+]
+\node[state] (11){11};
+\node[state] (10) [above right of=11]{10};
+\node[state] (9) [below right of=11]{9};
+\node[state] (7) [right of=10]{7};
+\node[state] (8) [right of=9]{8};
+\node[state] (6') [above right of=8] {6'};
+
+% solid: parent 1
+\path[->] (6') edge [red, dashed] node {}
+         (7);
+\path[->] ([xshift=0.7ex] 7.south) edge [red, dashed] node {}
+         ([xshift=0.7ex] 8.north);
+\path[->] (8) edge [red, dashed] node {}
+         (9);
+\path[->] ([xshift=0.7ex] 9.north) edge [red, dashed] node {}
+         ([xshift=0.7ex] 10.south);
+\path[->] (10) edge [red, dashed] node {}
+         (11);
+\end{tikzpicture}
+}
+\end{tabular}
+  \caption[Überprüfung, auf eine gültige Partitionierung von
+  $G_u'$]{In jeder Partition wird nachgeschaut, ob in den beiden
+  Rundreisen $G_1$ und $G_2$ ein Weg vom Eingangsknoten („1“ bzw. „6'“) 
+  zum Ausgangsknoten („6“ bzw. „11“) existiert.}
+\end{figure}
 \newpage
-\section{Implementierung}
+\begin{algorithm}
+\caption{Ermittlung kürzerer Teilweg in Komponente $G_{c_k}$} \label{alg:comp_out}
+\begin{algorithmic}[1]
+  \Procedure{$get\_shorter\_subpath$}{$G_{c_k}, G_1, G_2, E_c$}
+    \State $V \gets vertices(G_{c_k})$
+    \State $in \gets comp_{in}(G_{c_k}, E_c)$ \Comment{siehe Algorithmus 2} 
+    \State $out \gets comp_{out}(G_{c_k}, E_c)$\Comment{siehe Algorithmus 3}
+    \State $subpath_{G_1} \gets get\_path(G_1, in, out)$\Comment{von Eingang nach Ausgang}
+    \State $subpath_{G_2} \gets get\_path(G_2, in, out)$ 
+    \Foreach{$v \in V$}
+      \If {$(v \notin subpath_{G_1}) \lor (v \notin subpath_{G_2})$}
+        \State \textbf{return} $invalid\_partition$
+      \EndIf
+    \EndForeach
+    \If{$sum\_weights(subpath_{G_1}) < sum\_weights(subpath_{G_2})$}
+      \State \textbf{return} $subpath_{G_1}$
+    \Else
+      \State \textbf{return} $subpath_{G_2}$
+    \EndIf
+  \EndProcedure
+\end{algorithmic}
+\end{algorithm}
+Die kürzesten Teilwege für alle Komponenten (entweder von $G_1$ oder von
+$G_2$ stammend fügen wir dem Offspring $G_o$ hinzu. Ein möglicher
+Offspring könnte nun beispielsweise wie in Abbildung 2.6 aussehen.
+\begin{figure}[bh]
+  \centering
+\resizebox{100pt}{140pt}{
+\begin{tikzpicture}[%
+>=stealth,
+node distance=1.9cm,
+on grid,
+auto
+]
+\node[state] (1){1};
+\node[state] (3) [above right of=1]{3};
+\node[state] (2) [below right of=1]{2};
+\node[state] (4) [right of=3]{4};
+\node[state] (5) [right of=2]{5};
+\node[state] (6) [above right of=5] {6};
+\node[state] (7) [below of=5] {7};
+\node[state] (6') [below right of=7] {6'};
+\node[state] (10) [left of=7] {10};
+\node[state] (11) [below left of=10] {11};
+\node[state] (9) [below right of=11] {9};
+\node[state] (8) [right of=9] {8};
+
+% solid: parent 1
+\path[->] (11) edge [dashed, bend left=0] node  {} (1);
+\path[->] (6) edge [dashed, bend left=0] node  {} (6');
+
+\path[->] (6') edge [] node {}
+         (7);
+\path[->] ([xshift=0.7ex] 7.south) edge [] node {}
+         ([xshift=0.7ex] 8.north);
+\path[->] (8) edge [] node {}
+         (9);
+\path[->] ([xshift=0.7ex] 9.north) edge [] node {}
+         ([xshift=0.7ex] 10.south);
+\path[->] (10) edge [] node {}
+         (11);
+\path[->] (1) edge [bend left=0] node  {} (3);
+\path[->] (3) edge [bend left=0] node  {} (2);
+\path[->] (2) edge [bend left=0] node  {} (5);
+\path[->] (5) edge [bend left=0] node  {} (4);
+\path[->] (4) edge [bend left=0] node  {} (6);
+\end{tikzpicture}
+}
+  \caption[Finaler Offspring $G_o$ erzeugt aus $G_1$ und $G_2$]{Der
+  finale Zustand des Kindes $G_o$ nach Einfügen der Kantenmenge $E_c$
+  und der kürzesten Teilwege der Komponenten. Gestrichelte Linien: Menge
+  $E_c$, normale Linien: kürzeste Teilwege}
+\end{figure}
+%%\parbox[b][3cm][t]{4cm}{
+%  \begin{tabular}{l r}
+%    Komponente: & ${G_{c_1}}$ \\
+%    Eingangsknoten: & $\{1\}$ \\
+%    Ausgangsknoten: & $\{6\}$ \\
+%  \end{tabular}
+%}
