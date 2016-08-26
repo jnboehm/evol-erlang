@@ -52,3 +52,19 @@
     Rundreisen und schicken diese an den „master“ zurück.  Dieser muss
     die Rundreisen dann in die eigene Population einsortieren.}
 \end{SCfigure}
+
+\section{ets tables}
+\label{sec:ets}
+
+%% ets tables
+Wir haben außderdem die Sprache zum Teil zweckentfremdet.  Das normale
+Limit von Datenbanktabellen liegt bei 1400.  Da unsere Graphen aber
+jeweils drei Stück besitzen, können wir unser Programm nicht beliebig
+parallelisieren, da sonst das Limit auf einer Node erreicht wird.
+Darüber hinaus werden diese nicht von der „garbage collection”
+gelöscht sondern müssen manuell freigegeben werden.  Die Tabellen
+haben allerdings immer einen Besitzer und nur dieser hat das Recht den
+Speicher einer Tabelle aufzulösen.  Benutzen nun also mehrere Prozesse
+die selben Tabellen, muss der Besitzer immer geändert werden.
+
+% Das wird im Detail in Kapitel~\ref{chp:para} behandelt.
