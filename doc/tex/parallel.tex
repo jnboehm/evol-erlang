@@ -1,6 +1,13 @@
 \chapter{Parallelisierung}
 \label{chp:para}
 
+\section{Topologie}
+\label{sec:topo}
+
+Wir hatten anfangs beschlossen, dass mehrere Subpopulationen erzeugt
+werden, die sich dann untereinander austauschen, wie in
+Abbildung~\ref{fig:mult-subpop} beschrieben.
+
 \begin{SCfigure}
   \centering
   \begin{tikzpicture}
@@ -27,6 +34,23 @@
     erzeugt, die dem jeweils nächsten Prozess dann Teile aus der
     eigenen Population zusenden.}
 \end{SCfigure}
+
+Dabei stießen wir aber auf mehrere Probleme.  Zum einen mussten wir
+selber einen kleinen „garbage collector“ implementieren, der sich um
+das Löschen von Graphen kümmern sollte.  Da dies aber asynchron
+verlief, konnte es zu „race conditions,“ bei denen ein Graph gelöscht
+wurde und danach ein Prozess diesen in die eigene Population aufnehmen
+wollte, kommen.
+
+Deshalb hatten wurde der Aufbau so verändert, dass der Hauptprozess
+alle Kindprozesse instruiert jeweils einen „Offspring“ zu erzeugen und
+diesen wieder zurückzuschicken
+(vgl. Abbildung~\ref{fig:topology-central}).  Da in diesem Fall aber
+die Population nur zentral verwaltet wurde, musste die Einsortierung
+in die neue Population serialisiert %% this word does not really fit
+geschehen, was der Nebenläufigkeit schadet.  Darüber hinaus konnte
+während dieses Zeitraums der Status des Algorithmus nicht abgefragt
+werden.
 
 \begin{SCfigure}
   \begin{tikzpicture}
