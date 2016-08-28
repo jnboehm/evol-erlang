@@ -1,33 +1,19 @@
 \chapter{Einführung}
 \section{„Asymmetrisches Traveling Salesman“ (ATSP) Problem}
 Das Problem des Handlungsreisenden ist ein
-\textbf{NP-hartes} kombinatorisches Problem, bei dem versucht wird in
-einem vollständigen gerichtetem Graphen die kürzeste Rundreise zu finden. Jeder
-Knoten darf dabei nur einmal besucht werden. Der Zusatz „asymmetrisch“
-bedeutet, dass eine Kante zwischen $v_j$ und $v_k$ ein anderes Gewicht
-hat als die Kante zwischen $v_k$ und $v_j$. $v_j$ und $v_k$ sind
-dabei beliebige Knoten aus dem vollständigen Graphen.
+\textbf{NP-hartes}\cite{exakte_algo} kombinatorisches Problem, bei dem versucht wird in
+einem vollständigen, gerichteten Graphen die kürzeste Rundreise zu
+finden. Jeder Knoten muss dabei genau einmal besucht werden.
 
 \section{Komplexität}
-\begin{theorem}
-Die Komplexität zum Herausfinden der kürzesten Rundreise in einem
-vollständigen Graphen ist $\mathcal{O}(n!)$. 
-\end{theorem}
-
-\begin{proof}[Beweis]
-Sei $G=(V,E)$, wobei $V = \{ v_0, v_1, \dotsc, v_n\}$, $E= ?$ ein
-vollständiger gerichteter Graph, das bedeutet, von einem
-beliebigen Knoten $v_j$ mit $j \leq n$ sind alle anderen Knoten $v_0, v_1, \dotsc, v_n$
-erreichbar. Wir starten eine beliebige Rundreise bei dem Knoten $v_j$.
-Da wir $v_j$ nicht mehr besuchen dürfen, bleiben uns noch 
-$n-1$ Knoten zur Auswahl, die wir von $v_j$ besuchen können. Für den
-darauffolgende Knoten bleiben uns $n-2$ Knoten, und so weiter. Dies bedeutet, dass 
-die Anzahl der möglichen Touren $(n-1)!$ beträgt.
-\begin{align*}
-  (n-1)! = (n-1) \cdot (n-2) \cdot \dotsc \cdot 2 \cdot 1
-\end{align*}
-Daraus folgt, dass das Problem des Handlungsreisenden $∈ \mathcal{O}(n!)$
-\end{proof}
+Um die kürzeste Rundreise in einem vollständigen, gerichteten Graphen zu
+ermitteln, kann man die Kosten für jede mögliche Rundreise berechnen,
+um den optimalen Weg zu finden. Es gibt $(n-1)!$ Rundreisen, die zu
+untersuchen sind. Dies bedeutet, dass der Rechenaufwand für das Problem 
+des Handlungsreisenden exponentiell mit der Anzahl der Knoten im Graphen
+wächst, dadurch $\in 
+\mathcal{O}(n!)$ und somit auch~$\in$~\textbf{NP}, falls 
+\textbf{P} $\neq$ \textbf{NP}.
 \begin{bem}
 Die Anzahl der möglichen Rundreisen bei einer Knotenanzahl von $4$ wären also
 $(4-1)! = 1 \cdot 2 \cdot 3 = 6$. Wählen wir $n = 20$ würde die

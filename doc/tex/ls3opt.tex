@@ -1,4 +1,160 @@
 \chapter{Lokale Suche mit 3-opt}
 \section{Einleitung}
+Ein weiterer Teil des Projektes war die Implementierung der lokalen
+Suche namens „3-opt“ oder auch „ls3opt“ genannt. Dieses lokale 
+Suchverfahren wurde zum Erstellen der initialen Population des 
+evolutionären Algorithmus verwendet. Ebenfalls wurde „ls3opt“ als Teil
+des Mutationsoperators verwendet. Ziel des Verfahrens ist es durch das 
+Löschen und anschließende Neuverbinden von drei Kanten eine Verbesserung der Rundreise zu erzielen. Die Implementierung basiert auf der in
+\cite{nagata} vorgestellten, modifizierten Vorgehensweise. Die Vorgehensweise „reduziert die Rechenzeit“\cite{gapx} durch
+eine sogenannte „Don't-look-bits“-Strategie. Basis dieses Verfahrens ist
+eine Ausarbeitung von Kanellakis und Papadimitriou\cite{ls3opt_atsp} aus dem Jahre 1979,
+die auch zur Einarbeitung benutzt wurde. 
+
 \section{Funktionsweise}
+Sei $G = (V,E)$ eine Rundreise, erzeugt aus einem vollständigen Graphen,
+mit $\#V \geq 3$.
+Seien $v_1$, $v_3$, $v_5$ beliebige Knoten aus der Rundreise $G$, mit
+der Bedingung, dass es einen Weg von $v_1$ nach $v_3$ gibt und ebenfalls
+einen Weg von $v_3$ nach $v_5$. Dadurch ist sichergestellt, dass die
+Reihenfolge der Knoten in der Rundreise wie folgt lautet: $v_1, \dotsc, v_3, \dotsc, v_5$
+\begin{figure}[bh]
+\centering
+\resizebox{330pt}{30pt}{
+
+  \begin{tikzpicture}[%
+    >=stealth,
+    node distance=2cm,
+    on grid,
+    auto
+  ]
+  \node[state] (1){$v_1$};
+  \node[state] (2) [right of=1]{$v_2$};
+  \node[state] (3) [right of=2]{$v_3$};
+  \node[state] (4) [right of=3]{$v_4$};
+  \node[state] (5) [right of=4]{$v_5$};
+  \node[state] (6) [right of=5]{$v_6$};
+
+  \path[->] (1) edge [left=0] node  {} (2);
+  \path[->] (2) edge [left=0] node  {} (3);
+  \path[->] (3) edge [left=0] node  {} (4);
+  \path[->] (4) edge [left=0] node  {} (5);
+  \path[->] (4) edge [left=0] node  {} (5);
+  \path[->] (5) edge [left=0] node  {} (6);
+
+  \end{tikzpicture}
+}
+\caption[Ausgangssituation 3-opt]{Die Ausgangssituation des
+3-opt-Verfahren. Die Abbildung zeigt nur einen Teil einer größeren
+Rundreise.}
+\end {figure}
+
+\begin{figure}[bh]
+\centering
+\resizebox{330pt}{30pt}{
+
+  \begin{tikzpicture}[%
+    >=stealth,
+    node distance=2cm,
+    on grid,
+    auto
+  ]
+  \node[state] (1){$v_1$};
+  \node[state] (2) [right of=1]{$v_2$};
+  \node[state] (3) [right of=2]{$v_3$};
+  \node[state] (4) [right of=3]{$v_4$};
+  \node[state] (5) [right of=4]{$v_5$};
+  \node[state] (6) [right of=5]{$v_6$};
+
+  \path[->] (2) edge [left=0] node  {} (3);
+  \path[->] (4) edge [left=0] node  {} (5);
+
+  \end{tikzpicture}
+}
+\caption[Löschen von drei Kanten in 3-opt]{Es wurden die Kanten
+$(v_1,v_2)$,$(v_3,v_4)$ und $(v_5,v_6)$ gelöscht.}
+\end{figure}
+Zunächst werden die ausgehenden Kanten der Knoten $v_1$, 
+$v_3$ und $v_5$ gelöscht. Dies kann man in Abbildung 3.2 beispielhaft
+erkennen. Nachdem nun drei Kanten gelöscht wurden, müssen die Kanten wie
+folgt neu verbunden werden, damit die Richtung der Rundreise beibehalten
+wird.\cite{nagata}: 
+\begin{align*}
+  (v_1, v_4)\\
+  (v_5, v_2)\\
+  (v_3, v_6)
+\end{align*}
+Nachdem die Kanten neu verbunden wurden kann mittels
+Aufsummieren der Kantengewichte herausgefunden werden, ob die Rundreise
+verbessert wurde. Das Löschen und neu verbinden von drei Kanten wird
+auch „3-opt-move“ genannt.
+
+
+\begin{figure}[bh]
+\centering
+\resizebox{330pt}{90pt}{
+
+  \begin{tikzpicture}[%
+    >=stealth,
+    node distance=2cm,
+    on grid,
+    auto
+  ]
+  \node[state] (1){$v_1$};
+  \node[state] (2) [right of=1]{$v_2$};
+  \node[state] (3) [right of=2]{$v_3$};
+  \node[state] (4) [right of=3]{$v_4$};
+  \node[state] (5) [right of=4]{$v_5$};
+  \node[state] (6) [right of=5]{$v_6$};
+
+  \path[->] (1) edge [bend left=40] node  {} (4);
+  \path[->] (5) edge [bend left=40] node  {} (2);
+  \path[->] (3) edge [bend right=40] node  {} (6);
+  \path[->] (2) edge [left=0] node  {} (3);
+  \path[->] (4) edge [left=0] node  {} (5);
+
+  \end{tikzpicture}
+}
+\caption[Neues Verbinden der Kanten in 3-opt]{Die neuen Kanten wurden
+eingefügt, die Richtung der Rundreise wurde beibehalten.}
+\end{figure}
+
+\section{„Don't look bits“-Strategie}
+Der „3-opt-move“, wie in  Kapitel 3.2 beschrieben, beschreibt das Löschen
+und Neuverbinden von drei Kanten innerhalb einer Rundreise, wenn drei
+Kanten gegeben sind. Die „Don't look bits“-Strategie beschäftigt sich
+mit dem Thema, wie eine Rundreise mit $n$ Knoten in ihrer Gänze durch
+sehr viele „3-opt-move“-Vorgänge verbessert werden kann.
+
+\begin{figure}[bh]
+  \centering
+  \begin{tikzpicture}
+  \edef\turingtapesize{0.5cm}
+\tikzstyle{tape}=[draw,minimum size=\turingtapesize]
+
+% Drawing the tape itself
+\begin{scope}[start chain=0 going right,node distance=0mm]
+    \node[on chain=0,tape,draw=none](ü)     {$\ldots$};
+    \node[on chain=0,tape]          (a)     {$v_1$};
+    \node[on chain=0,tape]          (b)     {$v_2$};
+    \node[on chain=0,tape]          (c)     {$v_3$};
+    \node[on chain=0,tape]          (d)     {$v_4$};
+    \node[on chain=0,tape]          (e)     {$v_5$};
+    \node[on chain=0,tape]          (f)     {$v_6$};
+    \node[on chain=0,tape]          (g)     {$v_7$};
+    \node[on chain=0,tape]          (h)     {$v_8$};
+    \node[on chain=0,tape]          (i)     {$v_9$};
+    \node[on chain=0,tape]          (l)     {$v_{10}$};
+    \node[on chain=0,tape]          (l)     {$v_{11}$};
+    \node[on chain=0,tape]          (l)     {$v_{12}$};
+    \node[on chain=0,tape]          (m)     {$v_{13}$};
+    \node[on chain=0,tape]          (n)     {$v_{14}$};
+    \node[on chain=0,tape]          (o)     {$v_{15}$};
+    \node[on chain=0,tape]          (p)     {$v_{16}$};
+    \node[on chain=0,tape,draw=none](u)     {$\ldots$};
+
+\end{scope}
+\end{tikzpicture}
+  \caption[asd]{asd}
+\end{figure}
 \section{Ergebnisse}
