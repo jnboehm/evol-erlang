@@ -9,6 +9,40 @@ von zufällig generierten Rundreisen eine möglichst kurze Rundreise zu
 finden.
 
 \section{Basis}
+\begin{tikzpicture}[scale=1,align=center]
+  \def \r {\textwidth/3}
+  \def \margin {4}
+  \node (rekombination) at (0:\r) {Rekombination};
+  \node (paarungsselektion) at (60:\r) {Paarungs-\\selektion};
+  \node (terminierungsbedingung) at (120:\r) {Terminierungs-\\bedingung};
+  \node (umweltselektion) at (180:\r) {Umwelt-\\selektion};
+  \node (bewertung) at (240:\r) {Bewertung};
+  \node (mutation) at (300:\r) {Mutation};
+
+  \node (init) at (145:\r *1.75) {Init};
+  \path[draw, ->, >=latex] (init) .. controls (165:\r *1.75) and (165:\r) ..
+                  (terminierungsbedingung.south west);
+
+  \draw[<-, >=latex] (4:\r) arc (4:50:\r);
+  \draw[<-, >=latex] (305:\r) arc (305:356:\r);
+  \draw[<-, >=latex] (246:\r) arc (246:292:\r);
+  \draw[<-, >=latex] (186:\r) arc (186:235:\r);
+  \draw[<-, >=latex] (130:\r) arc (130:175:\r);
+  \draw[<-, >=latex] (75:\r) arc (75:100:\r);
+
+  %% this goes form node to node in y cycle but because of the points
+  %% where it leaves each node it makes the image loook wonky
+  %
+  % \path[draw] (rekombination) .. controls (20:5cm) and (40:5cm) ..
+  % (paarungsselektion) .. controls (80:5cm) and (100:5cm) ..
+  % (terminierungsbedienung) .. controls (140:5cm) and (160:5cm) ..
+  % (umweltselektion) .. controls (200:5cm) and (220:5cm) ..
+  % (bewertung) .. controls (260:5cm) and (280:5cm) ..
+  % (mutation) .. controls (320:5cm) and (340:5cm) ..
+  % (rekombination);
+
+\end{tikzpicture}
+
 \subsection{Pseudocode}
 \section{Fitness}
 \section{Paarungsselektion}
