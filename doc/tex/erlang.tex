@@ -42,6 +42,40 @@ er darauf antwortet.  Darüber hinaus gibt es Profiler wie
 \lstinline!eprof!, welche einem die Flaschenhälse aufzeigen, an denen
 man noch Optimierungen vornehmen kann.
 
+\medskip
+\renewcommand{\figurename}{Listing}
+\begin{figure}[ht]
+  \centering
+  \begin{lstlisting}
+  fac(0) -> 1;
+  fac(N) when is_integer(N) andalso N > 0 ->
+      N * fac(N-1).
+    \end{lstlisting}
+    \caption{\label{lst:fac} Funktion zur Berechnung der Fakultät einer Zahl}
+\end{figure}
+\renewcommand{\figurename}{Abbildung}
+
+
+Die Implementierung von Algorithmen ist aufgrund der Ähnlichkeit zur
+Mathematik angenehm.  Hier helfen vor allem „header guards“ und
+„higher-order functions“.
+
+„Header guards“ sind Ausdrücke in Funktionsparametern, die einen
+bestimmten Wert haben müssen oder mithilfe von einzelnen Funktionen
+getestet werden können, wie in dem Listing \ref{lst:fac} zu sehen ist.
+
+„Higher-order functions“ ersetzen zum großen Teil die
+\lstinline!for!-Schleife von imperativen Sprachen.  Solche Funktionen
+bekommen eine Liste und eine Funktion und wenden diese (meistens) auf
+jedes Element der Liste an.  Dabei kann eine neue Liste entstehen oder
+es werden bestimmte Werte akkumuliert.  Diese Art von Funktionen
+erlauben einfache und saubere Transformationen, die in vielen Fällen
+die Absicht der Anweisung deutlich ausdrücken.
+
+Darüber hinaus hilft auch die Unveränderbarkeit von Variablen, sobald
+diese einmalig einen Wert zugewiesen bekommen.  Das macht es
+einfacher, den Wert einer Variable während des durchlaufs zu wissen.
+
 \section{Nachteile}
 \label{sec:disadv}
 Für rechenintensive Aufgaben ist Erlang ungeeignet.  Dynamische
