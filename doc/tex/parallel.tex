@@ -6,7 +6,7 @@
 
 Wir hatten anfangs beschlossen, dass mehrere Subpopulationen erzeugt
 werden, die sich dann untereinander austauschen, wie in
-Abbildung~\ref{fig:mult-subpop} beschrieben.
+Abbildung~\ref{fig:mult-pop} beschrieben.
 
 \begin{SCfigure}
   \centering
@@ -30,9 +30,12 @@ Abbildung~\ref{fig:mult-subpop} beschrieben.
     \draw[->, >=latex, dashed] (master) -- (1);
     \draw[->, >=latex, dashed] (\n) -- (master);
   \end{tikzpicture}
-  \caption[Mehrere Subpopulationen]{\label{fig:mult-subpop}Es werden mehrere Subpopulationen
-    erzeugt, die dem jeweils nächsten Prozess dann Teile aus der
-    eigenen Population zusenden.}
+  \caption[Mehrere Populationen]{\label{fig:mult-pop}Es werden mehrere
+    Populationen erzeugt, die dem jeweils nächsten Prozess dann Teile
+    aus der eigenen Population zusenden.
+
+    Der Hauptprozess empfängt hier nur sporadisch neue Rundreisen und
+    antwortet hauptsächlich auf Nachrichten von dem Benutzer.}
 \end{SCfigure}
 
 Dabei stießen wir aber auf mehrere Probleme.  Zum einen mussten wir
