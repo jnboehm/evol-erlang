@@ -78,7 +78,7 @@ Zunächst werden die ausgehenden Kanten der Knoten $v_1$,
 $v_3$ und $v_5$ gelöscht. Dies kann man in Abbildung 3.2 beispielhaft
 erkennen. Nachdem nun drei Kanten gelöscht wurden, müssen die Kanten wie
 folgt neu verbunden werden, damit die Richtung der Rundreise beibehalten
-wird.\cite{nagata}: 
+wird\cite{nagata}: 
 \begin{align*}
   (v_1, v_4)\\
   (v_5, v_2)\\
@@ -121,11 +121,23 @@ eingefügt, die Richtung der Rundreise wurde beibehalten.}
 
 \section{„Don't look bits“-Strategie}
 Der „3-opt-move“, wie in  Kapitel 3.2 beschrieben, beschreibt das Löschen
-und Neuverbinden von drei Kanten innerhalb einer Rundreise, wenn drei
+und Neuverbinden innerhalb einer Rundreise, wenn drei
 Kanten gegeben sind. Die „Don't look bits“-Strategie beschäftigt sich
 mit dem Thema, wie eine Rundreise mit $n$ Knoten in ihrer Gänze durch
 sehr viele „3-opt-move“-Vorgänge verbessert werden kann.
 
+Hierzu wird zunächst für jeden Knoten $v$ aus einem Graphen
+eine Nachbarschaft gebildet. Eine Nachbarschaft $\mathcal{N}(v)$ mit der
+Bedigung $v = v_1$ nennen wir Nachbarschaft von $v$. Im initialen Fall 
+darf $v_4$ nur $10$ Punkte von $v_1$
+entfernt sein. Somit ist sichergestellt, dass „3-opt-move“-Vorgänge nur
+innerhalb einer begrenzten Nachbarschaft ausgeführt werden.
+
+\begin{bem}
+  Bei der Implementierung wurde der Einfachheit halber  überprüft, 
+  ob $v_5$ $10$ Punkte von $v_1$ entfernt ist (nicht $v_4$). Dies hat
+  die Implementierung vereinfacht. 
+\end{bem}
 \begin{figure}[bh]
   \centering
   \begin{tikzpicture}
@@ -135,26 +147,101 @@ sehr viele „3-opt-move“-Vorgänge verbessert werden kann.
 % Drawing the tape itself
 \begin{scope}[start chain=0 going right,node distance=0mm]
     \node[on chain=0,tape,draw=none](ü)     {$\ldots$};
-    \node[on chain=0,tape]          (a)     {$v_1$};
-    \node[on chain=0,tape]          (b)     {$v_2$};
-    \node[on chain=0,tape]          (c)     {$v_3$};
-    \node[on chain=0,tape]          (d)     {$v_4$};
-    \node[on chain=0,tape]          (e)     {$v_5$};
-    \node[on chain=0,tape]          (f)     {$v_6$};
-    \node[on chain=0,tape]          (g)     {$v_7$};
-    \node[on chain=0,tape]          (h)     {$v_8$};
-    \node[on chain=0,tape]          (i)     {$v_9$};
-    \node[on chain=0,tape]          (l)     {$v_{10}$};
-    \node[on chain=0,tape]          (l)     {$v_{11}$};
-    \node[on chain=0,tape]          (l)     {$v_{12}$};
-    \node[on chain=0,tape]          (m)     {$v_{13}$};
-    \node[on chain=0,tape]          (n)     {$v_{14}$};
-    \node[on chain=0,tape]          (o)     {$v_{15}$};
-    \node[on chain=0,tape]          (p)     {$v_{16}$};
+    \node[on chain=0,tape]          (a)     {$v'_1$};
+    \node[on chain=0,tape]          (b)     {$v'_2$};
+    \node[on chain=0,tape]          (c)     {$v'_3$};
+    \node[on chain=0,tape, blue]          (d)     {$v'_4$};
+    \node[on chain=0,tape, blue]          (e)     {$v'_5$};
+    \node[on chain=0,tape, blue]          (f)     {$v'_6$};
+    \node[on chain=0,tape, blue]          (g)     {$v'_7$};
+    \node[on chain=0,tape, blue]          (h)     {$v'_8$};
+    \node[on chain=0,tape, blue]          (i)     {$v'_9$};
+    \node[on chain=0,tape, blue]          (l)     {$v'_{10}$};
+    \node[on chain=0,tape, blue]          (l)     {$v'_{11}$};
+    \node[on chain=0,tape, blue]          (l)     {$v'_{12}$};
+    \node[on chain=0,tape, blue]          (m)     {$v'_{13}$};
+    \node[on chain=0,tape, blue]          (n)     {$v'_{14}$};
+    \node[on chain=0,tape]          (o)     {$v'_{15}$};
+    \node[on chain=0,tape]          (p)     {$v'_{16}$};
     \node[on chain=0,tape,draw=none](u)     {$\ldots$};
 
 \end{scope}
 \end{tikzpicture}
-  \caption[asd]{asd}
+  \caption[Beispiel einer Nachbarschaft $\mathcal{N}(v)$]{Beispiel
+  einer Nachbarschaft. Blau: Nachbarschaft von $v'_4$, Größe der
+  Nachbarschaft: $10$.}
 \end{figure}
+Es wird nun versucht innerhalb aller Nachbarschaften der Rundreise 3-Tupel zu finden, (die
+Knoten für den „3-opt-move“ $v_1$, $v_3$ und $v_5$) welche die Rundreise
+verbessern.
+\begin{bem}
+Die Bedigung für den „3-opt-move“, dass $v_1$ vor $v_3$ und $v_5$ nach
+  $v_3$ in der Rundreise vorkommen muss, darf nicht verletzt werden.
+\end{bem}
+Falls eine Verbesserung gefunden wurde, muss für die nachfolgenden
+3-Tupel die neue Rundreise verbessert werden. Falls die Rundreise jedoch
+nicht verbessert wurde, speichern wir uns die drei Werte aus dem Tripel
+in einer Liste, der sogenannten „Don't look bit list“. Diese Werte dürfen in den
+nachfolgenden Nachbarschaften nicht mehr verwendet werden. Der
+Algorithmus ist beendet, wenn alle Knoten aus der Rundreise in der
+„Dont-look-bit-list“ vorhanden sind.
+\newpage
+
+\begin{algorithm}
+  \caption{„3-opt-moves“ für alle Nachbarschaften von Rundreise $G$}\label{alg:ls3opt_run}
+\begin{algorithmic}[1]
+  \Procedure{$ls3opt\_run$}{$G, NSize$} \Comment{NSize = Nachbarschaftsgröße}
+    \State $V \gets vertices(G)$
+    \State $DontLook \gets list()$
+    \Foreach{$v \in V$}
+      \State $N \gets get\_neighborhood(v, DontLook, NSize)$\Comment{siehe Bem. 8}
+      \State $C \gets valid\_3\_tuple(N, DontLook)$\Comment{siehe Bem. 9}
+      \Foreach{$c \in C$}
+        \State $v_1 \gets c[0]$
+        \State $v_3 \gets c[1]$
+        \State $v_5 \gets c[2]$
+        \State $G' \gets optmove3(G, v_1,v_3,v_5)$
+        \If {$sum\_weights(G') < sum\_weights(G)$}
+          \State $G \gets G'$ \Comment{Rundreise wurde verbessert}
+        \Else
+          \State $DontLook \gets append(DontLook, v_1)$ 
+          \State $DontLook \gets append(DontLook, v_3)$
+          \State $DontLook \gets append(DontLook, v_5)$
+        \EndIf
+      \EndForeach
+      \If{$V = DontLook$}
+        \State \textbf{return} $G$ \Comment{Optimierte Rundreise}
+      \EndIf
+    \EndForeach
+    \State \textbf{return} $G$
+  \EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\begin{bem}
+  Die Funktion $get\_neighborhood(v, DontLook, NSize)$ gibt für den
+  Knoten $v$ und der Nachbarschaftsgröße $NSize$ die entsprechende
+  Nachbarschaft zurück. Die Nachbarschaft, die zurückgegeben wird, darf
+  dabei keine Werte enthalten, die in $DontLook$ vorhanden sind.
+\end{bem}
+
+\begin{bem}
+Die Funktion $valid\_3\_tuple(N, DontLook)$ gibt anhand der
+  Nachbarschaft $N$ alle 3-Tupel zurück, die für „3-opt-move“-Vorgänge
+  in Frage kommen. Die Tupel dürfen keine Werte enthalten, die
+  $DontLook$ vorhanden sind.
+\end{bem}
+In Zeile $15,16,17$ des Algorithmus 5 wurden die drei Knoten, die keine
+Verbesserung ergeben haben in die „Dont-look-bit“-Liste aufgenommen.
+Dadurch wird mit diesen Knoten nicht mehr versucht Verbesserungen in der
+Rundreise zu finden. 
+Es wurde zusätzlich noch das Ergebnis und das
+dazugehörige Laufzeitverhalten von verschiedenen
+„Dont-Look-bit“-Strategien untersucht: 
+\begin{itemize}
+  \item Nur $v_1$ wird in die Liste aufgenommen
+  \item $v_1$, $v_3$, $v_5$, wie im Algorithmus beschrieben wird
+    aufgenommen
+  \item Aufnahme der kompletten Nachbarschaft $\mathcal{N}(v)$
+\end{itemize}
 \section{Ergebnisse}
