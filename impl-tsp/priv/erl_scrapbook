@@ -239,3 +239,9 @@ lists:map(fun(V) -> evol_gapx:reverse_ghost_node(B, V) end, [V || V <- digraph:v
 
 optmove3:init_nif().
 [evol_gapx_central:init(A, [], B, P, 10) || A <- [string:concat(string:concat("../data/", Name), ".atsp") || Name <- ["ftv33","ftv35","ftv38","ftv44","ftv47","ftv55","ry48p"]], P <- [1,3,6,12,24,48], B <- [10, 50, 100, 300]].
+
+optmove3:init_nif().
+Names = ["ftv33","ftv35","ftv38","ftv47"]. % ,"ftv55","ftv44","ry48p"].
+Procs = [6,12,24].
+Populations = [300].
+[evol_gapx_central:init(A, [], B, P, 10) || A <- [string:concat(string:concat("../data/", Name), ".atsp") || Name <- Names], P <- Procs, B <- Populations].
