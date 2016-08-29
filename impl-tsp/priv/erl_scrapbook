@@ -237,3 +237,5 @@ B = evol_gapx:foldl1(fun graph_utils:merge_graphs/2, BL).
 lists:map(fun({_, V1, V2, W}) -> case graph_utils:get_weight(B, V1, V2) of undef -> digraph:add_edge(B, V1, V2, W); W -> ok end end, CommonEdges).
 lists:map(fun(V) -> evol_gapx:reverse_ghost_node(B, V) end, [V || V <- digraph:vertices(B), V > 0]).
 
+optmove3:init_nif().
+[evol_gapx_central:init(A, [], B, P, 10) || A <- [string:concat(string:concat("../data/", Name), ".atsp") || Name <- ["ftv33","ftv35","ftv38","ftv44","ftv47","ftv55","ry48p"]], P <- [1,3,6,12,24,48], B <- [10, 50, 100, 300]].

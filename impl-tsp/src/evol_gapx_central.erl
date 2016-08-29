@@ -28,7 +28,7 @@ spawn_slaves(N) ->
 %% @doc this function registers the main process, initializes the
 %% population and sends the workers the first call to action.
 master_proc(Graph, Opts, Pids) ->
-  register(evol_master, self()),
+  %% register(evol_master, self()),
   RndVertexList = evol_gapx:get_rnd_vertexlist(digraph:vertices(Graph),
                                                orddict:fetch(pop_size, Opts)),
   InitPop = evol_gapx:get_fitness_pairs(evol_gapx:pop_init(RndVertexList, Graph,
@@ -47,7 +47,7 @@ slave_handle() ->
     {make_offspring, Recipient, {Graph, Pop, NSize}} ->
       {{digraph, V, E, N, _}, _} = Offspring = evol_gapx:crossover_loop(Graph, Pop, NSize),
       lists:foreach(fun(Tid) -> ets:give_away(Tid, Recipient, ok) end, [V, E, N]),
-      evol_master ! {offspring, Offspring},
+      Recipient ! {offspring, Offspring},
       slave_handle();
     stop -> stopped
   end.
