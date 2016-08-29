@@ -53,6 +53,10 @@ slave_handle() ->
   end.
 
 master_loop(Graph, Opts, Pids, 0, Gen, [{_, PopF} | _] = Pop, Offsprings) ->
+  {_, Sum} = lists:foldl(fun({_, F}, {_, Acc}) -> {a, F + Acc} end, {a, 0}, Pop),
+  Avg = Sum / length(Pop),
+  io:format("~p,~p,~p,~p~n", [Gen, hd(orddict:fetch(best, Opts)),PopF, Avg]),
+  Gen == 100 andalso exit(normal),
   LastMut = orddict:fetch(last_mut, Opts),
   NewPop = evol_gapx:update_population(Pop, Offsprings, length(Pop)),
   lists:foreach(fun(Node) -> {G, _} = hd(NewPop), L = graph_utils:roundtrip_to_list(G),
