@@ -43,9 +43,16 @@ finden.
 
 \end{tikzpicture}
 
-\subsection{Pseudocode}
-\section{Fitness}
+\section{Initialisierung}
+In der Initialisierungsphase des EA werden $n$ Rundreisen aus einem
+vollständigen Graphen zunächst zufällig erzeugt. Direkt im Anschluss
+wird das in Kapitel 3 vorgestellte Verfahren „ls3opt“ angewendet, um die
+Rundreise an lokalen Stellen zu verbessern.
+\section{Terminierungsbedingung}
+Der EA wird beendet, wenn $1500$ Generationen durchlaufen wurden, oder
+die bekannte optimale Lösung erreicht wurde.
 \section{Paarungsselektion}
 \section{Rekombination}
 \section{Mutation}
+\section{Bewertung}
 \section{Umweltselektion}

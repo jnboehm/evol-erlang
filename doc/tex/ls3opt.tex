@@ -150,17 +150,17 @@ innerhalb einer begrenzten Nachbarschaft ausgeführt werden.
     \node[on chain=0,tape]          (a)     {$v'_1$};
     \node[on chain=0,tape]          (b)     {$v'_2$};
     \node[on chain=0,tape]          (c)     {$v'_3$};
-    \node[on chain=0,tape, blue]          (d)     {$v'_4$};
-    \node[on chain=0,tape, blue]          (e)     {$v'_5$};
-    \node[on chain=0,tape, blue]          (f)     {$v'_6$};
-    \node[on chain=0,tape, blue]          (g)     {$v'_7$};
-    \node[on chain=0,tape, blue]          (h)     {$v'_8$};
-    \node[on chain=0,tape, blue]          (i)     {$v'_9$};
-    \node[on chain=0,tape, blue]          (l)     {$v'_{10}$};
-    \node[on chain=0,tape, blue]          (l)     {$v'_{11}$};
-    \node[on chain=0,tape, blue]          (l)     {$v'_{12}$};
-    \node[on chain=0,tape, blue]          (m)     {$v'_{13}$};
-    \node[on chain=0,tape, blue]          (n)     {$v'_{14}$};
+    \node[on chain=0,tape, red]          (d)     {$v'_4$};
+    \node[on chain=0,tape, red]          (e)     {$v'_5$};
+    \node[on chain=0,tape, red]          (f)     {$v'_6$};
+    \node[on chain=0,tape, red]          (g)     {$v'_7$};
+    \node[on chain=0,tape, red]          (h)     {$v'_8$};
+    \node[on chain=0,tape, red]          (i)     {$v'_9$};
+    \node[on chain=0,tape, red]          (l)     {$v'_{10}$};
+    \node[on chain=0,tape, red]          (l)     {$v'_{11}$};
+    \node[on chain=0,tape, red]          (l)     {$v'_{12}$};
+    \node[on chain=0,tape, red]          (m)     {$v'_{13}$};
+    \node[on chain=0,tape, red]          (n)     {$v'_{14}$};
     \node[on chain=0,tape]          (o)     {$v'_{15}$};
     \node[on chain=0,tape]          (p)     {$v'_{16}$};
     \node[on chain=0,tape,draw=none](u)     {$\ldots$};
@@ -168,7 +168,7 @@ innerhalb einer begrenzten Nachbarschaft ausgeführt werden.
 \end{scope}
 \end{tikzpicture}
   \caption[Beispiel einer Nachbarschaft $\mathcal{N}(v)$]{Beispiel
-  einer Nachbarschaft. Blau: Nachbarschaft von $v'_4$, Größe der
+  einer Nachbarschaft. Rot: Nachbarschaft von $v'_4$, Größe der
   Nachbarschaft: $10$.}
 \end{figure}
 Es wird nun versucht innerhalb aller Nachbarschaften der Rundreise 3-Tupel zu finden, (die
@@ -179,7 +179,7 @@ Die Bedigung für den „3-opt-move“, dass $v_1$ vor $v_3$ und $v_5$ nach
   $v_3$ in der Rundreise vorkommen muss, darf nicht verletzt werden.
 \end{bem}
 Falls eine Verbesserung gefunden wurde, muss für die nachfolgenden
-3-Tupel die neue Rundreise verbessert werden. Falls die Rundreise jedoch
+3-Tupel die neue Rundreise benutzt werden. Falls die Rundreise jedoch
 nicht verbessert wurde, speichern wir uns die drei Werte aus dem Tripel
 in einer Liste, der sogenannten „Don't look bit list“. Diese Werte dürfen in den
 nachfolgenden Nachbarschaften nicht mehr verwendet werden. Der
@@ -235,7 +235,7 @@ In Zeile $15,16,17$ des Algorithmus 5 wurden die drei Knoten, die keine
 Verbesserung ergeben haben in die „Dont-look-bit“-Liste aufgenommen.
 Dadurch wird mit diesen Knoten nicht mehr versucht Verbesserungen in der
 Rundreise zu finden. 
-Es wurde zusätzlich noch das Ergebnis und das
+Als Teil des Projektes wurde zusätzlich noch das Ergebnis und das
 dazugehörige Laufzeitverhalten von verschiedenen
 „Dont-Look-bit“-Strategien untersucht: 
 \begin{itemize}
