@@ -55,7 +55,11 @@ slave_handle() ->
 master_loop(Graph, Opts, Pids, 0, Gen, [{_, PopF} | _] = Pop, Offsprings) ->
   {_, Sum} = lists:foldl(fun({_, F}, {_, Acc}) -> {a, F + Acc} end, {a, 0}, Pop),
   Avg = Sum / length(Pop),
-  io:format("~p,~p,~p,~p~n", [Gen, hd(orddict:fetch(best, Opts)),PopF, Avg]),
+  {ST1, ST2, ST3} = orddict:fetch(start_time, Opts),
+  Logname = lists:flatten(io_lib:fwrite("log/~s-~p-~p-~p-~p", [hd(orddict:fetch(name, Opts)), orddict:fetch(procs, Opts), ST1, ST2, ST3])),
+  file:write_file(Logname, io_lib:fwrite("~p,~p,~p,~p~n",
+                                         [Gen, hd(orddict:fetch(best, Opts)),PopF, Avg]),
+                  [append]),
   Gen == 100 andalso exit(normal),
   LastMut = orddict:fetch(last_mut, Opts),
   NewPop = evol_gapx:update_population(Pop, Offsprings, length(Pop)),
