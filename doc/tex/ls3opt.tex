@@ -12,6 +12,7 @@ eine Ausarbeitung von Kanellakis und Papadimitriou\cite{ls3opt_atsp} aus dem Jah
 die auch zur Einarbeitung benutzt wurde. 
 
 \section{Funktionsweise}
+\label{ls3opt_func}
 Sei $G = (V,E)$ eine Rundreise, erzeugt aus einem vollständigen Graphen,
 mit $\#V \geq 3$.
 Seien $v_1$, $v_3$, $v_5$ beliebige Knoten aus der Rundreise $G$, mit
@@ -235,13 +236,6 @@ In Zeile $15,16,17$ des Algorithmus 5 wurden die drei Knoten, die keine
 Verbesserung ergeben haben in die „Dont-look-bit“-Liste aufgenommen.
 Dadurch wird mit diesen Knoten nicht mehr versucht Verbesserungen in der
 Rundreise zu finden. 
-Als Teil des Projektes wurde zusätzlich noch das Ergebnis und das
-dazugehörige Laufzeitverhalten von verschiedenen
-„Dont-Look-bit“-Strategien untersucht: 
-\begin{itemize}
-  \item Nur $v_1$ wird in die Liste aufgenommen
-  \item $v_1$, $v_3$, $v_5$, wie im Algorithmus beschrieben wird
-    aufgenommen
-  \item Aufnahme der kompletten Nachbarschaft $\mathcal{N}(v)$
-\end{itemize}
-\section{Ergebnisse}
+\section{Laufzeitverhalten}
+Als Teil des Projektes wurde zusätzlich noch das Laufzeitverhalten des
+in Erlang implementierten Verfahrens untersucht. 
