@@ -229,7 +229,7 @@ Algorithmus ist beendet, wenn alle Knoten aus der Rundreise in der
 \begin{bem}
 Die Funktion $valid\_3\_tuple(N, DontLook)$ gibt anhand der
   Nachbarschaft $N$ alle 3-Tupel zurück, die für „3-opt-move“-Vorgänge
-  in Frage kommen. Die Tupel dürfen keine Werte enthalten, die
+  in Frage kommen. Die Tupel dürfen keine Werte enthalten, die in
   $DontLook$ vorhanden sind.
 \end{bem}
 In Zeile $15,16,17$ des Algorithmus 5 wurden die drei Knoten, die keine
@@ -237,5 +237,11 @@ Verbesserung ergeben haben in die „Dont-look-bit“-Liste aufgenommen.
 Dadurch wird mit diesen Knoten nicht mehr versucht Verbesserungen in der
 Rundreise zu finden. 
 \section{Laufzeitverhalten}
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=\textwidth]{../research/ls3opt}
+  \caption{\label{fig:ls3optcomplxty} a plot}
+\end{figure}
+
 Als Teil des Projektes wurde zusätzlich noch das Laufzeitverhalten des
 in Erlang implementierten Verfahrens untersucht. 
