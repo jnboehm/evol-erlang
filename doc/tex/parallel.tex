@@ -3,10 +3,16 @@
 
 \section{Topologie}
 \label{sec:topo}
+Da das Programm nebenläufig sein sollte, mussten wir eine Topologie
+erstellen, damit die Kommunikation zwischen den einzelnen Prozessen
+festgelegt wird.
 
-Wir hatten anfangs beschlossen, dass mehrere Subpopulationen erzeugt
-werden, die sich dann untereinander austauschen, wie in
-Abbildung~\ref{fig:mult-pop} beschrieben.
+Zunächst wollten wir das Programm mehrmals unabhängig voneinander
+laufen lassen, wobei zwischendurch immer wieder untereinander
+kommuniziert wird, wie in Abbildung~\ref{fig:mult-pop} dargestellt.
+Der Hauptprozess erhielt sporadisch die beste Rundreise eines
+Prozesses und war in der Topologie nur für das Initialisieren und
+Beantworten von Nachrichten des Benutzers zuständig.
 
 \begin{SCfigure}
   \centering
@@ -38,22 +44,20 @@ Abbildung~\ref{fig:mult-pop} beschrieben.
     antwortet hauptsächlich auf Nachrichten von dem Benutzer.}
 \end{SCfigure}
 
-Dabei stießen wir aber auf mehrere Probleme.  Zum einen mussten wir
-selber einen kleinen „garbage collector“ implementieren, der sich um
-das Löschen von Graphen kümmern sollte.  Da dies aber asynchron
-verlief, konnte es zu „race conditions,“ bei denen ein Graph gelöscht
-wurde und danach ein Prozess diesen in die eigene Population aufnehmen
-wollte, kommen.
+Dabei stießen wir auf mehrere Probleme.  Zum einen mussten wir selber
+einen Garbage-collector implementieren, der sich um das Löschen von
+Graphen kümmern sollte.  Da dies aber asynchron verlief, konnte es zu
+„race conditions,“ bei denen ein Graph gelöscht wurde und danach ein
+Prozess diesen in die eigene Population aufnehmen wollte, kommen.
 
-Deshalb hatten wurde der Aufbau so verändert, dass der Hauptprozess
-alle Kindprozesse instruiert jeweils einen „Offspring“ zu erzeugen und
-diesen wieder zurückzuschicken
-(vgl. Abbildung~\ref{fig:topology-central}).  Da in diesem Fall aber
-die Population nur zentral verwaltet wurde, musste die Einsortierung
-in die neue Population serialisiert %% this word does not really fit
-geschehen, was der Nebenläufigkeit schadet.  Darüber hinaus konnte
-während dieses Zeitraums der Status des Algorithmus nicht abgefragt
-werden.
+Deshalb wurde der Aufbau so verändert, dass der Hauptprozess alle
+Kindprozesse instruiert jeweils einen Offspring zu erzeugen und diesen
+wieder zurückzuschicken (vgl. Abbildung~\ref{fig:topology-central}).
+Da in diesem Fall aber die Population zentral verwaltet wurde, mussten
+neue Rundreisen sequenziell in die neue Population einsortiert werden,
+was der Nebenläufigkeit schadet.  Darüber hinaus konnte während dieses
+Zeitraums der Status nicht abgefragt werden, da der Hauptprozess
+während dem Erstellen der nächsten Generation blockierte.
 
 \begin{SCfigure}
   \begin{tikzpicture}
@@ -80,18 +84,22 @@ werden.
     die Rundreisen dann in die eigene Population einsortieren.}
 \end{SCfigure}
 
-\section{ets tables}
+\section{ETS-Tabellen im Netzwerk}
 \label{sec:ets}
 
 %% ets tables
-Wir haben außderdem die Sprache zum Teil zweckentfremdet.  Das normale
-Limit von Datenbanktabellen liegt bei 1400.  Da unsere Graphen aber
-jeweils drei Stück besitzen, können wir unser Programm nicht beliebig
-parallelisieren, da sonst das Limit auf einer Node erreicht wird.
-Darüber hinaus werden diese nicht von der „garbage collection”
-gelöscht sondern müssen manuell freigegeben werden.  Die Tabellen
-haben allerdings immer einen Besitzer und nur dieser hat das Recht den
-Speicher einer Tabelle aufzulösen.  Benutzen nun also mehrere Prozesse
-die selben Tabellen, muss der Besitzer immer geändert werden.
-
-% Das wird im Detail in Kapitel~\ref{chp:para} behandelt.
+Das normale Limit von Datenbanktabellen liegt bei
+1400.\footnote{\url{http://erlang.org/doc/man/ets.html}} \hskip2pt Da
+ein Graph aus jeweils drei Tabellen besteht, können wir unser Programm
+nicht beliebig skalieren, da sonst das Limit auf einer Node erreicht
+wird.  Erhöht man die Grenze, so degradiert die Geschwindigkeit der
+virutellen Maschine, wenn zu viele Tabellen vorhanden sind.  Darüber
+hinaus werden diese nicht von der Garbage-collection gelöscht sondern
+müssen manuell freigegeben werden.  Eine Tabelle hat allerdings immer
+einen Besitzer und nur dieser hat das Recht den Speicher einer Tabelle
+aufzulösen.  Benutzen nun also mehrere Prozesse die selben Tabelle,
+muss der Besitz auf einen anderen Prozess übertragen werden, bis nur
+noch ein Prozess diese Tabelle benutzt.  Dieser kann dann die Tabelle
+löschen.  Dass ein Graph so behandelt werden muss, ist nicht
+offensichtlich und benötigt Rechenzeit, die nicht für den
+evolutionären Algorithmus an sich verwendet werden kann.
