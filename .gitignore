@@ -321,4 +321,5 @@ TSWLatexianTemp*
 .upb
 /doc/main.pdf
 /doc/tex/auto
-research/*.pdf
+research/**/*.pdf
+research/scores/*-*-*-*
