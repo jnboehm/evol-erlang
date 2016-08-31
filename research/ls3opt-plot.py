@@ -39,11 +39,12 @@ sigma = numpy.ones(datax.size)
 def fitfunc(x,a): # model $f(x)=a x^3$
     return a*x**3
 a, b = scimin.curve_fit(fitfunc, datax, datay, x0, sigma)
+print(a)
 
 xs = numpy.linspace(0, 180, 100)
 ax = plt.figure().add_subplot(1,1,1)
 ax.plot(xs, fitfunc(xs, a[0]), color=(0.882352941,0,0.098039216),linewidth=2.2,
-        label="$f(n) = a \cdot n^3$")
+        label="$s = a \cdot n^3$")
 ax.plot(datax,datay,ls="",marker="x",color=(0.274509804,0.254901961,0.235294118),
         markersize=7, label="Gemessene Werte",
         mew=2.0)
@@ -51,7 +52,7 @@ ax.set_ylim([-1,80])
 
 
 plt.xlabel("Anzahl der Knoten ($n$)")
-plt.ylabel("Zeit in Sekunden")
+plt.ylabel("Zeit in Sekunden ($s$)")
 plt.legend(loc="upper left")
 # plt.legend(["unicode math: $λ=∑_i^∞ μ_i^2$"])
 plt.tight_layout(.5)
