@@ -1,14 +1,17 @@
 \chapter{Ergebnisse}
-Unsere Ergebnisse wurden mit denen der Authoren verglichen.  Dabei
-sind unsere Lösungen konsistent schlechter.
-
+Bei den ATSP-Instanzen der TSPLIB~\cite{tsplib}, bei denen die Knotenanzahl $\leq 33$ 
+beträgt, wurden die bekannten, optimalen Lösungen gefunden. Bei größeren
+Problemen konnten die optimalen Lösungen nicht gefunden werden. Die
+nachfolgende Tabelle zeigt eine Zusammenfassung der Ergebnisse.
+\begin{table}[H]
+  \centering
 {
   \setmainfont[Numbers={Uppercase,Monospaced}]{Vollkorn}
   \begin{tabular}{lrrr}
     Problem & Beste Lösung & Erreichte Fitness & Generationen \\
     \hline
     br17    & 39           & 39                & 1            \\
-    ftv33   & 1286         & 1296              & 199          \\
+    ftv33   & 1286         & 1286              & 199          \\
     ftv35   & 1473         & 1475              & 196          \\
     ftv38   & 1530         & 1536              & 286          \\
     ftv44   & 1613         & 1653              & 237          \\
@@ -17,35 +20,58 @@ sind unsere Lösungen konsistent schlechter.
     ry48p   & 14422        & 14608             & 313          \\
   \end{tabular}
 }
-
+  \caption[Ergebnisse TSPLIB Instanzen]{Die Ergebnisse einiger asymmetrischen Instanzen der
+  TSPLIB~\cite{tsplib}}
+\end{table}
 \begin{figure}[ht]
     \centering
     \begin{subfigure}[b]{0.45\textwidth}
-      \includegraphics[width=\textwidth]{../research/scores/ry48p-300-12}
-      \caption{ry48p-300-12}
-      \label{fig:ry48p-300-12}
-    \end{subfigure}
-    ~ %add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc.
-      %(or a blank line to force the subfigure onto a new line)
-    \begin{subfigure}[b]{0.45\textwidth}
       \includegraphics[width=\textwidth]{../research/scores/br17-300-24}
-      \caption{br17-300-24}
+      %\caption{br17-300-24}
+      \caption{br17}
+      \begin{center}
+        \vskip-10pt
+        \small 300 Generationen, 24 Prozesse
+      \end{center}
       \label{fig:br17-300-24}
     \end{subfigure}
-
+    ~
     % add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc.
     %(or a blank line to force the subfigure onto a new line)
     \begin{subfigure}[b]{0.45\textwidth}
       \includegraphics[width=\textwidth]{../research/scores/ftv33-300-12}
-      \caption{ftv33-300-12}
+      %\caption{ftv33-300-12}
+      \caption{ftv33}
+      \begin{center}
+        \vskip-10pt
+        \small 300 Generationen, 12 Prozesse
+      \end{center}
       \label{fig:ftv33-300-12}
+    \end{subfigure}
+
+    \begin{subfigure}[b]{0.45\textwidth}
+      \includegraphics[width=\textwidth]{../research/scores/ftv44-300-12}
+      %\caption{ftv44-300-12}
+      \caption{ftv44}
+      \begin{center}
+        \vskip-10pt
+        \small 300 Generationen, 12 Prozesse
+      \end{center}
+      \label{fig:ftv44-300-12}
     \end{subfigure}
     ~
     \begin{subfigure}[b]{0.45\textwidth}
-      \includegraphics[width=\textwidth]{../research/scores/ftv44-300-12}
-      \caption{ftv44-300-12}
-      \label{fig:ftv44-300-12}
+      \includegraphics[width=\textwidth]{../research/scores/ry48p-300-12}
+      \caption{ry48p}
+      \begin{center}
+      \vskip-10pt
+      \small 300 Generationen, 12 Prozesse
+      \end{center}
+      \label{fig:ry48p-300-12}
     \end{subfigure}
-    \caption{\label{fig:fitness-plots} Fitnesswerte über die ersten
-      100 Generationen}
+    \caption[Fitnesswerte einiger ATSP-Probleme]{\label{fig:fitness-plots} 
+    Fitnesswerte über die ersten 100 Generationen. Die Graphen sind
+    normiert, die bekannten Lösungen befinden sich bei $1.0$. Schwarz:
+    Durchschnittlicher Fitness-Wert im Verlauf des EA, Rot: Bester
+    Fitness-Wert pro Generation}
 \end{figure}

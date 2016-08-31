@@ -18,6 +18,7 @@ $G_o$ zu erzeugen.
 \EndProcedure
 \end{algorithmic}
 \end{algorithm}
+\noindent
 GAPX versucht durch ein bestimmtes Verfahren die beiden Rundreisen zu
 partitionieren und daraus das neue Kind $G_o$ zu erzeugen. Die
 Funktionsweise, die im nachfolgenden Kapitel beschrieben wird, basiert
@@ -122,6 +123,7 @@ dem neuen Graphen $G_u$ anhand zwei Rundreisen mit je vier Knoten.
 %%  eingeschränkt, da ein „normaler Graph“ eine Spezielform eines
 %%  Multigraphen ist.
 %%\end{bem}
+\noindent
 Nach der Zusammenführung der beiden Graphen in $G_u$ muss für alle
 Knoten $v$ aus $G_u$ bei der die Bedingung $deg(v) = 4$ erfüllt ist ein
 sogenannter Ghost-Knoten $v'$ nach $v$ eingeführt werden. Zusätzlich muss eine
@@ -267,6 +269,7 @@ Anzahl der Nachbarn von $v$ anzuschauen, um herauszufinden, ob ein
 Ghost-Knoten $v'$ eingefügt werden muss.
 \end{bem}
 \newpage
+\noindent
 Nachdem alle Ghost-Knoten eingefügt wurden müssen Kanten mit einer
 bestimmten Eigenschaft aus $G_u'$ entfernt werden, um eine Paritionierung
 des Graphen vorzunehmen. In $G_u'$ müssen genau jene Kanten entfernt
@@ -315,6 +318,7 @@ auto
   Rundreisen $G_1$ und $G_2$ vorhanden. $E_c$ wurde in $G_o$ eingefügt.}
 \end{figure}
 \newpage
+\noindent
 Durch das Entfernen von $E_c$ in $G_u'$ haben wir eine Partitionierung
 des Graphen erreicht. Der Graph $G_u'$ wurde in seine Komponenten
 zerlegt.
@@ -445,7 +449,7 @@ auto
 $G_u'$ nach Löschen der gemeinsamen Kanten $E_c$. Die Teile des
 partitionierten Graphen werden Komponenten genannt.}
 \end{figure}
-
+\noindent
 Jede Komponente wird als Teilgraph $G_{c_k}$ gekennzeichnet, wobei $k
 \leq $Anzahl der Komponenten in $G_u'$. 
 
@@ -454,6 +458,7 @@ Jede Komponente wird als Teilgraph $G_{c_k}$ gekennzeichnet, wobei $k
   mit den Knoten
   $11,9,10,7,8,6'$
 \end{bem}
+\noindent
 Für alle Komponenten $G_{c_k}$ muss als nächstes die Menge der Eingangs- und
 Ausgangsknoten festgestellt werden. Hierfür werden zwei Funktionen
 definiert:
@@ -498,6 +503,7 @@ definiert:
   \EndProcedure
 \end{algorithmic}
 \end{algorithm}
+\noindent
 Die prinzipielle Vorgehensweise der beiden Funktionen ist das Anschauen
 der eingehenden beziehungsweise ausgehenden Kanten. Ein Knoten $v$ kommt
 nur als Eingangspunkt in Frage, wenn keine eingehenden Kanten für $v$
@@ -520,6 +526,7 @@ besitzen.
   Eingangs- oder Ausgangspunkt verwendet werden, da sie die Komponente
   in weitere Teile aufspalten würde.
 \end{bem}
+\noindent
 Mit den Informationen über Eingangs- und Ausgangsknoten ist der „Weg“ 
 einer Komponente zum teil bekannt. Man startet in einem Eingangsknoten und endet
 in einem Ausgangsknoten. Der Weg innerhalb der Komponente muss nun
@@ -676,6 +683,7 @@ auto
   \EndProcedure
 \end{algorithmic}
 \end{algorithm}
+\noindent
 Die kürzesten Teilwege von alle Komponenten (entweder von $G_1$ oder von
 $G_2$ stammend fügen wir dem Offspring $G_o$ hinzu. Ein möglicher
 Offspring könnte nun beispielsweise wie in

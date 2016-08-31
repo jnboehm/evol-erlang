@@ -76,6 +76,7 @@ Reihenfolge der Knoten in der Rundreise wie folgt lautet: $v_1, \dotsc, v_3, \do
 \caption[Löschen von drei Kanten in 3-opt]{Es wurden die Kanten
 $(v_1,v_2)$,$(v_3,v_4)$ und $(v_5,v_6)$ gelöscht.}
 \end{figure}
+\noindent
 Zunächst werden die ausgehenden Kanten der Knoten $v_1$, 
   $v_3$ und $v_5$ gelöscht. Dies kann man in
   \hyperref[fig:3opt_2]{Abbildung 3.2} beispielhaft
@@ -174,6 +175,7 @@ innerhalb einer begrenzten Nachbarschaft ausgeführt werden.
   einer Nachbarschaft. Rot: Nachbarschaft von $v'_4$, Größe der
   Nachbarschaft: $10$.}
 \end{figure}
+\noindent
 Es wird nun versucht innerhalb aller Nachbarschaften der Rundreise 3-Tupel zu finden, (die
 Knoten für den „3-opt-move“ $v_1$, $v_3$ und $v_5$) welche die Rundreise
 verbessern.
@@ -181,13 +183,14 @@ verbessern.
 Die Bedingung für den „3-opt-move“, dass $v_1$ vor $v_3$ und $v_5$ nach
   $v_3$ in der Rundreise vorkommen muss, darf nicht verletzt werden.
 \end{bem}
+\noindent
 Falls eine Verbesserung gefunden wurde, muss für die nachfolgenden
 3-Tupel die neue Rundreise benutzt werden. Wenn die Rundreise jedoch
 nicht verbessert wurde, speichern wir uns die drei Werte aus dem 3-Tupel
 in einer Liste, der sogenannten „Don't look bit“-Liste. Diese Werte dürfen in den
 nachfolgenden Nachbarschaften nicht mehr verwendet werden. Der
 Algorithmus ist beendet, wenn alle Knoten aus der Rundreise in der
-„Dont-look-bit“-Liste vorhanden sind und somit keine lokalen
+„Don't-look-bit“-Liste vorhanden sind und somit keine lokalen
 Optimierungen mehr vorgenommen werden können.
 \newpage
 
@@ -235,8 +238,9 @@ Die Funktion $valid\_3\_tuple(N, DontLook)$ gibt anhand der
   in Frage kommen. Die Tupel dürfen keine Werte enthalten, die in
   $DontLook$ vorhanden sind.
 \end{bem}
+\noindent
 In Zeile $15,16,17$ des \hyperref[alg:ls3opt_run]{Algorithmus 5} wurden die drei Knoten, die keine
-Verbesserung ergeben haben, in die „Dont-look-bit“-Liste aufgenommen.
+Verbesserung ergeben haben, in die „Don't-look-bit“-Liste aufgenommen.
 Dadurch wird mit diesen Knoten nicht mehr versucht Verbesserungen in der
 Rundreise zu finden. 
 \section{Laufzeitverhalten}
@@ -248,11 +252,13 @@ in Erlang implementierten Verfahrens untersucht.
   \caption[Laufzeit von ls3opt im Verhältnis zu der Anzahl der
   Knoten]{\label{fig:ls3optcomplxty} Die Laufzeit von ls3opt im
     Verhältnis zu der Anzahl der Knoten in dem Graphen (der Anzahl der
-    Städte in einer Rundreise).  Die Laufzeit ist kubisch, wie bei
-    dessen ersten Einführung in \cite{lin1965computer} beschrieben.
-    In unserer Implementierung beträgt $a$ ungefähr
+    Städte in einer Rundreise).   In unserer Implementierung beträgt $a$ ungefähr
     $6,\kern-1pt 3113 \times 10^{-4}$.} % fix kerning after comma in math mode
   %% erwähnen, wie wir auf den wert gekommen sind? Least squares?
 \end{figure}
-
-
+\noindent
+Die Laufzeit der naiven Implementierung ist kubisch, wie bei
+dessen ersten Einführung in \cite{lin1965computer} beschrieben
+wurde. Die Laufzeit wurde offenbar von $\mathcal{O}(n^3)$ auf
+$\mathcal{O}(n^{2.2})$ verbessert, da die „Don't-Look-bits“-Strategie
+verwendet wurde.
