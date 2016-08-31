@@ -1,5 +1,6 @@
 \chapter{Generalized Asymmetric Partition Crossover}
 
+\label{gapx_einleitung}
 \section{Einleitung}
 Der „Generalized Asymmetric Partition Crossover“ (GAPX) ist ein
 Rekombinationsoperator, der als Teil eines evolutionären Algorithmus
@@ -123,10 +124,11 @@ dem neuen Graphen $G_u$ anhand zwei Rundreisen mit je vier Knoten.
 %%\end{bem}
 Nach der Zusammenführung der beiden Graphen in $G_u$ muss für alle
 Knoten $v$ aus $G_u$ bei der die Bedingung $deg(v) = 4$ erfüllt ist ein
-sogenannter Ghost-Knoten $v'$ eingeführt werden. Zusätzlich muss eine
+sogenannter Ghost-Knoten $v'$ nach $v$ eingeführt werden. Zusätzlich muss eine
 Kante mit dem Gewicht $0$ zwischen $v$ und $v'$ eingefügt werden. 
 Der Graph $G_u$ mit eingefügten Ghost-Knoten an den entsprechenden Stellen kennzeichnen wir als $G_u'$.
 \begin{figure}[hb]
+\label{fig:ghostnodes}
 \centering
 \begin{tabular}{ c c }
 \resizebox{120pt}{170pt}{
@@ -262,7 +264,7 @@ zweites Elternteil}
 \begin{bem}
 Es hat sich herausgestellt, dass es bei der Implementierung einfacher war die
 Anzahl der Nachbarn von $v$ anzuschauen, um herauszufinden, ob ein
-Ghost-Knoten $v'$ eingefügt werden muss, oder nicht.
+Ghost-Knoten $v'$ eingefügt werden muss.
 \end{bem}
 \newpage
 Nachdem alle Ghost-Knoten eingefügt wurden müssen Kanten mit einer
@@ -270,13 +272,14 @@ bestimmten Eigenschaft aus $G_u'$ entfernt werden, um eine Paritionierung
 des Graphen vorzunehmen. In $G_u'$ müssen genau jene Kanten entfernt
 werden, die sowohl in $G_1$ \textbf{und} $G_2$ vorkommen. Zusätzlich
 müssen die Kanten entfernt werden, die bei der Generierung der
-Ghost-Knoten neu eingefügt wurden. In Abbildung 2.2 wäre dies die Kante
+Ghost-Knoten neu eingefügt wurden. In \hyperref[fig:ghostnodes]{Abbildung 2.2} wäre dies die Kante
 zwischen $6$ und $6'$. Die Menge dieser entfernten Kanten nennen wir
 nachfolgend $E_c$ und werden auch „Common-Edges“ genannt. Die Menge
 beinhaltet also genau die Kanten die in beiden Elternteilen vorkommen. Die
 Menge $E_c$ wird nun in die Kantenmenge von $G_o$ (dem Offspring)
 eingefügt.
 \begin{figure}[hb]
+  \label{fig:offspring_1}
 \centering
 \resizebox{100pt}{140pt}{
 \begin{tikzpicture}[%
@@ -305,7 +308,8 @@ auto
 \end{tikzpicture}
 }
   \caption[Kind $G_o$ nach Einfügen der gemeinsamen Kantenmenge $E_c$]
-  {Das Kind $G_o$ im momentanen Zustand. In Abbildung 2.2 sind Ghost-Knoten eingefügt
+  {Das Kind $G_o$ im momentanen Zustand. In
+  \hyperref[fig:ghostnodes]{Abbildung 2.2} sind Ghost-Knoten eingefügt
   worden. $E_c = \{(6,6'),(1,11)\}$. Die Kante $(6,6')$ ist durch das
   Einfügen eines Ghost-Knoten entstanden. Die Kante $(1,11)$ ist in beiden
   Rundreisen $G_1$ und $G_2$ vorhanden. $E_c$ wurde in $G_o$ eingefügt.}
@@ -315,6 +319,7 @@ Durch das Entfernen von $E_c$ in $G_u'$ haben wir eine Partitionierung
 des Graphen erreicht. Der Graph $G_u'$ wurde in seine Komponenten
 zerlegt.
 \begin{figure}[bh]
+  \label{fig:components}
 \centering
   \begin{tabular}{c c}
 \resizebox{120pt}{170pt}{
@@ -436,7 +441,7 @@ auto
 }
 
 \end{tabular}
-\caption[Partitionierung von $G_u'$ nach Löschen von $E_c$]{Der Graph
+\caption[Partitionierung von $G_u'$ nach Löschen von $E_c$]{Rechts: Der Graph
 $G_u'$ nach Löschen der gemeinsamen Kanten $E_c$. Die Teile des
 partitionierten Graphen werden Komponenten genannt.}
 \end{figure}
@@ -445,7 +450,7 @@ Jede Komponente wird als Teilgraph $G_{c_k}$ gekennzeichnet, wobei $k
 \leq $Anzahl der Komponenten in $G_u'$. 
 
 \begin{bem}
-  In Abbildung 2.4 ist $G_{p_1}$ der Teilgraph mit den Knoten $1,2,3,4,5,6$, $G_{p_2}$ ist der Teilgraph
+  In \hyperref[fig:components]{Abbildung 2.4} ist $G_{c_1}$ der Teilgraph mit den Knoten $1,2,3,4,5,6$, $G_{c_2}$ ist der Teilgraph
   mit den Knoten
   $11,9,10,7,8,6'$
 \end{bem}
@@ -502,29 +507,29 @@ besitzen.
   Es können Komponenten existieren welche nicht nur einen Eingangs- und
   einen Ausgangsknoten haben. Tatsächlich gibt es sehr häufig
   Partitionierungen mit Komponenten, die drei oder vier Eingängen
-  beziehungsweise Ausgängen haben. Die Algorithmen 3 und 4 beachten
+  beziehungsweise Ausgängen besitzen. Die Algorithmen 3 und 4 beachten
   diesen Umstand.
 \end{bem}
 \begin{bem}
   Die Funktion $has\_ghostnode\_in\_comp(G_{c_k}, v)$ ist hier nicht
   ausführlich erläutert. Sie überprüft, ob für einen Knoten $v$ ein
-  entsprechender Ghost-Knoten $v'$ eingefügt wurde, der sich ebenfalls
-  innerhalb der Komponente $G_{c_k}$ befindet. Ist dies der Fall, gibt
+  entsprechender Ghost-Knoten $v'$ eingefügt wurde, wobei sich $v$ und
+  $v'$ innerhalb der selben Komponente $G_{c_k}$ befinden. Ist dies der Fall, gibt
   die Funktion den Wert true zurück. Knoten, für die ein entsprechender
   Ghost-Knoten innerhalb der Komponente existiert können nicht als
   Eingangs- oder Ausgangspunkt verwendet werden, da sie die Komponente
   in weitere Teile aufspalten würde.
 \end{bem}
-Mit den Informationen über Eingangs- und Ausgangsknoten ist der „Fluss“ 
-einer Komponente bekannt. Man startet in einem Eingangsknoten und endet
-in einem Ausgangsknoten. Dieser Fluss innerhalb der Komponente muss nun
+Mit den Informationen über Eingangs- und Ausgangsknoten ist der „Weg“ 
+einer Komponente zum teil bekannt. Man startet in einem Eingangsknoten und endet
+in einem Ausgangsknoten. Der Weg innerhalb der Komponente muss nun
 näher untersucht werden, da nicht immer eine gültige Partitionierung des
 Graphen erfolgt.
-Für alle Komponenten $G_{c_k}$ muss überprüft werden,
-ob für beide Elternteile ($G_1$, $G_2$) ein Weg vom Eingangsknoten zum
+Für alle Komponenten $G_{c_k}$ muss nun überprüft werden,
+ob für beide Elternteile $G_1$, $G_2$ ein Weg vom Eingangsknoten zum
 Ausgangsknoten führt. Der Weg muss zudem durch alle Knoten der
 Komponente führen. Nur dann ist die Partitionierung gültig. 
-Dieser Vorgang ist in Abbildung 2.5 an einem Beispiel demonstriert.
+Dieser Vorgang ist in \hyperref[fig:entry_exit]{Abbildung 2.5} an einem Beispiel demonstriert.
 
 Als letzter Schritt von GAPX muss für jede Komponente $G_{c_k}$ berechnet werden,
 ob der Weg von $G_1$, der vom Eingangsknoten zum Ausgangsknoten führt,
@@ -533,6 +538,7 @@ Kanten, die diesen Weg repräsentieren, werden in den Offspring $G_o$
 übernommen. 
 
 \begin{figure}
+  \label{fig:entry_exit}
 \centering
 \begin{tabular}{l|c|c}
  & $G_1$ & $G_2$ \\
@@ -649,7 +655,7 @@ auto
 \end{figure}
 \newpage
 \begin{algorithm}
-\caption{Ermittlung kürzerer Teilweg in Komponente $G_{c_k}$} \label{alg:comp_out}
+\caption{Ermittlung kürzerer Teilweg in einer Komponente $G_{c_k}$} \label{alg:comp_out}
 \begin{algorithmic}[1]
   \Procedure{$get\_shorter\_subpath$}{$G_{c_k}, G_1, G_2, E_c$}
     \State $V \gets vertices(G_{c_k})$
@@ -670,10 +676,12 @@ auto
   \EndProcedure
 \end{algorithmic}
 \end{algorithm}
-Die kürzesten Teilwege für alle Komponenten (entweder von $G_1$ oder von
+Die kürzesten Teilwege von alle Komponenten (entweder von $G_1$ oder von
 $G_2$ stammend fügen wir dem Offspring $G_o$ hinzu. Ein möglicher
-Offspring könnte nun beispielsweise wie in Abbildung 2.6 aussehen.
+Offspring könnte nun beispielsweise wie in
+\hyperref[fig:offspring_final]{Abbildung 2.6} aussehen.
 \begin{figure}[bh]
+  \label{fig:offspring_final}
   \centering
 \resizebox{100pt}{140pt}{
 \begin{tikzpicture}[%

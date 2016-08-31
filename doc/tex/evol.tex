@@ -6,7 +6,8 @@ vorkommenden Gesetze der Evolution zu lösen. Ziel des Algorithmus ist es
 ein Ergebnis über mehrere Generationen zu verbessern. Für das Traveling-
 Salesman-Problem bedeutet dies, dass versucht wird aus einer Menge
 von zufällig generierten Rundreisen eine möglichst kurze Rundreise zu
-finden.
+finden. In diesem Kapitel wird beschrieben, welcher EA bei der
+Implementierung verwendet wurde.
 
 \section{Basis}
 
@@ -47,13 +48,13 @@ finden.
 \caption[Standardablauf eines evolutionären Algorithmus]{Der
   Standardablauf eines evolutionären Ablaufs}
 \end{figure}
-Der EA, der in diesem Projekt verwendet wurde basiert auf einer
+Der EA, der in diesem Projekt verwendet wurde, basiert auf einer
 Arbeit von Yuichi Nagata und David Soler und weicht an manchen
-Stellen von diesem Standard ab~\cite{nagata}. Die entsprechenden
+Stellen vom dargestellten Standard ab~\cite{nagata}. Die entsprechenden
 Parameter des EA sind in der Ausarbeitung zu GAPX von Tinós et al.
 enthalten~\cite{gapx}.
 
-\begin{algorithm}
+\begin{algorithm}[H]
 \caption{EA nach Nagata und Soler }\label{alg:ea}
 \begin{algorithmic}[1]
   \Procedure{$EA$}{$GenLimit$}
@@ -67,6 +68,7 @@ enthalten~\cite{gapx}.
       \State $P \gets append(P, G_o)$
       \If{Beste Lösung nach 20. Gen nicht verbessert}
         \State Nachbarschaftsgröße für ls3opt erhöhen
+        \State $P = immigration(P)$\Comment{siehe Bem. 10}
       \EndIf
       \State $P = next\_generation(P)$
     \EndWhile
@@ -74,10 +76,18 @@ enthalten~\cite{gapx}.
   \EndProcedure
 \end{algorithmic}
 \end{algorithm}
+\begin{bem}
+  Bei der Immigration werden alle Rundreisen bis auf die beste durch
+  neue zufällig generierte Rundreisen ersetzt. Diese Funktion ist nicht
+  Teil unserer Implementierung. Wir haben uns gegen die Immigration
+  entschieden, da die Laufzeit bereits sehr hoch war und durch „ls2opt“
+  (siehe Abschnitt Mutation) auch zufällige neue Rundreisen entstehen.
+\end{bem}
 \section{Initialisierung}
 In der Initialisierungsphase des EA werden $n$ Rundreisen aus einem
 vollständigen Graphen zunächst zufällig erzeugt. Direkt im Anschluss
-wird das in Kapitel 3 vorgestellte Verfahren „ls3opt“ angewendet, um die
+wird das in \hyperref[alg:ls3opt_run]{Algorithmus 5} vorgestellte Verfahren 
+„ls3opt“ angewendet, um die
 Rundreise an lokalen Stellen zu verbessern. Die initiale
 \textit{Nachbarschaftsgröße für „ls3opt“ beträgt 10}. Sie wird um 1
 inkrementiert, falls in den letzten 20 Generationen die beste Lösung
@@ -93,18 +103,27 @@ Elternteil verwendet~\cite{gapx}. Die Selektion findet also zwei mal
 (für $G_1$ und für $G_2$) statt. Sind die beiden Elternteile $G_1$ und
 $G_2$ bestimmt kann die Rekombination mittels GAPX durchgeführt werden.
 \section{Rekombination}
-Als Rekombinationsoperator wurde GAPX verwendet, der in Kapitel 2
+Als Rekombinationsoperator wurde GAPX verwendet, welcher in
+\hyperref[gapx_einleitung]{Kapitel 2}
 ausführlich beschrieben wurde. Zwei Rundreisen müssen vorher ausgewählt
 werden. Anschließend kann der Crossover, wie in
-\hyperref[alg:crossover_ea]{Algorithmus 1}
+\hyperref[alg:crossover_ea]{Algorithmus 1},
 beschrieben angewandt werden.
 \section{Mutation}
 Die Mutation wird bei allen Rundreisen durchgeführt, die einen
 schlechteren Fitness-Wert haben als die derzeit beste Rundreise. 
 Bei der Mutation wird eine zufällige Anzahl von „ls2opt“-Vorgänge
 (Anzahl $\leq 10$) durchgeführt. Nach der Modifikation der Rundreise wird
-zusätzlich noch ein „ls3opt“-Vorgang, wie in \hyperref[ls3opt_func]{Kapitel
-3.2} erläutert, durchgeführt.
+zusätzlich noch ein „ls3opt“-Vorgang, wie in \hyperref[alg:ls3opt_run]{Algorithmus 5} 
+erläutert, durchgeführt.
+
+\begin{bem}
+Bei einem „ls2opt“-Vorgang werden an zufälligen zwei zufälligen Stellen
+zwei Kanten gelöscht und in einer anderen Art wieder verbunden. Bei
+diesem Vorgang kann der Fitness-Wert der Rundreise schlechter werden.
+Mit „ls2opt“ wird versucht eine höhere Vielfalt in der Population zu
+erreichen.
+\end{bem}
 
 \section{Bewertung}
 Die Bewertung der Rundreise findet mittels einer Fitness-Funktion statt.
@@ -121,8 +140,8 @@ Graphen.
 \section{Umweltselektion}
 \textit{Elitismus} wird angewandt,
 um die beste Rundreise immer in die nächsten Generation zu übernehmen.
-Der Fitness-Wert während des evolutionären Algorithmus kann sich während
-des Prozesses somit niemals verschlechtern. Die beste Lösung wird
+Der Fitness-Wert der besten Rundreise kann sich während des
+evolutionären Algorithmus somit niemals verschlechtern. Die beste Lösung wird
 zurückgegeben, wenn die Abbruchbedingung erreicht wurde.
 \section{Parameterübersicht}
 \begin{tabular}{l|p{5.4cm}}

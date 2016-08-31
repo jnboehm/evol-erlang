@@ -1,12 +1,12 @@
-\chapter{Lokale Suche mit 3-opt}
+\chapter{Optimierung mit 3-opt}
 \section{Einleitung}
-Ein weiterer Teil des Projektes war die Implementierung der lokalen
-Suche namens „3-opt“ oder auch „ls3opt“ genannt. Dieses lokale 
-Suchverfahren wurde zum Erstellen der initialen Population des 
+Ein weiterer Teil des Projektes war die Implementierung der
+Grapheno-Otimierung namens „3-opt“ oder auch „ls3opt“ genannt. Dieses lokale 
+Optimierungsverfahren wurde zum Erstellen der initialen Population des 
 evolutionären Algorithmus verwendet. Ebenfalls wurde „ls3opt“ als Teil
-des Mutationsoperators verwendet. Ziel des Verfahrens ist es durch das 
-Löschen und anschließende Neuverbinden von drei Kanten eine Verbesserung der Rundreise zu erzielen. Die Implementierung basiert auf der in
-\cite{nagata} vorgestellten, modifizierten Vorgehensweise. Die Vorgehensweise „reduziert die Rechenzeit“\cite{gapx} durch
+des Mutationsoperators verwendet. Ziel des Verfahrens ist es durch 
+Löschen und anschließendes Neuverbinden von drei Kanten eine Verbesserung der Rundreise zu erzielen. Die Implementierung basiert auf der in
+\cite{nagata} vorgestellten, modifizierten Vorgehensweise. Das Verfahren „reduziert die Rechenzeit“\cite{gapx} durch
 eine sogenannte „Don't-look-bits“-Strategie. Basis dieses Verfahrens ist
 eine Ausarbeitung von Kanellakis und Papadimitriou\cite{ls3opt_atsp} aus dem Jahre 1979,
 die auch zur Einarbeitung benutzt wurde. 
@@ -46,11 +46,12 @@ Reihenfolge der Knoten in der Rundreise wie folgt lautet: $v_1, \dotsc, v_3, \do
   \end{tikzpicture}
 }
 \caption[Ausgangssituation 3-opt]{Die Ausgangssituation des
-3-opt-Verfahren. Die Abbildung zeigt nur einen Teil einer größeren
-Rundreise.}
+3-opt-Verfahren. Die Abbildung zeigt nur einen Teil einer größeren,
+  beispielhaften Rundreise.}
 \end {figure}
 
 \begin{figure}[bh]
+\label{fig:3opt_2}
 \centering
 \resizebox{330pt}{30pt}{
 
@@ -76,7 +77,8 @@ Rundreise.}
 $(v_1,v_2)$,$(v_3,v_4)$ und $(v_5,v_6)$ gelöscht.}
 \end{figure}
 Zunächst werden die ausgehenden Kanten der Knoten $v_1$, 
-$v_3$ und $v_5$ gelöscht. Dies kann man in Abbildung 3.2 beispielhaft
+  $v_3$ und $v_5$ gelöscht. Dies kann man in
+  \hyperref[fig:3opt_2]{Abbildung 3.2} beispielhaft
 erkennen. Nachdem nun drei Kanten gelöscht wurden, müssen die Kanten wie
 folgt neu verbunden werden, damit die Richtung der Rundreise beibehalten
 wird\cite{nagata}: 
@@ -85,9 +87,9 @@ wird\cite{nagata}:
   (v_5, v_2)\\
   (v_3, v_6)
 \end{align*}
-Nachdem die Kanten neu verbunden wurden kann mittels
+Nun kann mittels
 Aufsummieren der Kantengewichte herausgefunden werden, ob die Rundreise
-verbessert wurde. Das Löschen und neu verbinden von drei Kanten wird
+verbessert wurde. Das Löschen und Neuverbinden von drei Kanten wird
 auch „3-opt-move“ genannt.
 
 
@@ -121,7 +123,7 @@ eingefügt, die Richtung der Rundreise wurde beibehalten.}
 \end{figure}
 
 \section{„Don't look bits“-Strategie}
-Der „3-opt-move“, wie in  Kapitel 3.2 beschrieben, beschreibt das Löschen
+Der „3-opt-move“, wie in  \hyperref[ls3opt_func]{Kapitel 3.2} beschrieben, beschreibt das Löschen
 und Neuverbinden innerhalb einer Rundreise, wenn drei
 Kanten gegeben sind. Die „Don't look bits“-Strategie beschäftigt sich
 mit dem Thema, wie eine Rundreise mit $n$ Knoten in ihrer Gänze durch
@@ -176,16 +178,17 @@ Es wird nun versucht innerhalb aller Nachbarschaften der Rundreise 3-Tupel zu fi
 Knoten für den „3-opt-move“ $v_1$, $v_3$ und $v_5$) welche die Rundreise
 verbessern.
 \begin{bem}
-Die Bedigung für den „3-opt-move“, dass $v_1$ vor $v_3$ und $v_5$ nach
+Die Bedingung für den „3-opt-move“, dass $v_1$ vor $v_3$ und $v_5$ nach
   $v_3$ in der Rundreise vorkommen muss, darf nicht verletzt werden.
 \end{bem}
 Falls eine Verbesserung gefunden wurde, muss für die nachfolgenden
-3-Tupel die neue Rundreise benutzt werden. Falls die Rundreise jedoch
-nicht verbessert wurde, speichern wir uns die drei Werte aus dem Tripel
-in einer Liste, der sogenannten „Don't look bit list“. Diese Werte dürfen in den
+3-Tupel die neue Rundreise benutzt werden. Wenn die Rundreise jedoch
+nicht verbessert wurde, speichern wir uns die drei Werte aus dem 3-Tupel
+in einer Liste, der sogenannten „Don't look bit“-Liste. Diese Werte dürfen in den
 nachfolgenden Nachbarschaften nicht mehr verwendet werden. Der
 Algorithmus ist beendet, wenn alle Knoten aus der Rundreise in der
-„Dont-look-bit-list“ vorhanden sind.
+„Dont-look-bit“-Liste vorhanden sind und somit keine lokalen
+Optimierungen mehr vorgenommen werden können.
 \newpage
 
 \begin{algorithm}
@@ -201,7 +204,7 @@ Algorithmus ist beendet, wenn alle Knoten aus der Rundreise in der
         \State $v_1 \gets c[0]$
         \State $v_3 \gets c[1]$
         \State $v_5 \gets c[2]$
-        \State $G' \gets optmove3(G, v_1,v_3,v_5)$
+        \State $G' \gets optmove3(G, v_1,v_3,v_5)$ \Comment{siehe Kap. \hyperref[ls3opt_func]{3.2}}
         \If {$sum\_weights(G') < sum\_weights(G)$}
           \State $G \gets G'$ \Comment{Rundreise wurde verbessert}
         \Else
@@ -232,23 +235,24 @@ Die Funktion $valid\_3\_tuple(N, DontLook)$ gibt anhand der
   in Frage kommen. Die Tupel dürfen keine Werte enthalten, die in
   $DontLook$ vorhanden sind.
 \end{bem}
-In Zeile $15,16,17$ des Algorithmus 5 wurden die drei Knoten, die keine
-Verbesserung ergeben haben in die „Dont-look-bit“-Liste aufgenommen.
+In Zeile $15,16,17$ des \hyperref[alg:ls3opt_run]{Algorithmus 5} wurden die drei Knoten, die keine
+Verbesserung ergeben haben, in die „Dont-look-bit“-Liste aufgenommen.
 Dadurch wird mit diesen Knoten nicht mehr versucht Verbesserungen in der
 Rundreise zu finden. 
 \section{Laufzeitverhalten}
-\begin{figure}[ht]
+Als Teil des Projektes wurde zusätzlich noch das Laufzeitverhalten des
+in Erlang implementierten Verfahrens untersucht. 
+\begin{figure}[H]
   \centering
   \includegraphics[width=\textwidth]{../research/ls3opt}
   \caption[Laufzeit von ls3opt im Verhältnis zu der Anzahl der
   Knoten]{\label{fig:ls3optcomplxty} Die Laufzeit von ls3opt im
     Verhältnis zu der Anzahl der Knoten in dem Graphen (der Anzahl der
     Städte in einer Rundreise).  Die Laufzeit ist kubisch, wie bei
-    dessen ersten Einführung in \cite{lin1965computer} geschrieben
-    wurde.  In unserer Implementierung beträgt $a$ ungefähr
+    dessen ersten Einführung in \cite{lin1965computer} beschrieben.
+    In unserer Implementierung beträgt $a$ ungefähr
     $1,\kern-1pt 3577 \times 10^{-5}$.} % fix kerning after comma in math mode
   %% erwähnen, wie wir auf den wert gekommen sind? Least squares?
 \end{figure}
 
-Als Teil des Projektes wurde zusätzlich noch das Laufzeitverhalten des
-in Erlang implementierten Verfahrens untersucht. 
+
