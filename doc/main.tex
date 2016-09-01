@@ -21,10 +21,12 @@
 
 \newtheorem{theorem}{Satz}
 \newtheorem{bem}{Bemerkung}
+\floatname{algorithm}{Algorithmus}
 
 \usepackage{style}
 \algblockdefx[Foreach]{Foreach}{EndForeach}[1]{\textbf{foreach} #1 \textbf{do}}{\textbf{end foreach}}
 \begin{document}
+\renewcommand*{\listalgorithmname}{Algorithmenverzeichnis}
 
 \newcommand{\gtwght}{\texttt{get\_weight/3}}
 
@@ -32,13 +34,13 @@
 
 \maketitle
 
-\input{./tex/vorwort.tex}
+%\input{./tex/vorwort.tex}
 
 % if we want to shorten the toc
 % \setcounter{tocdepth}{0}
 \tableofcontents
 \listoffigures
-\listoftables
+\listofalgorithms
 
 \input{./tex/intro.tex}
 \input{./tex/einleitung.tex}

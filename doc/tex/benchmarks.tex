@@ -2,7 +2,10 @@
 Bei den ATSP-Instanzen der TSPLIB~\cite{tsplib}, bei denen die Knotenanzahl $\leq 33$ 
 beträgt, wurden die bekannten, optimalen Lösungen gefunden. Bei größeren
 Problemen konnten die optimalen Lösungen nicht gefunden werden. Die
-nachfolgende Tabelle zeigt eine Zusammenfassung der Ergebnisse.
+nachfolgende Tabelle zeigt eine Zusammenfassung der Ergebnisse. Sofern
+keine optimale Lösung gefunden wurde, haben wir den Vorgang manuell
+abgebrochen, wenn keine wesentliche Verbesserung der Fitness ersichtlich
+war.
 \begin{table}[H]
   \centering
 {
@@ -23,7 +26,7 @@ nachfolgende Tabelle zeigt eine Zusammenfassung der Ergebnisse.
   \caption[Ergebnisse TSPLIB Instanzen]{Die Ergebnisse einiger asymmetrischen Instanzen der
   TSPLIB~\cite{tsplib}}
 \end{table}
-\begin{figure}[ht]
+\begin{figure}[H]
     \centering
     \begin{subfigure}[b]{0.45\textwidth}
       \includegraphics[width=\textwidth]{../research/scores/br17-300-24}
@@ -71,7 +74,17 @@ nachfolgende Tabelle zeigt eine Zusammenfassung der Ergebnisse.
     \end{subfigure}
     \caption[Fitnesswerte einiger ATSP-Probleme]{\label{fig:fitness-plots} 
     Fitnesswerte über die ersten 100 Generationen. Die Graphen sind
-    normiert, die bekannten Lösungen befinden sich bei $1.0$. Schwarz:
+    normiert, die besten, bekannten Lösungen befinden sich bei $1.0$. Schwarz:
     Durchschnittlicher Fitness-Wert im Verlauf des EA, Rot: Bester
     Fitness-Wert pro Generation}
 \end{figure}
+\noindent
+Nach der Implementierung unseres Programms nahmen wir Kontakt mit den
+Autoren von \cite{gapx} auf, um herauszufinden, nach wie vielen
+Generationen ihre Anwendung terminierte. Als Antwort wurde uns der
+Quellcode von GAPX samt dem dazugehörigen EA bereitgestellt. Im
+Vergleich benötigt unsere Implementierung bei allen Problemen (bis auf
+br17) mehr Generationen oder findet nicht die optimale Lösung. Der Grund
+dafür kann an der nicht durchgeführten „Immigration“ des EA liegen.
+Wenn wir diese implementiert hätten, kämen für unser Programm nur kleine
+Probleme in Frage.

@@ -22,7 +22,7 @@ Beantworten von Nachrichten des Benutzers zuständig.
     %% from http://www.texample.net/tikz/examples/cycle/
     % Author : Jerome Tremblay
     \def \n {10}
-    \def \radius {3cm}
+    \def \radius {2.5cm}
     \def \margin {4} % margin in angles, depends on the radius
 
     \foreach \s in {1,...,\n}
@@ -64,7 +64,7 @@ während dem Erstellen der nächsten Generation blockierte.
     [place/.style={circle,
       inner sep=0pt,minimum size=2mm}]
     \def \n {10}
-    \def \radius {3cm}
+    \def \radius {2.5cm}
     \def \margin {4} % margin in angles, depends on the radius
 
     \node[draw, circle] (master) at (0:0) {master};
@@ -89,7 +89,7 @@ während dem Erstellen der nächsten Generation blockierte.
 
 %% ets tables
 Das normale Limit von Datenbanktabellen liegt bei
-1400.\footnote{\url{http://erlang.org/doc/man/ets.html}} \hskip2pt Da
+1400 Tabellen pro Node.\footnote{\url{http://erlang.org/doc/man/ets.html}} \hskip2pt Da
 ein Graph aus jeweils drei Tabellen besteht, können wir unser Programm
 nicht beliebig skalieren, da sonst das Limit auf einer Node erreicht
 wird.  Erhöht man die Grenze, so degradiert die Geschwindigkeit der
@@ -102,4 +102,4 @@ muss der Besitz auf einen anderen Prozess übertragen werden, bis nur
 noch ein Prozess diese Tabelle benutzt.  Dieser kann dann die Tabelle
 löschen.  Dass ein Graph so behandelt werden muss, ist nicht
 offensichtlich und benötigt Rechenzeit, die nicht für den
-evolutionären Algorithmus an sich verwendet werden kann.
+evolutionären Algorithmus selbst verwendet werden kann.

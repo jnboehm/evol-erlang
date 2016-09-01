@@ -1,11 +1,11 @@
 \chapter{Erlang}
-Erlang ist eine dynamische, funktionale Programmiersprache.  Die
+Erlang ist eine dynamische und funktionale Programmiersprache.  Die
 Sprache wurde im „Ericsson Computer Science Laboratory“ für große
-Telekommunikationsanwendungen entwickelt. In diesem Bereich wird auf
-Nachrichtenaustausch und Distribution viel Wert gelegt.
+Telekommunikationsanwendungen entwickelt, wo viel Wert auf
+Nachrichtenaustausch und Distribution gelegt wird.
 
 Obwohl funktionale Programmiersprachen generell frei von
-Seiteneffekten sind, werden einzelne Prinzipien gebrochen werden, wenn
+Seiteneffekten sind, werden einzelne Prinzipien gebrochen, wenn
 praktische Probleme dies erfordern.  Eine Datenbanktabelle kann zum
 Beispiel verändert werden, ohne gleich eine komplette Kopie der
 Datenbank zu erstellen.
@@ -15,18 +15,15 @@ Prozesse Informationen mittels Nachrichten.  Hierbei gibt es keinen
 gemeinsamen Speicher, was das Message-passing sicher macht – das
 Versenden einer Nachricht kann nie fehlschlagen.  Da wir den
 Algorithmus durch Message-passing parallelisieren wollten, haben wir
-uns für Erlang als unsere Programmiersprache entschieden.
+uns für Erlang als Programmiersprache entschieden.
 
 Erlangs Prozesse benötigen initial deutlich weniger Speicher als
-Systemprozesse, da sie dieses dynamisch zugewiesen bekommen.  Die
+Systemprozesse, da sie diesen dynamisch zugewiesen bekommen.  Die
 Nebenläufigkeit wird in Erlang mittels Threads realisiert, deren
-Scheduling von der Laufzeitumgebung selber betrieben wird.  Der
-Unterschied zu vielen anderen Sprachen ist dabei, dass das Scheduling
-„preemptive“ ist, dem rechnenden Prozess also der Kern entzogen werden
-kann.
+Scheduling von der Laufzeitumgebung selber betrieben wird.
 
-Ein Erlang-Prozess entspricht ungefähr einer Node.  Diese Node
-erscheint im Betriebssystem als ein Prozess.  Die Node selber kann
+Ein Erlang-Prozess entspricht ungefähr einer Node.Die Node
+erscheint im Betriebssystem als ein Prozess und kann
 wiederum mehrere Prozesse erzeugen, die von ihr selber verwaltet
 werden.  Nach einmaliger Verbindung mit einer anderen Node können
 diese über Message-passing kommunizieren, ähnlich zu der Kommunikation
@@ -63,13 +60,14 @@ er darauf antwortet.
 \renewcommand{\figurename}{Abbildung}
 
 
-Die Implementierung von Algorithmen ist aufgrund der Ähnlichkeit zur
-Mathematik angenehm.  Hier helfen vor allem Header-guards und
+Algorithmen können aufgrund der Ähnlichkeit zur mathematischen Notation
+in Erlang leicht umgesetzt werden. Hier helfen vor allem Header-guards und
 Higher-order-functions.
 
 Header-guards sind Ausdrücke in Funktionsparametern, die einen
 bestimmten Wert haben müssen oder mithilfe von einzelnen Funktionen
 getestet werden können, wie in dem Listing \ref{lst:fac} zu sehen ist.
+Diese ersetzen zum großen Teil \lstinline!if!-Abfragen.
 
 Higher-order-functions ersetzen zum großen Teil die
 \lstinline!for!-Schleife von imperativen Sprachen.  Solche Funktionen
@@ -77,10 +75,11 @@ bekommen eine Liste und eine Funktion und wenden diese (meistens) auf
 jedes Element der Liste an.  Dabei kann eine neue Liste entstehen oder
 es werden bestimmte Werte akkumuliert.  Diese Art von Funktionen
 erlauben einfache und saubere Transformationen, die in vielen Fällen
-die Absicht der Anweisung deutlich und kürzer ausdrücken.
+die Absicht der Anweisung übersichtlich ausdrücken.
 
-Darüber hinaus hilft auch die Unveränderbarkeit von Variablen, sobald
-diese einmalig einen Wert zugewiesen bekommen, was den Zustand einer
+Darüber hinaus hilft auch die Unveränderbarkeit von Variablen. Sobald
+eine Variable einmalig einen Wert zugewiesen bekommt, kann sich dieser
+nicht mehr ändern, was den Zustand einer
 Variable zur Laufzeit eindeutig werden lässt.
 
 \section{Nachteile}
@@ -91,7 +90,7 @@ Laufzeit haben müssen und der Kompiler deshalb weniger Optimierungen
 vornehmen kann.  Es führt außerdem dazu, dass der Typ zur Laufzeit
 überprüft werden muss, was ebenfalls Rechenzeit kostet.
 
-Generell wird davon abgeraten, die Sprache für solche Zwecke zu
+Generell wird davon abgeraten, die Sprache für rechenintensive Aufgaben zu
 benutzen, da Erlang dafür nicht konzipiert wurde
 \cite[Kapitel~3]{lyse}.  Stattdessen soll man Erlang für Kommunikation
 verwenden und für rechenintensive Aufgaben auf Sprachen
@@ -103,7 +102,7 @@ auf einer virutellen Maschine laufen.
 
 In unserer Implementierung gibt die Funktion \gtwght\ – die Notation
 bedeutet, dass die Funktion drei Parameter übergeben bekommt – das
-Gewicht zwischen zwei Knoten in dem Graphen zurück.  Der Profiler
+Gewicht zwischen zwei Knoten in dem übergebenen Graphen zurück.  Der Profiler
 \lstinline!eprof!  zeigte, dass über 90\% der Aufrufe, und damit auch
 ein Großteil der Zeit, dieser Funktion zufallen.  Deshalb hatten wir
 versucht \gtwght\ zu optimieren, da die Anzahl der Aufrufe nicht
@@ -118,22 +117,21 @@ wird diese „Erlang Term Storage“ (ETS) genannt, einen konstanten
 Zeitaufwand für Lese- und Schreiboperationen hat, war die konstante
 Zugriffszeit zu hoch.  Deshalb wurde vorher eine Liste mit allen
 Kanten erstellt aus denen mit Hilfe von Pattern-matching der gefundene
-Wert zurückgegeben wurde.  Danach betrug die durchschnittliche Zeit
-0,13 Mikrosekunden pro Aufruf.
+Wert zurückgegeben wurde.  
 
 Die Laufzeit verbrachte weiterhin einen Großteil der Zeit in \gtwght.
 Daher wollten wir durch eine „Native Implemented Function“ (NIF) in C
 die Zeit pro Aufruf weiter verringern.  Das Resultat hat die Zeit pro
 Aufruf leider verschlechtert, da die Makros für die Datenkonvertierung
-(von Erlangs dynamischen Termen zu C-Typen) zu viel Zeit beansprucht.
+(von Erlangs dynamischen Termen zu C-Typen) zu viel Zeit beanspruchen.
 
 Die Funktion \gtwght\ benötigt also immer noch die meisten Zeit in
 unserem Programm.  Dieser Teil wäre in einer Sprache wie C schnell und
 intuitiv gewesen, da lediglich ein Zugriff auf ein zweidimensionales
 Array an den übergebenen Indizes nötig gewesen wäre.
 
-Es gibt in Erlang Arrays, diese sind allerdings funktional – müssen
+Es gibt in Erlang Arrays, diese sind allerdings „immutable“ – müssen
 also bei einer Veränderung komplett neu erstellt werden – und bieten
 vor allem keinen wahlfreien Speicherzugriff \cite[Kapitel~11]{lyse}.
-Das hätte und bei dem Auslesen von Gewichtswerten ebenfalls nicht die
+Arrays hätten uns bei dem Auslesen von Gewichtswerten ebenfalls nicht die
 nötige Geschwindigkeit geliefert. % komisches wort
