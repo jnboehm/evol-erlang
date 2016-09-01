@@ -1,11 +1,11 @@
 \chapter{Evolutionärer Algorithmus}
 \section{Einleitung}
-Ein „evolutionärer Algorithmus“ (kurz EA) ist ein Algorithmus, welcher 
+Ein „evolutionärer Algorithmus“ (kurz EA)
 versucht ein Optimierungsproblem mithilfe der in der Biologie 
-vorkommenden Gesetze der Evolution zu lösen. Ziel des Algorithmus ist es
-ein Ergebnis über mehrere Generationen zu verbessern. Für das Traveling-
-Salesman-Problem bedeutet dies, dass versucht wird aus einer Menge
-von zufällig generierten Rundreisen eine möglichst kurze Rundreise zu
+vorkommenden Gesetze der Evolution zu lösen. Ziel des Algorithmus ist
+es ein Ergebnis über mehrere Generationen zu verbessern. Für das Traveling-
+Salesman-Problem bedeutet dies, dass versucht wird, aus einer Menge
+von zufällig generierten Rundreisen, eine möglichst kurze Rundreise zu
 finden. In diesem Kapitel wird beschrieben, welcher EA bei der
 Implementierung verwendet wurde.
 
@@ -17,7 +17,7 @@ Implementierung verwendet wurde.
   \def \margin {4}
   \node (rekombination) at (0:\r) {Rekombination};
   \node (paarungsselektion) at (60:\r) {Paarungs-\\selektion};
-  \node (terminierungsbedingung) at (120:\r) {Terminierungs-\\bedingung};
+  \node (terminierungsbedingung) at (120:\r) {Abbruch-\\bedingung};
   \node (umweltselektion) at (180:\r) {Umwelt-\\selektion};
   \node (bewertung) at (240:\r) {Bewertung};
   \node (mutation) at (300:\r) {Mutation};
@@ -78,10 +78,12 @@ enthalten~\cite{gapx}.
 \end{algorithm}
 \begin{bem}
   Bei der Immigration werden alle Rundreisen, bis auf die Beste, durch
-  neue zufällig generierte Rundreisen ersetzt. Diese Funktion ist nicht
+  neue zufällig generierte Rundreisen ersetzt, die mit „ls3opt“
+  verbessert werden. Diese Funktion ist nicht
   Teil unserer Implementierung. Wir haben uns gegen die Immigration
-  entschieden, da die Laufzeit bereits sehr hoch ist und durch „ls2opt“
-  (siehe Abschnitt Mutation) auch zufällige neue Rundreisen entstehen.
+  entschieden, da die Laufzeit von „ls3opt“ bereits sehr hoch ist und 
+  durch „ls2opt“ (siehe Abschnitt Mutation) auch zufällige neue Rundreisen 
+  entstehen.
 \end{bem}
 \section{Initialisierung}
 In der Initialisierungsphase des EA werden $n$ Rundreisen aus einem
@@ -92,23 +94,24 @@ Rundreise an lokalen Stellen zu verbessern. Die initiale
 \textit{Nachbarschaftsgröße für „ls3opt“ beträgt 10}. Sie wird um 1
 inkrementiert, falls in den letzten 20 Generationen die beste Lösung
 nicht verbessert wurde.
-\section{Terminierungsbedingung}
+\section{Abbruchbedingung}
 Der EA wird beendet, wenn \textit{1500 Generationen} durchlaufen wurden, oder
 die bekannte optimale Lösung erreicht wurde. 
 \section{Paarungsselektion}
 Zur Selektion einer Rundreise wird eine \textit{Turnierselektion} angewendet, 
 bei der zwei zufällige Rundreisen ausgewählt werden~\cite{weicker}. Jene mit dem
-besseren Fitness-Wert wird mit einer \textit{Wahrscheinlichkeit von 0.8} als 
+besseren Fitness-Wert wird mit einer \textit{Wahrscheinlichkeit von 0,8} als 
 Elternteil verwendet~\cite{gapx}. Die Selektion findet also zwei mal 
 (für $G_1$ und für $G_2$) statt. Sind die beiden Elternteile $G_1$ und
-$G_2$ bestimmt kann die Rekombination mittels GAPX durchgeführt werden.
+$G_2$ bestimmt, kann die Rekombination mittels GAPX durchgeführt werden.
 \section{Rekombination}
 Als Rekombinationsoperator wurde GAPX verwendet, welcher in
 \hyperref[gapx_einleitung]{Kapitel 2}
-ausführlich beschrieben wurde. Zwei Rundreisen müssen vorher ausgewählt
+ausführlich beschrieben wurde. Zwei Rundreisen müssen vorher mithilfe
+der Paarungsselektion ausgewählt
 werden. Anschließend kann der Crossover, wie in
-\hyperref[alg:crossover_ea]{Algorithmus 1},
-beschrieben angewandt werden.
+\hyperref[alg:crossover_ea]{Algorithmus 1}
+beschrieben, angewandt werden.
 \section{Mutation}
 Die Mutation wird bei allen Rundreisen durchgeführt, die einen
 schlechteren Fitness-Wert haben als die derzeit beste Rundreise. 
@@ -126,7 +129,7 @@ erreichen.
 \end{bem}
 
 \section{Bewertung}
-Die Bewertung der Rundreise findet mittels einer Fitness-Funktion statt.
+Die Rundreise wird mittels einer Fitness-Funktion $f$ bewertet.
 Zur Ermittlung der Kantengewichte in einem Grpahen $G = (V, E)$ wird
 eine Funktion $d(e)$, mit $e \in E$ definiert, die für eine Kante das
 entsprechende Gewicht zurückgibt.

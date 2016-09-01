@@ -4,7 +4,8 @@
 \section{Einleitung}
 Der „Generalized Asymmetric Partition Crossover“ (GAPX) ist ein
 Rekombinationsoperator, der als Teil eines evolutionären Algorithmus
-verwendet werden kann~\cite{gapx}. Aufgabe einer Rekombination beim ATSP ist es aus
+verwendet werden kann~\cite{gapx}. Aufgabe einer Rekombination (auch
+Crossover genannt) beim ATSP ist es aus
 zwei gegebenen Rundreisen $G_1$, $G_2$ ein Kind (auch Offspring genannt)
 $G_o$ zu erzeugen.
 
@@ -20,7 +21,8 @@ $G_o$ zu erzeugen.
 \end{algorithm}
 \noindent
 GAPX versucht durch ein bestimmtes Verfahren die beiden Rundreisen zu
-partitionieren und daraus das neue Kind $G_o$ zu erzeugen. Die
+partitionieren und anhand der kürzesten Wege innerhalb der Komponenten
+das neue Kind $G_o$ zu erzeugen. Die
 Funktionsweise, die im nachfolgenden Kapitel beschrieben wird, basiert
 auf~\cite{gapx}.
 
@@ -28,8 +30,7 @@ auf~\cite{gapx}.
 \section{Funktionsweise}
 Seien $G_1$ und $G_2$ beliebige Rundreisen, beide erzeugt aus einem
 vollständigen Graphen $G$. Zunächst werden $G_1$ und $G_2$ in einem
-gemeinsamen Graphen $G_u$ zusammengeführt. Den Graph $G_u = G_1 \cup
-G_2$ nennen wir auch Vereinigungsgraph von $G_1$ und $G_2$.
+gemeinsamen Graphen $G_u$ zusammengeführt.
 \newpage
 %% Bild mergen von G1, G2
 \begin{figure}[hb]
@@ -124,9 +125,12 @@ dem neuen Graphen $G_u$ anhand zwei Rundreisen mit je vier Knoten.
 %%  Multigraphen ist.
 %%\end{bem}
 \noindent
-Nach der Zusammenführung der beiden Graphen in $G_u$ muss für alle
-Knoten $v$ aus $G_u$ bei der die Bedingung $deg(v) = 4$ erfüllt ist ein
-sogenannter Ghost-Knoten $v'$ nach $v$ eingeführt werden. Zusätzlich muss eine
+Nachfolgend betrachten wir zur Erklärung zwei Graphen $G_1$ und $G_2$ mit elf Knoten. 
+Nach der Zusammenführung der beiden Graphen in $G_u$ muss für jeden 
+Knoten $v$ aus $G_u$, der \textit{vier} Nachbarn hat, ein
+sogenannter Ghost-Knoten $v'$ nach $v$ eingefügt werden. Durch das
+Einführen der zusätzlichen Knoten ist es möglich mehr Komponenten im
+Graphen zu finden. Zusätzlich muss eine
 Kante mit dem Gewicht $0$ zwischen $v$ und $v'$ eingefügt werden. 
 Der Graph $G_u$ mit eingefügten Ghost-Knoten an den entsprechenden Stellen kennzeichnen wir als $G_u'$.
 \begin{figure}[hb]
@@ -263,22 +267,17 @@ Ghostknoten. Rechts: Der Graph $G_u'$ mit dem eingefügten Ghostknoten $6'$.
 Blaue Linie: $G_1$, erstes Elternteil; rote, gestrichelte Linie: $G_2$,
 zweites Elternteil}
 \end{figure}
-\begin{bem}
-Es hat sich herausgestellt, dass es bei der Implementierung einfacher war die
-Anzahl der Nachbarn von $v$ anzuschauen, um herauszufinden, ob ein
-Ghost-Knoten $v'$ eingefügt werden muss.
-\end{bem}
 \newpage
 \noindent
-Nachdem alle Ghost-Knoten eingefügt wurden müssen Kanten mit einer
-bestimmten Eigenschaft aus $G_u'$ entfernt werden, um eine Paritionierung
-des Graphen vorzunehmen. In $G_u'$ müssen genau jene Kanten entfernt
-werden, die sowohl in $G_1$ \textbf{und} $G_2$ vorkommen. Zusätzlich
+Nachdem alle Ghost-Knoten eingefügt wurden, müssen genau jene Kanten entfernt
+werden, die in $G_1$ \textbf{und} $G_2$ vorkommen, um eine
+Partitionierung des Graphen vorzunehmen. Zusätzlich
 müssen die Kanten entfernt werden, die bei der Generierung der
 Ghost-Knoten neu eingefügt wurden. In \hyperref[fig:ghostnodes]{Abbildung 2.2} wäre dies die Kante
 zwischen $6$ und $6'$. Die Menge dieser entfernten Kanten nennen wir
 nachfolgend $E_c$ und werden auch „Common-Edges“ genannt. Die Menge
-beinhaltet also genau die Kanten die in beiden Elternteilen vorkommen. Die
+$E_c$
+beinhaltet also genau die Kanten, die in beiden Elternteilen vorkommen. Die
 Menge $E_c$ wird nun in die Kantenmenge von $G_o$ (dem Offspring)
 eingefügt.
 \begin{figure}[hb]
@@ -317,12 +316,12 @@ auto
   Einfügen eines Ghost-Knoten entstanden. Die Kante $(1,11)$ ist in beiden
   Rundreisen $G_1$ und $G_2$ vorhanden. $E_c$ wurde in $G_o$ eingefügt.}
 \end{figure}
-\newpage
 \noindent
 Durch das Entfernen von $E_c$ in $G_u'$ haben wir eine Partitionierung
 des Graphen erreicht. Der Graph $G_u'$ wurde in seine Komponenten
-zerlegt.
-\begin{figure}[bh]
+zerlegt. Es sollen nun „gute“ Wege durch die Komponenten gefunden
+werden.
+\begin{figure}[H]
   \label{fig:components}
 \centering
   \begin{tabular}{c c}
@@ -445,21 +444,16 @@ auto
 }
 
 \end{tabular}
-\caption[Partitionierung von $G_u'$ nach Löschen von $E_c$]{Rechts: Der Graph
-$G_u'$ nach Löschen der gemeinsamen Kanten $E_c$. Die Teile des
-partitionierten Graphen werden Komponenten genannt.}
+\caption[Partitionierung von $G_u'$ nach Löschen von $E_c$]{Rechts oben:
+$G_{c_1}$ der Teilgraph mit den Knoten $1,2,3,4,5,6$, 
+Rechts unten: $G_{c_2}$ ist der Teilgraph mit den Knoten $11,9,10,7,8,6'$ }
 \end{figure}
 \noindent
 Jede Komponente wird als Teilgraph $G_{c_k}$ gekennzeichnet, wobei $k
 \leq $Anzahl der Komponenten in $G_u'$. 
-
-\begin{bem}
-  In \hyperref[fig:components]{Abbildung 2.4} ist $G_{c_1}$ der Teilgraph mit den Knoten $1,2,3,4,5,6$, $G_{c_2}$ ist der Teilgraph
-  mit den Knoten
-  $11,9,10,7,8,6'$
-\end{bem}
-\noindent
-Für alle Komponenten $G_{c_k}$ muss als nächstes die Menge der Eingangs- und
+Wir definieren $G_c = \bigcup_{1 \leq k \leq n}{\{G_{c_k}\}}$, wobei $n$ die Anzahl 
+der Komponenten in $G_u'$ ist.
+Für alle Komponenten in $G_c$ müssen die Menge der Eingangs- und
 Ausgangsknoten festgestellt werden. Hierfür werden zwei Funktionen
 definiert:
 \begin{itemize}
@@ -468,14 +462,13 @@ definiert:
   \item $comp_{out}(G_{c_k}, E_c)$ - ermittelt die Menge der
     Ausgangsknoten von $G_{c_k}$ 
 \end{itemize}
-\newpage
-\begin{algorithm}
+\begin{algorithm}[H]
   \caption{Ermittlung Eingangsknoten in $G_{c_k}$}\label{alg:comp_in}
 \begin{algorithmic}[1]
   \Procedure{$comp_{in}$}{$G_{c_k}, E_c$}
     \State $V \gets vertices(G_{c_k})$
     \State $Entry \gets list()$
-    \Foreach{$v \in V$}
+    \Foreach{$v \in]V$}
       \State $g = has\_ghostnode\_in\_comp(G_{c_k}, v)$
       \If {$\neg g \land in\_degree(G_{c_k}, v) = 0$}
       \Comment{In-Degree}    
@@ -486,7 +479,7 @@ definiert:
   \EndProcedure
 \end{algorithmic}
 \end{algorithm}
-\begin{algorithm}
+\begin{algorithm}[H]
 \caption{Ermittlung Ausgangsknoten in $G_{c_k}$}\label{alg:comp_out}
 \begin{algorithmic}[1]
   \Procedure{$comp_{out}$}{$G_{c_k}, E_c$}
@@ -504,16 +497,16 @@ definiert:
 \end{algorithmic}
 \end{algorithm}
 \noindent
-Die prinzipielle Vorgehensweise der beiden Funktionen ist das Anschauen
+Die prinzipielle Vorgehensweise der beiden Funktionen ist das Prüfen 
 der eingehenden beziehungsweise ausgehenden Kanten. Ein Knoten $v$ kommt
 nur als Eingangspunkt in Frage, wenn keine eingehenden Kanten für $v$
-existieren. Ein ausgehender Knoten kann hingegen keine ausgehende Kanten
+existieren. Ein ausgehender Knoten kann hingegen keine ausgehenden Kanten
 besitzen.
 \begin{bem}
-  Es können Komponenten existieren welche nicht nur einen Eingangs- und
+  Es können Komponenten existieren welche, nicht nur einen Eingangs- und
   einen Ausgangsknoten haben. Tatsächlich gibt es sehr häufig
-  Partitionierungen mit Komponenten, die drei oder vier Eingängen
-  beziehungsweise Ausgängen besitzen. Die Algorithmen 3 und 4 beachten
+  Partitionierungen mit Komponenten, die drei oder vier Eingänge
+  beziehungsweise Ausgänge besitzen. Die Algorithmen 3 und 4 beachten
   diesen Umstand.
 \end{bem}
 \begin{bem}
@@ -522,27 +515,27 @@ besitzen.
   entsprechender Ghost-Knoten $v'$ eingefügt wurde, wobei sich $v$ und
   $v'$ innerhalb der selben Komponente $G_{c_k}$ befinden. Ist dies der Fall, gibt
   die Funktion den Wert true zurück. Knoten, für die ein entsprechender
-  Ghost-Knoten innerhalb der Komponente existiert können nicht als
+  Ghost-Knoten innerhalb der Komponente existiert, können nicht als
   Eingangs- oder Ausgangspunkt verwendet werden, da sie die Komponente
   in weitere Teile aufspalten würde.
 \end{bem}
 \noindent
 Mit den Informationen über Eingangs- und Ausgangsknoten ist der „Weg“ 
-einer Komponente zum teil bekannt. Man startet in einem Eingangsknoten und endet
+einer Komponente zum Teil bekannt. Man startet in einem Eingangsknoten und endet
 in einem Ausgangsknoten. Der Weg innerhalb der Komponente muss nun
-näher untersucht werden, da nicht immer eine gültige Partitionierung des
-Graphen erfolgt.
-Für alle Komponenten $G_{c_k}$ muss nun überprüft werden,
+näher untersucht werden.
+Für jede Komponente in $G_c$ muss überprüft werden,
 ob für beide Elternteile $G_1$, $G_2$ ein Weg vom Eingangsknoten zum
 Ausgangsknoten führt. Der Weg muss zudem durch alle Knoten der
-Komponente führen. Nur dann ist die Partitionierung gültig. 
+Komponente führen. Nur dann ist die Partitionierung gültig. Wenn die
+Partitionierung ungültig ist, kann kein Kind erzeugt werden.
 Dieser Vorgang ist in \hyperref[fig:entry_exit]{Abbildung 2.5} an einem Beispiel demonstriert.
 
-Als letzter Schritt von GAPX muss für jede Komponente $G_{c_k}$ berechnet werden,
+Als letzter Schritt von GAPX muss für jede Komponente in $G_c$ berechnet werden,
 ob der Weg von $G_1$, der vom Eingangsknoten zum Ausgangsknoten führt,
 günstiger ist als der von $G_2$. Der kürzere Teilweg, beziehungsweise die
-Kanten, die diesen Weg repräsentieren, werden in den Offspring $G_o$
-übernommen. 
+Kanten, die diesen Weg repräsentieren, werden in den Graphen des
+Offsprings $G_o$ übernommen. 
 
 \begin{figure}
   \label{fig:entry_exit}
@@ -655,8 +648,8 @@ auto
 \end{tikzpicture}
 }
 \end{tabular}
-  \caption[Überprüfung, auf eine gültige Partitionierung von
-  $G_u'$]{In jeder Partition wird nachgeschaut, ob in den beiden
+  \caption[Überprüfung auf eine gültige Partitionierung von
+  $G_u'$]{In jeder Partition wird überprüft, ob in beiden
   Rundreisen $G_1$ und $G_2$ ein Weg vom Eingangsknoten („1“ bzw. „6'“) 
   zum Ausgangsknoten („6“ bzw. „11“) existiert.}
 \end{figure}
