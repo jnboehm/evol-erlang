@@ -1,0 +1,90 @@
+\chapter{Ergebnisse}
+Bei den ATSP-Instanzen der TSPLIB~\cite{tsplib}, bei denen die Knotenanzahl $\leq 33$ 
+beträgt, wurden die bekannten, optimalen Lösungen gefunden. Bei größeren
+Problemen konnten die optimalen Lösungen nicht gefunden werden. Die
+nachfolgende Tabelle zeigt eine Zusammenfassung der Ergebnisse. Sofern
+keine optimale Lösung gefunden wurde, haben wir den Vorgang manuell
+abgebrochen, wenn keine wesentliche Verbesserung der Fitness ersichtlich
+war.
+\begin{table}[H]
+  \centering
+{
+  \setmainfont[Numbers={Uppercase,Monospaced}]{Vollkorn}
+  \begin{tabular}{lrrr}
+    Problem & Beste Lösung & Erreichte Fitness & Generationen \\
+    \hline
+    br17    & 39           & 39                & 1            \\
+    ftv33   & 1286         & 1286              & 199          \\
+    ftv35   & 1473         & 1475              & 196          \\
+    ftv38   & 1530         & 1536              & 286          \\
+    ftv44   & 1613         & 1653              & 237          \\
+    ftv47   & 1776         & 1794              & 233          \\
+    ftv55   & 1608         & 1691              & 252          \\
+    ry48p   & 14422        & 14608             & 313          \\
+  \end{tabular}
+}
+  \caption[Ergebnisse TSPLIB Instanzen]{Die Ergebnisse einiger asymmetrischen Instanzen der
+  TSPLIB~\cite{tsplib}}
+\end{table}
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.45\textwidth}
+      \includegraphics[width=\textwidth]{../research/scores/br17-300-24}
+      %\caption{br17-300-24}
+      \caption{br17}
+      \begin{center}
+        \vskip-10pt
+        \small 300 Generationen, 24 Prozesse
+      \end{center}
+      \label{fig:br17-300-24}
+    \end{subfigure}
+    ~
+    % add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc.
+    %(or a blank line to force the subfigure onto a new line)
+    \begin{subfigure}[b]{0.45\textwidth}
+      \includegraphics[width=\textwidth]{../research/scores/ftv33-300-12}
+      %\caption{ftv33-300-12}
+      \caption{ftv33}
+      \begin{center}
+        \vskip-10pt
+        \small 300 Generationen, 12 Prozesse
+      \end{center}
+      \label{fig:ftv33-300-12}
+    \end{subfigure}
+
+    \begin{subfigure}[b]{0.45\textwidth}
+      \includegraphics[width=\textwidth]{../research/scores/ftv44-300-12}
+      %\caption{ftv44-300-12}
+      \caption{ftv44}
+      \begin{center}
+        \vskip-10pt
+        \small 300 Generationen, 12 Prozesse
+      \end{center}
+      \label{fig:ftv44-300-12}
+    \end{subfigure}
+    ~
+    \begin{subfigure}[b]{0.45\textwidth}
+      \includegraphics[width=\textwidth]{../research/scores/ry48p-300-12}
+      \caption{ry48p}
+      \begin{center}
+      \vskip-10pt
+      \small 300 Generationen, 12 Prozesse
+      \end{center}
+      \label{fig:ry48p-300-12}
+    \end{subfigure}
+    \caption[Fitnesswerte einiger ATSP-Probleme]{\label{fig:fitness-plots} 
+    Fitnesswerte über die ersten 100 Generationen. Die Graphen sind
+    normiert, die besten, bekannten Lösungen befinden sich bei $1.0$. Schwarz:
+    Durchschnittlicher Fitness-Wert im Verlauf des EA, Rot: Bester
+    Fitness-Wert pro Generation}
+\end{figure}
+\noindent
+Nach der Implementierung unseres Programms nahmen wir Kontakt mit den
+Autoren von \cite{gapx} auf, um herauszufinden, nach wie vielen
+Generationen ihre Anwendung terminierte. Als Antwort wurde uns der
+Quellcode von GAPX samt dem dazugehörigen EA bereitgestellt. Im
+Vergleich benötigt unsere Implementierung bei allen Problemen (bis auf
+br17) mehr Generationen oder findet nicht die optimale Lösung. Der Grund
+dafür kann an der nicht durchgeführten „Immigration“ des EA liegen.
+Wenn wir diese implementiert hätten, kämen für unser Programm nur kleine
+Probleme in Frage.

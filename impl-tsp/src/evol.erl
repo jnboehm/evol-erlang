@@ -7,11 +7,11 @@
 -module(evol).
 -import(lists, [nth/2]).
 -export([init/0]).
--compile(export_all).
+-compile([export_all, {nowarn_deprecated_function, [{random,uniform,0},
+                                                    {random,uniform,1},
+                                                    {random,seed,   1},
+                                                    {erlang,now,    0}]}]).
 
-
-gapx_recomb(_ParentA, _ParentB, _EdgeList) ->
-  ok.
 
 %% @doc Creates an union graph of the two parent elements
 ug_of(ParentA, ParentB, EdgeList) ->
@@ -97,10 +97,11 @@ get_rnd_roundtrip(Vertices, N, VertexList) ->
   get_rnd_roundtrip(Vertices, N-1, [Trip|VertexList]).
 
 
-init(InitialRoundtrips, FileName) ->
-  {Opts, Graph} = parse_tsp_file:make_atsp_graph(FileName),
-  Roundtrips = get_rnd_roundtrip(digraph:vertices(Graph), InitialRoundtrips),
-  Edgelist = graph_utils:get_edge_list(Graph).
+init(_InitialRoundtrips, FileName) ->
+  {_Opts, _Graph} = parse_tsp_file:make_atsp_graph(FileName).
+  
+  %Roundtrips = get_rnd_roundtrip(digraph:vertices(Graph), InitialRoundtrips),
+  %Edgelist = graph_utils:get_edge_list(Graph).
 
   %random:seed(erlang:now()),          % from http://erlang.org/doc/man/random.html
   %run(Opts, Graph, Roundtrips, Edgelist, fun(_, _) -> true end).
@@ -119,6 +120,26 @@ run(Opts, Graph, Roundtrips, Edgelist, HiScore,CancelFun, MateFun, Gen) ->
 	    end;
     false -> Best
   end.
+
+select_parents(Roundtrips) ->
+  Par1 = nth(random:uniform(length(Roundtrips)), Roundtrips),
+  Par2 = nth(random:uniform(length(Roundtrips)), Roundtrips),
+  {Par1, Par2}.
+
+gapx(Par1, Par2, EdgeList) ->
+  Ug = ug_of(Par1, Par2, EdgeList),
+  EdgeListUg = graph_utils:get_edge_list(Ug),
+
+  % Create ghost nodes for all nodes of degree 4.
+  lists:map(fun (Vertex) -> graph_utils:create_ghost_node(Ug,
+                                                          EdgeListUg,
+                                                          Vertex) end, 
+            [ V || V <- digraph:vertices(Ug), graph_utils:has_deg_4(Ug, V) =:= true ]),
+
+  % Partitioning
+  
+  % Return offspring
+  [].
 
 
 make_offspring(Roundtrips, MateFun, Pool) ->

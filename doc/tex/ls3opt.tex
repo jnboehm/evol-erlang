@@ -1,0 +1,263 @@
+\chapter{Optimierung mit 3-opt}
+\section{Einleitung}
+Ein weiterer Teil des Projektes war die Implementierung der
+Graphen-Optimierung namens „3-opt“ oder auch „ls3opt“ genannt. Dieses lokale 
+Optimierungsverfahren wurde zum Erstellen der initialen Population des 
+evolutionären Algorithmus verwendet. Ebenfalls wurde „ls3opt“ als Teil
+des Mutationsoperators verwendet. Ziel des Verfahrens ist es durch 
+Löschen und anschließendes Neuverbinden von drei Kanten eine Verbesserung der Rundreise zu erzielen. Die Implementierung basiert auf der in
+\cite{nagata} vorgestellten, modifizierten Vorgehensweise. Das Verfahren „reduziert die Rechenzeit“\cite{gapx} durch
+eine sogenannte „Don't-look-bits“-Strategie. Basis dieses Verfahrens ist
+eine Ausarbeitung von Kanellakis und Papadimitriou\cite{ls3opt_atsp} aus dem Jahre 1979,
+die auch zur Einarbeitung benutzt wurde. 
+
+\section{Funktionsweise}
+\label{ls3opt_func}
+Sei $G = (V,E)$ eine Rundreise, erzeugt aus einem vollständigen Graphen,
+mit $\#V \geq 3$.
+Seien $v_1$, $v_3$, $v_5$ beliebige Knoten aus der Rundreise $G$, mit
+der Bedingung, dass es einen Weg von $v_1$ nach $v_3$ gibt und ebenfalls
+einen Weg von $v_3$ nach $v_5$. Dadurch ist sichergestellt, dass die
+Reihenfolge der Knoten in der Rundreise wie folgt lautet: $v_1, \dotsc, v_3, \dotsc, v_5$
+\begin{figure}[bh]
+\centering
+\resizebox{330pt}{30pt}{
+
+  \begin{tikzpicture}[%
+    >=stealth,
+    node distance=2cm,
+    on grid,
+    auto
+  ]
+  \node[state] (1){$v_1$};
+  \node[state] (2) [right of=1]{$v_2$};
+  \node[state] (3) [right of=2]{$v_3$};
+  \node[state] (4) [right of=3]{$v_4$};
+  \node[state] (5) [right of=4]{$v_5$};
+  \node[state] (6) [right of=5]{$v_6$};
+
+  \path[->] (1) edge [left=0] node  {} (2);
+  \path[->] (2) edge [left=0] node  {} (3);
+  \path[->] (3) edge [left=0] node  {} (4);
+  \path[->] (4) edge [left=0] node  {} (5);
+  \path[->] (4) edge [left=0] node  {} (5);
+  \path[->] (5) edge [left=0] node  {} (6);
+
+  \end{tikzpicture}
+}
+\caption[Ausgangssituation 3-opt]{Die Ausgangssituation des
+3-opt-Verfahren. Die Abbildung zeigt nur einen Teil einer größeren,
+  beispielhaften Rundreise.}
+\end {figure}
+
+\begin{figure}[bh]
+\label{fig:3opt_2}
+\centering
+\resizebox{330pt}{30pt}{
+
+  \begin{tikzpicture}[%
+    >=stealth,
+    node distance=2cm,
+    on grid,
+    auto
+  ]
+  \node[state] (1){$v_1$};
+  \node[state] (2) [right of=1]{$v_2$};
+  \node[state] (3) [right of=2]{$v_3$};
+  \node[state] (4) [right of=3]{$v_4$};
+  \node[state] (5) [right of=4]{$v_5$};
+  \node[state] (6) [right of=5]{$v_6$};
+
+  \path[->] (2) edge [left=0] node  {} (3);
+  \path[->] (4) edge [left=0] node  {} (5);
+
+  \end{tikzpicture}
+}
+\caption[Löschen von drei Kanten in 3-opt]{Es wurden die Kanten
+$(v_1,v_2)$,$(v_3,v_4)$ und $(v_5,v_6)$ gelöscht.}
+\end{figure}
+\noindent
+Zunächst werden die ausgehenden Kanten der Knoten $v_1$, 
+  $v_3$ und $v_5$ gelöscht. Dies kann man in
+  \hyperref[fig:3opt_2]{Abbildung 3.2} beispielhaft
+erkennen. Nachdem nun drei Kanten gelöscht wurden, müssen die Kanten wie
+folgt neu verbunden werden, „damit die Richtung der Rundreise beibehalten
+wird“\cite{nagata}, $v_1$ bleibt Eingangs- und $v_6$ bleibt
+Ausgangsknoten: 
+\begin{align*}
+  (v_1, v_4)\\
+  (v_5, v_2)\\
+  (v_3, v_6)
+\end{align*}
+Nun kann mittels
+Aufsummieren der Kantengewichte herausgefunden werden, ob die Rundreise
+verbessert wurde. Das Löschen und Neuverbinden von drei Kanten wird
+auch „3-opt-move“ genannt.
+
+
+\begin{figure}[bh]
+\centering
+\resizebox{330pt}{90pt}{
+
+  \begin{tikzpicture}[%
+    >=stealth,
+    node distance=2cm,
+    on grid,
+    auto
+  ]
+  \node[state] (1){$v_1$};
+  \node[state] (2) [right of=1]{$v_2$};
+  \node[state] (3) [right of=2]{$v_3$};
+  \node[state] (4) [right of=3]{$v_4$};
+  \node[state] (5) [right of=4]{$v_5$};
+  \node[state] (6) [right of=5]{$v_6$};
+
+  \path[->] (1) edge [bend left=40] node  {} (4);
+  \path[->] (5) edge [bend left=40] node  {} (2);
+  \path[->] (3) edge [bend right=40] node  {} (6);
+  \path[->] (2) edge [left=0] node  {} (3);
+  \path[->] (4) edge [left=0] node  {} (5);
+
+  \end{tikzpicture}
+}
+\caption[Neues Verbinden der Kanten in 3-opt]{Die neuen Kanten wurden
+eingefügt, die Richtung der Rundreise wurde beibehalten.}
+\end{figure}
+
+\section{„Don't look bits“-Strategie}
+Der „3-opt-move“, wie in  \hyperref[ls3opt_func]{Kapitel 3.2} beschrieben, beschreibt das Löschen
+und Neuverbinden innerhalb einer Rundreise, wenn drei
+Kanten gegeben sind. Die „Don't look bits“-Strategie beschäftigt sich
+mit dem Thema, wie eine Rundreise mit $n$ Knoten in ihrer Gänze durch
+sehr viele „3-opt-move“-Vorgänge verbessert werden kann.
+
+Hierzu wird zunächst für jeden Knoten $v$ aus einem Graphen
+eine Nachbarschaft gebildet. Eine Nachbarschaft $\mathcal{N}(v)$ mit der
+Bedigung $v = v_1$ nennen wir Nachbarschaft von $v$. Im initialen Fall 
+darf $v_4$ nur $10$ Knoten von $v_1$
+entfernt sein. Somit ist sichergestellt, dass „3-opt-move“-Vorgänge nur
+innerhalb einer begrenzten Nachbarschaft ausgeführt werden und somit die
+Komplexität des Verfahrens verringert wird.
+
+\begin{bem}
+  Bei der Implementierung wurde der Einfachheit halberüberprüft, 
+  ob $v_5$ $10$ Knoten von $v_1$ entfernt ist (nicht $v_4$). Dies hat
+  die Implementierung vereinfacht. 
+\end{bem}
+\begin{figure}[bh]
+  \centering
+  \begin{tikzpicture}
+  \edef\turingtapesize{0.5cm}
+\tikzstyle{tape}=[draw,minimum size=\turingtapesize]
+
+% Drawing the tape itself
+\begin{scope}[start chain=0 going right,node distance=0mm]
+    \node[on chain=0,tape,draw=none](ü)     {$\ldots$};
+    \node[on chain=0,tape]          (a)     {$v'_1$};
+    \node[on chain=0,tape]          (b)     {$v'_2$};
+    \node[on chain=0,tape]          (c)     {$v'_3$};
+    \node[on chain=0,tape, red]          (d)     {$v'_4$};
+    \node[on chain=0,tape, red]          (e)     {$v'_5$};
+    \node[on chain=0,tape, red]          (f)     {$v'_6$};
+    \node[on chain=0,tape, red]          (g)     {$v'_7$};
+    \node[on chain=0,tape, red]          (h)     {$v'_8$};
+    \node[on chain=0,tape, red]          (i)     {$v'_9$};
+    \node[on chain=0,tape, red]          (l)     {$v'_{10}$};
+    \node[on chain=0,tape, red]          (l)     {$v'_{11}$};
+    \node[on chain=0,tape, red]          (l)     {$v'_{12}$};
+    \node[on chain=0,tape, red]          (m)     {$v'_{13}$};
+    \node[on chain=0,tape, red]          (n)     {$v'_{14}$};
+    \node[on chain=0,tape]          (o)     {$v'_{15}$};
+    \node[on chain=0,tape]          (p)     {$v'_{16}$};
+    \node[on chain=0,tape,draw=none](u)     {$\ldots$};
+
+\end{scope}
+\end{tikzpicture}
+  \caption[Beispiel einer Nachbarschaft $\mathcal{N}(v)$]{Beispiel
+  einer Nachbarschaft. Rot: Nachbarschaft von $v'_4$, Größe der
+  Nachbarschaft: $10$.}
+\end{figure}
+\noindent
+Es wird nun versucht innerhalb aller Nachbarschaften der Rundreise 3-Tupel zu finden, (die
+Knoten für den „3-opt-move“ $v_1$, $v_3$ und $v_5$) welche die Rundreise
+verbessern.
+\noindent
+Falls eine Verbesserung gefunden wurde, muss für die nachfolgenden
+3-Tupel die neue Rundreise benutzt werden. Wenn die Rundreise jedoch
+nicht verbessert wurde, speichern wir uns die drei Werte aus dem 3-Tupel
+in einer Liste, der sogenannten „Don't look bit“-Liste. Diese Werte dürfen in den
+nachfolgenden Nachbarschaften nicht mehr verwendet werden. Der
+Algorithmus terminiert, wenn alle Knoten aus der Rundreise in der
+„Don't-look-bit“-Liste vorhanden sind und somit keine lokalen
+Optimierungen mehr vorgenommen werden können.
+\newpage
+
+\begin{algorithm}
+  \caption{„3-opt-moves“ für alle Nachbarschaften von Rundreise $G$}\label{alg:ls3opt_run}
+\begin{algorithmic}[1]
+  \Procedure{$ls3opt\_run$}{$G, NSize$} \Comment{NSize = Nachbarschaftsgröße}
+    \State $V \gets vertices(G)$
+    \State $DontLook \gets list()$
+    \Foreach{$v \in V$}
+      \State $N \gets get\_neighborhood(v, DontLook, NSize)$\Comment{siehe Bem. 8}
+      \State $C \gets valid\_3\_tuple(N, DontLook)$\Comment{siehe Bem. 9}
+      \Foreach{$c \in C$}
+        \State $v_1 \gets c[0]$
+        \State $v_3 \gets c[1]$
+        \State $v_5 \gets c[2]$
+        \State $G' \gets optmove3(G, v_1,v_3,v_5)$ \Comment{siehe Kap. \hyperref[ls3opt_func]{3.2}}
+        \If {$sum\_weights(G') < sum\_weights(G)$}
+          \State $G \gets G'$ \Comment{Rundreise wurde verbessert}
+        \Else
+          \State $DontLook \gets append(DontLook, v_1)$ 
+          \State $DontLook \gets append(DontLook, v_3)$
+          \State $DontLook \gets append(DontLook, v_5)$
+        \EndIf
+      \EndForeach
+      \If{$V = DontLook$}
+        \State \textbf{return} $G$ \Comment{Optimierte Rundreise}
+      \EndIf
+    \EndForeach
+    \State \textbf{return} $G$
+  \EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\begin{bem}
+  Die Funktion $get\_neighborhood(v, DontLook, NSize)$ gibt für den
+  Knoten $v$ und der Nachbarschaftsgröße $NSize$ die entsprechende
+  Nachbarschaft zurück. Die Nachbarschaft, die zurückgegeben wird, darf
+  dabei keine Werte enthalten, die in $DontLook$ vorhanden sind.
+\end{bem}
+
+\begin{bem}
+Die Funktion $valid\_3\_tuple(N, DontLook)$ gibt anhand der
+  Nachbarschaft $N$ alle 3-Tupel zurück, die für „3-opt-move“-Vorgänge
+  in Frage kommen. Die Tupel dürfen keine Werte enthalten, die in
+  $DontLook$ vorhanden sind.
+\end{bem}
+\noindent
+In Zeile 15,16 und 17 des \hyperref[alg:ls3opt_run]{Algorithmus 5} wurden die drei Knoten, die keine
+Verbesserung ergeben haben, in die „Don't-look-bit“-Liste aufgenommen.
+Dadurch wird mit diesen Knoten nicht mehr versucht Verbesserungen in der
+Rundreise zu finden. 
+\section{Laufzeitverhalten}
+Im Rahmen des Projektes wurde zusätzlich noch das Laufzeitverhalten des
+in Erlang implementierten Verfahrens untersucht. 
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\textwidth]{../research/ls3opt}
+  \caption[Laufzeit von ls3opt im Verhältnis zu der Anzahl der
+  Knoten]{\label{fig:ls3optcomplxty} Die Laufzeit von ls3opt im
+    Verhältnis zu der Anzahl der Knoten in dem Graphen (der Anzahl der
+    Städte in einer Rundreise).   In unserer Implementierung beträgt $a$ ungefähr
+    $6,\kern-1pt 3113 \times 10^{-4}$. Die Ausgleichsfunktion wurde mit
+    dem Least-Squares-Verfahren ermittelt.} % fix kerning after comma in math mode
+  %% erwähnen, wie wir auf den wert gekommen sind? Least squares?
+\end{figure}
+\noindent
+Die Laufzeit der naiven Implementierung ist kubisch, wie bei
+dessen ersten Einführung in \cite{lin1965computer} beschrieben
+wurde. Die Laufzeit wurde von $\mathcal{O}(n^3)$ auf
+$\mathcal{O}(n^{2.2})$ verbessert, da die „Don't-Look-bits“-Strategie
+verwendet wurde.

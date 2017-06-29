@@ -1,0 +1,247 @@
+{O, G} = evol:init().
+EdgeList = graph_utils:get_edge_list(G).
+Rnds = evol:get_rnd_roundtrip(digraph:vertices(G), 2).
+Ug = graph_utils:ug_of(hd(Rnds), hd(tl(Rnds)), EdgeList).
+EdgeListUg = graph_utils:get_edge_list(Ug).
+lists:map(fun (Vertex) -> graph_utils:create_ghost_node(Ug, EdgeListUg, Vertex) end, [ V || V <- digraph:vertices(Ug), graph_utils:has_deg_4(Ug, V) =:= true ]).
+G1 = graph_utils:list_to_graph(hd(Rnds), EdgeList).
+G2 = graph_utils:list_to_graph(hd(tl(Rnds)), EdgeList).
+G1Merged = graph_utils:merge_graphs(G1, G2).
+EdgeListG1Merged = graph_utils:get_edge_list(G1Merged).
+lists:map(fun (Vertex) -> graph_utils:create_ghost_node(G1Merged, EdgeListG1Merged, Vertex) end, [ V || V <- digraph:vertices(G1Merged), graph_utils:has_deg_4(G1Merged, V) =:= true ]).
+
+{O, G} = evol:init().
+EdgeList = graph_utils:get_edge_list(G).
+Rnds = evol:get_rnd_roundtrip(digraph:vertices(G), 2).
+Ug = graph_utils:ug_of([1,3,4,2,5], [1,2,5,3,4], EdgeList).
+EdgeListUg = graph_utils:get_edge_list(Ug).
+lists:map(fun (Vertex) -> graph_utils:create_ghost_node(Ug, EdgeListUg, Vertex) end, [ V || V <- digraph:vertices(Ug), graph_utils:has_deg_4(Ug, V) =:= true ]).
+G1 = graph_utils:list_to_graph([1,3,4,2,5], EdgeList).
+G2 = graph_utils:list_to_graph([1,2,5,3,4], EdgeList).
+G1G2Merged = graph_utils:merge_graphs(G1, G2).
+EdgeListG1G2Merged = graph_utils:get_edge_list(G1G2Merged).
+
+
+{O, G} = evol:init().
+EdgeList = graph_utils:get_edge_list(G).
+Gu = graph_utils:merge_graphs(graph_utils:list_to_graph([1,3,4,2,5], EdgeList), graph_utils:list_to_graph([1,2,5,3,4], EdgeList)).
+GuDash = graph_utils:merge_graphs(graph_utils:list_to_graph([1,3,4,2,5], EdgeList), graph_utils:list_to_graph([1,2,5,3,4], EdgeList)).
+EdgeListGuDash = graph_utils:get_edge_list(GuDash).
+lists:map(fun (Vertex) -> graph_utils:create_ghost_node(GuDash, EdgeListGuDash, Vertex) end, [ V || V <- digraph:vertices(GuDash), graph_utils:has_deg_4(GuDash, V) =:= true ]).
+graph_utils:get_common_edges(graph_utils:get_edge_list(GuDash)).
+graph_utils:display_graph(GuDash).
+
+{O, G} = evol:init().
+EdgeList = graph_utils:get_edge_list(G).
+Rnds = evol:get_rnd_roundtrip(digraph:vertices(G), 2).
+Gu = graph_utils:merge_graphs(graph_utils:list_to_graph(hd(Rnds),EdgeList), graph_utils:list_to_graph(hd(tl(Rnds)), EdgeList)).
+GuDash = graph_utils:merge_graphs(graph_utils:list_to_graph(hd(Rnds), EdgeList), graph_utils:list_to_graph(hd(tl(Rnds)), EdgeList)).
+EdgeListGuDash = graph_utils:get_edge_list(GuDash).
+lists:map(fun (Vertex) -> graph_utils:create_ghost_node(GuDash, EdgeListGuDash, Vertex) end, [ V || V <- digraph:vertices(GuDash), graph_utils:has_deg_4(GuDash, V) =:= true ]).
+graph_utils:get_common_edges(graph_utils:get_edge_list(GuDash)).
+
+{O, G} = evol:init().
+EdgeList = graph_utils:get_edge_list(G).
+GuDash = graph_utils:merge_graphs(graph_utils:list_to_graph([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15], EdgeList), graph_utils:list_to_graph([1,2,4,3,6,5,7,8,15,9,13,10,12,11,14], EdgeList)).
+EdgeListGuDash = graph_utils:get_edge_list(GuDash).
+lists:map(fun (Vertex) -> graph_utils:create_ghost_node(GuDash, EdgeListGuDash, Vertex) end, [ V || V <- digraph:vertices(GuDash), graph_utils:has_deg_4(GuDash, V) =:= true ]).
+graph_utils:get_common_edges(graph_utils:get_edge_list(GuDash)).
+graph_utils:display_graph(GuDash).
+
+{O, G} = evol:init().
+EdgeList = graph_utils:get_edge_list(G).
+BitList = [ {V, false} || V <- digraph:vertices(G) ].
+G1 = graph_utils:list_to_graph([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17], EdgeList).
+optmove3:optmove3_run(G1, EdgeList, 5).
+
+
+Neighborhood = optmove3::optmove3_get_subneighborhood(G1, [15], 5).
+graph_utils:optmove3_next_triple(BitList, Neighborhood).
+graph_utils:optmove3_get_subneighborhood(G1, hd([ X || {X,Y} <- BitList, Y =:= false]), [], 5).
+
+G2 = graph_utils:list_to_graph([1,2,3,4,5,6], EdgeList).
+graph_utils:optmove3_get_subneighborhood(G1, 3).
+
+
+
+---
+Random Rundreise
+---
+
+{O, G} = evol:init().
+EdgeList = graph_utils:get_edge_list(G).
+Rnds = evol:get_rnd_roundtrip(digraph:vertices(G), 2).
+G1 = graph_utils:list_to_graph(hd(Rnds), EdgeList).
+G2 = graph_utils:list_to_graph(hd(tl(Rnds)), EdgeList).
+optmove3:optmove3_run(G1, EdgeList, 10).
+optmove3:optmove3_run(G2, EdgeList, 10).
+GM = graph_utils:get_merged_graph_of(G1, G2).
+GhostNodes = graph_utils:create_ghost_node_run(GM).
+CommonEdges = graph_utils:get_common_edges(graph_utils:get_edge_list(GM)).
+graph_utils:del_common_edges(GM).
+graph_utils:is_feasable_partition(GM, CommonEdges, G1,G2, GhostNodes).
+
+---
+Beispiel aus PDF
+---
+{O, G} = evol:init().
+EdgeList = graph_utils:get_edge_list(G).
+G1 = graph_utils:list_to_graph([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15], EdgeList).
+G2 = graph_utils:list_to_graph([1,2,4,3,6,5,7,8,15,9,13,10,12,11,14], EdgeList).
+GM  = graph_utils:get_merged_graph_of(G1, G2).
+GhostNodes = graph_utils:create_ghost_node_run(GM).
+CommonEdges = graph_utils:get_common_edges(graph_utils:get_edge_list(GM)).
+graph_utils:del_common_edges(GM).
+Comps = digraph_utils:components(GM).
+Comp1 = hd(tl(tl(Comps))).
+Comp1Graph = digraph_utils:subgraph(GM, Comp1).
+Comp1G1 = digraph_utils:subgraph(G1, Comp1).
+Comp1G2 = digraph_utils:subgraph(G2, Comp1).
+EntryComp1 = graph_utils:get_entry_points(Comp1Graph, CommonEdges).
+ExitComp1 = graph_utils:get_exit_points(Comp1Graph, CommonEdges).
+A = graph_utils:subgraph_comp(G1, GhostNodes, EntryComp1, graph_utils:get_edge_list(GM), Comp1).
+B = graph_utils:subgraph_comp(G2, GhostNodes, EntryComp1, graph_utils:get_edge_list(GM), Comp1).
+
+
+EdgeListGM = graph_utils:get_edge_list(GM).
+EdgeListG1 = graph_utils:get_edge_list(G1).
+EdgeListG2 = graph_utils:get_edge_list(G2).
+GhostIn = [ {V1,V2} || {_,V1,V2,_} <- EdgeListGM, lists:member(V1, EntryComp1) and lists:member(V1, GhostNodes) and lists:member(V2, Comp1) ].
+X1 = [ {V1,V2} || {V1,V2} <- GhostIn, lists:member({V1,V2}, [ {X1 * (-1),X2} || {_,X1,X2,_} <- EdgeListG1]) ].
+X2 = [ {V1,V2} || {V1,V2} <- GhostIn, lists:member({V1,V2}, [ {X1 * (-1),X2} || {_,X1,X2,_} <- EdgeListG2]) ].
+
+graph_utils:display_graph(GM).
+
+
+{O, G} = evol:init().
+EdgeList = graph_utils:get_edge_list(G).
+G1 = graph_utils:list_to_graph([1,6,9,17,15,2,3,12,7,4,16,11,8,14,13,10,5], G).
+G2 = graph_utils:list_to_graph([1,7,13,3,17,8,14,16,5,4,15,6,2,11,10,9,12], G).
+GM = graph_utils:get_merged_graph_of(G1, G2).
+GhostNodes = graph_utils:create_ghost_node_run(GM).
+CommonEdges = graph_utils:get_common_edges(GM).
+graph_utils:del_common_edges(GM).
+graph_utils:feasable_partition(GM, CommonEdges, G1,G2, GhostNodes).
+
+
+{O, G} = evol:init().
+EdgeList = graph_utils:get_edge_list(G).
+G1 = graph_utils:list_to_graph([1,6,9,17,15,2,3,12,7,4,16,11,8,14,13,10,5], EdgeList).
+F = fun(X,Y) -> graph_utils:get_weight(EdgeList, X,Y) end.
+{Cost, Path} = a_star:run(G1, 1, 11, F).
+
+{O, G} = evol:init().
+G1 = graph_utils:list_to_graph([1,6,9,17,15,2,3,12,7,4,16,11,8,14,13,10,5], G).
+G2 = graph_utils:list_to_graph([1,7,13,3,17,8,14,16,5,4,15,6,2,11,10,9,12], G).
+GM = graph_utils:get_merged_graph_of(G1, G2).
+GhostNodes = graph_utils:create_ghost_node_run(GM).
+CommonEdges = graph_utils:get_common_edges(GM).
+graph_utils:del_common_edges(GM).
+graph_utils:feasible_partition(GM, CommonEdges, G1,G2, GhostNodes).
+
+{O, G} = evol:init().
+G1 = graph_utils:list_to_graph([1,6,9,17,15,2,3,12,7,4,16,11,8,14,13,10,5], G).
+G2 = graph_utils:list_to_graph([1,7,13,3,17,8,14,16,5,4,15,6,2,11,10,9,12], G).
+GU = graph_utils:union_graph(G1,G2).
+
+
+{O, G} = evol:init().
+G1 = graph_utils:list_to_graph([1,2,3,5,4], G).
+G2 = graph_utils:list_to_graph([1,3,5,4,2], G).
+GU = digraph_utils:subgraph(G1, digraph:vertices(G1)).
+Ins = [ {V1,V2,W} || {_,V1,V2,W} <- get_edge_list(G2), get_weight(GU, V1,V2) =:= undef ].
+
+GU = graph_utils:union_graph(G1,G2).
+
+
+
+======
+Nach Edge List umstellung
+======
+
+Aus Random:
+{O, G} = evol:init().
+G1 = graph_utils:list_to_graph([1,6,9,17,15,2,3,12,7,4,16,11,8,14,13,10,5], G).
+G2 = graph_utils:list_to_graph([1,7,13,3,17,8,14,16,5,4,15,6,2,11,10,9,12], G).
+GM = graph_utils:get_merged_graph_of(G1, G2).
+GhostNodes = graph_utils:create_ghost_node_run(GM).
+CommonEdges = graph_utils:get_common_edges(GM).
+graph_utils:del_common_edges(GM).
+graph_utils:feasible_partition(GM, CommonEdges, G1,G2, GhostNodes).
+
+Aus PDF:
+{O, G} = evol:init().
+G1 = graph_utils:list_to_graph([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15], EdgeList).
+G2 = graph_utils:list_to_graph([1,2,4,3,6,5,7,8,15,9,13,10,12,11,14], EdgeList).
+GM = graph_utils:get_merged_graph_of(G1, G2).
+GhostNodes = graph_utils:create_ghost_node_run(GM).
+CommonEdges = graph_utils:get_common_edges(GM).
+graph_utils:del_common_edges(GM).
+graph_utils:feasible_partition(GM, CommonEdges, G1,G2, GhostNodes).
+
+
+======
+evol_gapx run stuff
+======
+G = evol_gapx:run(20, '../data/br17.atsp').
+graph_utils:get_fitness_graph(G).
+[] == [V || V <- digraph:vertices(G), digraph:out_degree(G, V) =/= 1] ++ [V || V <- digraph:vertices(G),  digraph:in_degree(G, V) =/= 1].
+graph_utils:display_graph(B1).
+
+{O, G} = evol:init().
+EL = graph_utils:get_edge_list(G).
+graph_utils:get_weight_el(EL, 6,6).
+graph_utils:init_nif().
+graph_utils:get_weight_el(EL, 6,6).
+
+eprof:start().
+eprof:start_profiling([self()]).
+evol_gapx:run_test().
+eprof:stop_profiling().
+eprof:analyze(total).
+
+graph_utils:init_nif().
+
+evol_gapx:init('../data/br17.atsp', 50, 10, 5, 10, 150).
+
+evol_gapx:init('../data/ftv33.atsp', 50, 10, 5, 10, 2).
+
+evol_gapx:init('../data/ftv33.atsp',100,15,24,10,150).
+=======
+evol_gapx:run().
+
+# eine Edge fehlt
+{O, G} = evol:init(10, '../data/ftv33.atsp').
+G1 = graph_utils:list_to_graph([1,2,34,30,20,14,3,4,25,24,32,19,18,12,11,33,13,28,29,26,17,31,27,23,21,22,9,6,7,5,8,10,15,16], G).
+G2 = graph_utils:list_to_graph([1,3,31,29,30,26,25,24,20,23,27,28,34,17,13,4,7,10,9,8,5,6,33,14,15,16,2,19,11,12,32,22,21,18], G).
+GM = graph_utils:get_merged_graph_of(G1, G2).
+GhostNodes = graph_utils:create_ghost_node_run(GM).
+CommonEdges = graph_utils:get_common_edges(GM).
+graph_utils:del_common_edges(GM).
+M = graph_utils:feasible_partition(GM, CommonEdges, G1,G2, GhostNodes).
+
+
+
+# mit zwei Komponenten
+{O, G} = evol:init(10, '../data/ftv33.atsp').
+G1 = graph_utils:list_to_graph([1,25,24,20,19,12,32,21,22,28,29,4,2,31,9,33,5,3,13,15,26,34,30,27,23,18,11,10,8,6,7,17,16,14], G).
+G2 = graph_utils:list_to_graph([1,24,22,32,21,27,28,31,34,3,5,7,6,10,33,8,9,2,4,26,29,30,23,25,20,19,18,12,11,13,16,17,15,14], G).
+GM = graph_utils:get_merged_graph_of(G1, G2).
+GhostNodes = graph_utils:create_ghost_node_run(GM).
+CommonEdges = graph_utils:get_common_edges(GM).
+graph_utils:del_common_edges(GM).
+M = graph_utils:feasible_partition(GM, CommonEdges, G1,G2, GhostNodes).
+F = fun({C,CA,CB,Simpl}) -> evol_gapx:get_path_for_simple_graph(G,C,CA,CB,Simpl) end.
+BL = lists:map(F, M).
+B = evol_gapx:foldl1(fun graph_utils:merge_graphs/2, BL).
+lists:map(fun({_, V1, V2, W}) -> case graph_utils:get_weight(B, V1, V2) of undef -> digraph:add_edge(B, V1, V2, W); W -> ok end end, CommonEdges).
+lists:map(fun(V) -> evol_gapx:reverse_ghost_node(B, V) end, [V || V <- digraph:vertices(B), V > 0]).
+
+optmove3:init_nif().
+[evol_gapx_central:init(A, [], B, P, 10) || A <- [string:concat(string:concat("../data/", Name), ".atsp") || Name <- ["ftv33","ftv35","ftv38","ftv44","ftv47","ftv55","ry48p"]], P <- [1,3,6,12,24,48], B <- [10, 50, 100, 300]].
+
+optmove3:init_nif().
+Names = ["ftv33","ftv35","ftv38","ftv47"]. % ,"ftv55","ftv44","ry48p"].
+Procs = [6,12,24].
+Populations = [300].
+[evol_gapx_central:init(A, [], B, P, 10) || A <- [string:concat(string:concat("../data/", Name), ".atsp") || Name <- Names], P <- Procs, B <- Populations].

@@ -1,0 +1,739 @@
+\chapter{Generalized Asymmetric Partition Crossover}
+
+\label{gapx_einleitung}
+\section{Einleitung}
+Der „Generalized Asymmetric Partition Crossover“ (GAPX) ist ein
+Rekombinationsoperator, der als Teil eines evolutionären Algorithmus
+verwendet werden kann~\cite{gapx}. Aufgabe einer Rekombination (auch
+Crossover genannt) beim ATSP ist es aus
+zwei gegebenen Rundreisen $G_1$, $G_2$ ein Kind (auch Offspring genannt)
+$G_o$ zu erzeugen.
+
+
+\begin{algorithm}
+\caption{Crossover in einem EA}\label{alg:crossover_ea}
+\begin{algorithmic}[1]
+\Procedure{Crossover}{$G_1,G_2$}\Comment{}
+\State $G_o\gets gapx(G_1,G_2)$\Comment{In 2.2 beschrieben}
+\State \textbf{return} $G_o$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\noindent
+GAPX versucht durch ein bestimmtes Verfahren die beiden Rundreisen zu
+partitionieren und anhand der kürzesten Wege innerhalb der Komponenten
+das neue Kind $G_o$ zu erzeugen. Die
+Funktionsweise, die im nachfolgenden Kapitel beschrieben wird, basiert
+auf~\cite{gapx}.
+
+
+\section{Funktionsweise}
+Seien $G_1$ und $G_2$ beliebige Rundreisen, beide erzeugt aus einem
+vollständigen Graphen $G$. Zunächst werden $G_1$ und $G_2$ in einem
+gemeinsamen Graphen $G_u$ zusammengeführt.
+\newpage
+%% Bild mergen von G1, G2
+\begin{figure}[hb]
+\centering
+\renewcommand{\arraystretch}{3.5}
+\begin{tabular}{ c c c }
+$G_1$ & $G_2$ & $G_u$ \\
+\resizebox{90pt}{90pt}{
+
+  \begin{tikzpicture}[%
+    >=stealth,
+    node distance=2cm,
+    on grid,
+    auto
+  ]
+  \node[state] (1){1};
+  \node[state] (3) [above right of=1]{3};
+  \node[state] (2) [below right of=1]{2};
+  \node[state] (4) [below right of=3]{4};
+  
+  \path[->] (1) edge [blue, bend left=0] node  {} (3);
+  \path[->] (3) edge [blue, bend left=0] node  {} (2);
+  \path[->] (2) edge [blue, bend left=0] node  {} (4);
+  \path[->] (4) edge [blue, bend left=0] node  {} (1);
+  
+  \end{tikzpicture}
+} 
+
+& 
+
+\resizebox{90pt}{90pt}{
+
+  \begin{tikzpicture}[%
+    >=stealth,
+    node distance=2cm,
+    on grid,
+    auto
+  ]
+  \node[state] (1){1};
+  \node[state] (3) [above right of=1]{3};
+  \node[state] (2) [below right of=1]{2};
+  \node[state] (4) [below right of=3]{4};
+
+  \path[->] (1) edge [red, dashed, left=0] node  {} (2);
+  \path[->] (2) edge [red, dashed, left=0] node  {} (3);
+  \path[->] (3) edge [red, dashed, left=0] node  {} (4);
+  \path[->] (4) edge [red, dashed, left=0] node  {} (1);
+
+  \end{tikzpicture}
+} 
+
+&
+
+\resizebox{90pt}{90pt}{
+
+  \begin{tikzpicture}[%
+    >=stealth,
+    node distance=2cm,
+    on grid,
+    auto
+  ]
+  \node[state] (1){1};
+  \node[state] (3) [above right of=1]{3};
+  \node[state] (2) [below right of=1]{2};
+  \node[state] (4) [below right of=3]{4};
+
+  \path[->] (1) edge [blue, bend left=0] node  {} (3);
+  \path[->] (3) edge [blue, bend left=0] node  {} (2);
+  \path[->] (2) edge [blue, bend left=0] node  {} (4);
+  \path[->] (4) edge [blue, bend left=0] node  {} (1);
+
+  \path[->] (1) edge [red, dashed, left=0] node  {} (2);
+  \path[->] ([xshift=0.4em] 2.north) edge 
+      [red, dashed, left=0] node  {} ([xshift=0.4em] 3.south);
+  \path[->] (3) edge [red, dashed, left=0] node  {} (4);
+  \path[->] ([yshift=0.4em] 4.west) edge 
+      [red, dashed, left=0] node  {} ([yshift=0.4em] 1.east);
+
+  \end{tikzpicture}
+} 
+\end{tabular}
+\renewcommand{\arraystretch}{1}
+\caption[Beispiel einer Zusammenlegung von Graphen]{
+Beispiel für das Zusammenführen der Graphen $G_1$ und $G_2$ zu
+dem neuen Graphen $G_u$ anhand zwei Rundreisen mit je vier Knoten.
+}
+\end{figure}
+%%\begin{bem}
+%%  Streng genommen ist $G_u$ ein Multigraph, da doppelte Kanten zwischen
+%%  Knoten existieren können, jedoch hat dies die Implementierung nicht
+%%  eingeschränkt, da ein „normaler Graph“ eine Spezielform eines
+%%  Multigraphen ist.
+%%\end{bem}
+\noindent
+Nachfolgend betrachten wir zur Erklärung zwei Graphen $G_1$ und $G_2$ mit elf Knoten. 
+Nach der Zusammenführung der beiden Graphen in $G_u$ muss für jeden 
+Knoten $v$ aus $G_u$, der \textit{vier} Nachbarn hat, ein
+sogenannter Ghost-Knoten $v'$ nach $v$ eingefügt werden. Durch das
+Einführen der zusätzlichen Knoten ist es möglich mehr Komponenten im
+Graphen zu finden. Zusätzlich muss eine
+Kante mit dem Gewicht $0$ zwischen $v$ und $v'$ eingefügt werden. 
+Der Graph $G_u$ mit eingefügten Ghost-Knoten an den entsprechenden Stellen kennzeichnen wir als $G_u'$.
+\begin{figure}[hb]
+\label{fig:ghostnodes}
+\centering
+\begin{tabular}{ c c }
+\resizebox{120pt}{170pt}{
+\begin{tikzpicture}[%
+>=stealth,
+node distance=1.7cm,
+on grid
+]
+\node[state] (1)              {1};
+
+
+\node[state] (3) [above right of=1]             {3};
+\node[state] (2) [below right of=1]            {2};
+\node[state] (4) [right of=3]             {4};
+\node[state] (5) [right of=2]             {5};
+
+\node[state] (6) [below right of=5] {6};
+
+\node[state] (7) [below left of=6] {7};
+\node[state] (10) [left of=7] {10};
+
+\node[state] (11) [below left of=10] {11};
+
+\node[state] (9) [below right of=11] {9};
+\node[state] (8) [right of=9] {8};
+
+% solid: parent 1
+\path[->] (1) edge [blue, bend left=0] node  {} (3);
+\path[->] (3) edge [blue, bend left=0] node  {} (2);
+\path[->] (2) edge [blue, bend left=0] node  {} (5);
+\path[->] (5) edge [blue, bend left=0] node  {} (4);
+\path[->] (4) edge [blue, bend left=0] node  {} (6);
+\path[->] (6) edge [blue, bend left=0] node  {} (8);
+\path[->] (8) edge [blue, bend left=0] node  {} (7);
+\path[->] (7) edge [blue, bend left=0] node  {} (10);
+\path[->] (10) edge [blue, bend left=0] node  {} (9);
+\path[->] (9) edge [blue, bend left=0] node  {} (11);
+\path[->] (11) edge [blue, bend left=0] node  {} (1);
+
+% dashed: parent 2
+\path[->] (1) edge [bend left=0, dashed, red] node {} (2);
+\path[->] ([xshift=0.7ex] 2.north) edge [red, dashed] node {}
+         ([xshift=0.7ex] 3.south);
+\path[->] (3) edge [red, dashed] node {}
+         (4);
+\path[->] ([xshift=0.7ex] 4.south) edge [red, dashed] node {}
+         ([xshift=0.7ex] 5.north);
+\path[->] (5) edge [red, dashed] node {}
+         (6);
+\path[->] (6) edge [red, dashed] node {}
+         (7);
+\path[->] ([xshift=0.7ex] 7.south) edge [red, dashed] node {}
+         ([xshift=0.7ex] 8.north);
+\path[->] (8) edge [red, dashed] node {}
+         (9);
+\path[->] ([xshift=0.7ex] 9.north) edge [red, dashed] node {}
+         ([xshift=0.7ex] 10.south);
+\path[->] (10) edge [red, dashed] node {}
+         (11);
+\path[->] ([xshift=0.7ex] 11.north) edge [red, dashed] node {}
+         ([xshift=0.7ex] 1.south);
+\end{tikzpicture}
+}
+
+&
+\resizebox{120pt}{170pt}{
+\begin{tikzpicture}[%
+>=stealth,
+node distance=1.9cm,
+on grid,
+auto
+]
+\node[state] (1){1};
+\node[state] (3) [above right of=1]{3};
+\node[state] (2) [below right of=1]{2};
+\node[state] (4) [right of=3]{4};
+\node[state] (5) [right of=2]{5};
+\node[state] (6) [above right of=5] {6};
+\node[state] (7) [below of=5] {7};
+\node[state] (6') [below right of=7] {6'};
+\node[state] (10) [left of=7] {10};
+\node[state] (11) [below left of=10] {11};
+\node[state] (9) [below right of=11] {9};
+\node[state] (8) [right of=9] {8};
+
+% solid: parent 1
+\path[->] (1) edge [blue, bend left=0] node  {} (3);
+\path[->] (3) edge [blue, bend left=0] node  {} (2);
+\path[->] (2) edge [blue, bend left=0] node  {} (5);
+\path[->] (5) edge [blue, bend left=0] node  {} (4);
+\path[->] (6') edge [blue, bend left=0] node  {} (8);
+\path[->] (4) edge [blue, bend left=0] node  {} (6);
+\path[->] (8) edge [blue, bend left=0] node  {} (7);
+\path[->] (7) edge [blue, bend left=0] node  {} (10);
+\path[->] (10) edge [blue, bend left=0] node  {} (9);
+\path[->] (9) edge [blue, bend left=0] node  {} (11);
+\path[->] (11) edge [blue, bend left=0] node  {} (1);
+\path[->] (6) edge [blue, bend left=0] node  {} (6');
+
+% dashed: parent 2
+\path[->] (1) edge [bend left=0, dashed, red] node {} (2);
+\path[->] ([xshift=0.7ex] 2.north) edge [red, dashed] node {}
+         ([xshift=0.7ex] 3.south);
+\path[->] (3) edge [red, dashed] node {}
+         (4);
+\path[->] ([xshift=0.7ex] 4.south) edge [red, dashed] node {}
+         ([xshift=0.7ex] 5.north);
+\path[->] (5) edge [red, dashed] node {}
+         (6);
+\path[->] (6') edge [red, dashed] node {}
+         (7);
+\path[->] ([xshift=0.7ex] 7.south) edge [red, dashed] node {}
+         ([xshift=0.7ex] 8.north);
+\path[->] (8) edge [red, dashed] node {}
+         (9);
+\path[->] ([xshift=0.7ex] 9.north) edge [red, dashed] node {}
+         ([xshift=0.7ex] 10.south);
+\path[->] (10) edge [red, dashed] node {}
+         (11);
+\path[->] ([xshift=0.7ex] 11.north) edge [red, dashed] node {}
+         ([xshift=0.7ex] 1.south);
+  \path[->] ([xshift=0.7ex] 6.south) edge [red, dashed] node {}
+         ([xshift=0.7ex] 6'.north);
+
+\end{tikzpicture}
+}
+\end{tabular}
+\caption[Beispiel Einfügung von Ghost-Knoten]{Links: Ein Graph $G_u$ vor der Einführung von
+Ghostknoten. Rechts: Der Graph $G_u'$ mit dem eingefügten Ghostknoten $6'$.
+Blaue Linie: $G_1$, erstes Elternteil; rote, gestrichelte Linie: $G_2$,
+zweites Elternteil}
+\end{figure}
+\newpage
+\noindent
+Nachdem alle Ghost-Knoten eingefügt wurden, müssen genau jene Kanten entfernt
+werden, die in $G_1$ \textbf{und} $G_2$ vorkommen, um eine
+Partitionierung des Graphen vorzunehmen. Zusätzlich
+müssen die Kanten entfernt werden, die bei der Generierung der
+Ghost-Knoten neu eingefügt wurden. In \hyperref[fig:ghostnodes]{Abbildung 2.2} wäre dies die Kante
+zwischen $6$ und $6'$. Die Menge dieser entfernten Kanten nennen wir
+nachfolgend $E_c$ und werden auch „Common-Edges“ genannt. Die Menge
+$E_c$
+beinhaltet also genau die Kanten, die in beiden Elternteilen vorkommen. Die
+Menge $E_c$ wird nun in die Kantenmenge von $G_o$ (dem Offspring)
+eingefügt.
+\begin{figure}[hb]
+  \label{fig:offspring_1}
+\centering
+\resizebox{100pt}{140pt}{
+\begin{tikzpicture}[%
+>=stealth,
+node distance=1.9cm,
+on grid,
+auto
+]
+\node[state] (1){1};
+\node[state] (3) [above right of=1]{3};
+\node[state] (2) [below right of=1]{2};
+\node[state] (4) [right of=3]{4};
+\node[state] (5) [right of=2]{5};
+\node[state] (6) [above right of=5] {6};
+\node[state] (7) [below of=5] {7};
+\node[state] (6') [below right of=7] {6'};
+\node[state] (10) [left of=7] {10};
+\node[state] (11) [below left of=10] {11};
+\node[state] (9) [below right of=11] {9};
+\node[state] (8) [right of=9] {8};
+
+% solid: parent 1
+\path[->] (11) edge [bend left=0] node  {} (1);
+\path[->] (6) edge [bend left=0] node  {} (6');
+
+\end{tikzpicture}
+}
+  \caption[Kind $G_o$ nach Einfügen der gemeinsamen Kantenmenge $E_c$]
+  {Das Kind $G_o$ im momentanen Zustand. In
+  \hyperref[fig:ghostnodes]{Abbildung 2.2} sind Ghost-Knoten eingefügt
+  worden. $E_c = \{(6,6'),(1,11)\}$. Die Kante $(6,6')$ ist durch das
+  Einfügen eines Ghost-Knoten entstanden. Die Kante $(1,11)$ ist in beiden
+  Rundreisen $G_1$ und $G_2$ vorhanden. $E_c$ wurde in $G_o$ eingefügt.}
+\end{figure}
+\noindent
+Durch das Entfernen von $E_c$ in $G_u'$ haben wir eine Partitionierung
+des Graphen erreicht. Der Graph $G_u'$ wurde in seine Komponenten
+zerlegt. Es sollen nun „gute“ Wege durch die Komponenten gefunden
+werden.
+\begin{figure}[H]
+  \label{fig:components}
+\centering
+  \begin{tabular}{c c}
+\resizebox{120pt}{170pt}{
+\begin{tikzpicture}[%
+>=stealth,
+node distance=1.9cm,
+on grid,
+auto
+]
+\node[state] (1){1};
+\node[state] (3) [above right of=1]{3};
+\node[state] (2) [below right of=1]{2};
+\node[state] (4) [right of=3]{4};
+\node[state] (5) [right of=2]{5};
+\node[state] (6) [above right of=5] {6};
+\node[state] (7) [below of=5] {7};
+\node[state] (6') [below right of=7] {6'};
+\node[state] (10) [left of=7] {10};
+\node[state] (11) [below left of=10] {11};
+\node[state] (9) [below right of=11] {9};
+\node[state] (8) [right of=9] {8};
+
+% solid: parent 1
+\path[->] (1) edge [blue, bend left=0] node  {} (3);
+\path[->] (3) edge [blue, bend left=0] node  {} (2);
+\path[->] (2) edge [blue, bend left=0] node  {} (5);
+\path[->] (5) edge [blue, bend left=0] node  {} (4);
+\path[->] (6') edge [blue, bend left=0] node  {} (8);
+\path[->] (4) edge [blue, bend left=0] node  {} (6);
+\path[->] (8) edge [blue, bend left=0] node  {} (7);
+\path[->] (7) edge [blue, bend left=0] node  {} (10);
+\path[->] (10) edge [blue, bend left=0] node  {} (9);
+\path[->] (9) edge [blue, bend left=0] node  {} (11);
+\path[->] (11) edge [blue, bend left=0] node  {} (1);
+\path[->] (6) edge [blue, bend left=0] node  {} (6');
+
+% dashed: parent 2
+\path[->] (1) edge [bend left=0, dashed, red] node {} (2);
+\path[->] ([xshift=0.7ex] 2.north) edge [red, dashed] node {}
+         ([xshift=0.7ex] 3.south);
+\path[->] (3) edge [red, dashed] node {}
+         (4);
+\path[->] ([xshift=0.7ex] 4.south) edge [red, dashed] node {}
+         ([xshift=0.7ex] 5.north);
+\path[->] (5) edge [red, dashed] node {}
+         (6);
+\path[->] (6') edge [red, dashed] node {}
+         (7);
+\path[->] ([xshift=0.7ex] 7.south) edge [red, dashed] node {}
+         ([xshift=0.7ex] 8.north);
+\path[->] (8) edge [red, dashed] node {}
+         (9);
+\path[->] ([xshift=0.7ex] 9.north) edge [red, dashed] node {}
+         ([xshift=0.7ex] 10.south);
+\path[->] (10) edge [red, dashed] node {}
+         (11);
+\path[->] ([xshift=0.7ex] 11.north) edge [red, dashed] node {}
+         ([xshift=0.7ex] 1.south);
+  \path[->] ([xshift=0.7ex] 6.south) edge [red, dashed] node {}
+         ([xshift=0.7ex] 6'.north);
+
+\end{tikzpicture}
+}
+&
+\resizebox{120pt}{170pt}{
+\begin{tikzpicture}[%
+>=stealth,
+node distance=1.9cm,
+on grid,
+auto
+]
+\node[state] (1){1};
+\node[state] (3) [above right of=1]{3};
+\node[state] (2) [below right of=1]{2};
+\node[state] (4) [right of=3]{4};
+\node[state] (5) [right of=2]{5};
+\node[state] (6) [above right of=5] {6};
+\node[state] (7) [below of=5] {7};
+\node[state] (6') [below right of=7] {6'};
+\node[state] (10) [left of=7] {10};
+\node[state] (11) [below left of=10] {11};
+\node[state] (9) [below right of=11] {9};
+\node[state] (8) [right of=9] {8};
+
+% solid: parent 1
+\path[->] (1) edge [blue, bend left=0] node  {} (3);
+\path[->] (3) edge [blue, bend left=0] node  {} (2);
+\path[->] (2) edge [blue, bend left=0] node  {} (5);
+\path[->] (5) edge [blue, bend left=0] node  {} (4);
+\path[->] (6') edge [blue, bend left=0] node  {} (8);
+\path[->] (4) edge [blue, bend left=0] node  {} (6);
+\path[->] (8) edge [blue, bend left=0] node  {} (7);
+\path[->] (7) edge [blue, bend left=0] node  {} (10);
+\path[->] (10) edge [blue, bend left=0] node  {} (9);
+\path[->] (9) edge [blue, bend left=0] node  {} (11);
+
+% dashed: parent 2
+\path[->] (1) edge [bend left=0, dashed, red] node {} (2);
+\path[->] ([xshift=0.7ex] 2.north) edge [red, dashed] node {}
+         ([xshift=0.7ex] 3.south);
+\path[->] (3) edge [red, dashed] node {}
+         (4);
+\path[->] ([xshift=0.7ex] 4.south) edge [red, dashed] node {}
+         ([xshift=0.7ex] 5.north);
+\path[->] (5) edge [red, dashed] node {}
+         (6);
+\path[->] (6') edge [red, dashed] node {}
+         (7);
+\path[->] ([xshift=0.7ex] 7.south) edge [red, dashed] node {}
+         ([xshift=0.7ex] 8.north);
+\path[->] (8) edge [red, dashed] node {}
+         (9);
+\path[->] ([xshift=0.7ex] 9.north) edge [red, dashed] node {}
+         ([xshift=0.7ex] 10.south);
+\path[->] (10) edge [red, dashed] node {}
+         (11);
+
+\end{tikzpicture}
+}
+
+\end{tabular}
+\caption[Partitionierung von $G_u'$ nach Löschen von $E_c$]{Rechts oben:
+$G_{c_1}$ der Teilgraph mit den Knoten $1,2,3,4,5,6$, 
+Rechts unten: $G_{c_2}$ ist der Teilgraph mit den Knoten $11,9,10,7,8,6'$ }
+\end{figure}
+\noindent
+Jede Komponente wird als Teilgraph $G_{c_k}$ gekennzeichnet, wobei $k
+\leq $Anzahl der Komponenten in $G_u'$. 
+Wir definieren $G_c = \bigcup_{1 \leq k \leq n}{\{G_{c_k}\}}$, wobei $n$ die Anzahl 
+der Komponenten in $G_u'$ ist.
+Für alle Komponenten in $G_c$ müssen die Menge der Eingangs- und
+Ausgangsknoten festgestellt werden. Hierfür werden zwei Funktionen
+definiert:
+\begin{itemize}
+  \item $comp_{in}(G_{c_k}, E_c)$ - ermittelt die Menge der
+    Eingangsknoten von $G_{c_k}$ 
+  \item $comp_{out}(G_{c_k}, E_c)$ - ermittelt die Menge der
+    Ausgangsknoten von $G_{c_k}$ 
+\end{itemize}
+\begin{algorithm}[H]
+  \caption{Ermittlung Eingangsknoten in $G_{c_k}$}\label{alg:comp_in}
+\begin{algorithmic}[1]
+  \Procedure{$comp_{in}$}{$G_{c_k}, E_c$}
+    \State $V \gets vertices(G_{c_k})$
+    \State $Entry \gets list()$
+    \Foreach{$v \in]V$}
+      \State $g = has\_ghostnode\_in\_comp(G_{c_k}, v)$
+      \If {$\neg g \land in\_degree(G_{c_k}, v) = 0$}
+      \Comment{In-Degree}    
+        \State $Entry \gets append(Entry, v)$
+      \EndIf
+    \EndForeach
+    \State \textbf{return} $Entry$
+  \EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+\caption{Ermittlung Ausgangsknoten in $G_{c_k}$}\label{alg:comp_out}
+\begin{algorithmic}[1]
+  \Procedure{$comp_{out}$}{$G_{c_k}, E_c$}
+    \State $V \gets vertices(G_{c_k})$
+    \State $Exit \gets list()$
+    \Foreach{$v \in V$}
+      \State $g = has\_ghostnode\_in\_comp(G_{c_k}, v)$
+      \If {$\neg g \land out\_degree(G_{c_k}, v) = 0$}
+      \Comment{Out-Degree} 
+        \State $Exit \gets append(Exit, v)$
+      \EndIf
+    \EndForeach
+    \State \textbf{return} $Exit$
+  \EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\noindent
+Die prinzipielle Vorgehensweise der beiden Funktionen ist das Prüfen 
+der eingehenden beziehungsweise ausgehenden Kanten. Ein Knoten $v$ kommt
+nur als Eingangspunkt in Frage, wenn keine eingehenden Kanten für $v$
+existieren. Ein ausgehender Knoten kann hingegen keine ausgehenden Kanten
+besitzen.
+\begin{bem}
+  Es können Komponenten existieren welche, nicht nur einen Eingangs- und
+  einen Ausgangsknoten haben. Tatsächlich gibt es sehr häufig
+  Partitionierungen mit Komponenten, die drei oder vier Eingänge
+  beziehungsweise Ausgänge besitzen. Die Algorithmen 3 und 4 beachten
+  diesen Umstand.
+\end{bem}
+\begin{bem}
+  Die Funktion $has\_ghostnode\_in\_comp(G_{c_k}, v)$ ist hier nicht
+  ausführlich erläutert. Sie überprüft, ob für einen Knoten $v$ ein
+  entsprechender Ghost-Knoten $v'$ eingefügt wurde, wobei sich $v$ und
+  $v'$ innerhalb der selben Komponente $G_{c_k}$ befinden. Ist dies der Fall, gibt
+  die Funktion den Wert true zurück. Knoten, für die ein entsprechender
+  Ghost-Knoten innerhalb der Komponente existiert, können nicht als
+  Eingangs- oder Ausgangspunkt verwendet werden, da sie die Komponente
+  in weitere Teile aufspalten würde.
+\end{bem}
+\noindent
+Mit den Informationen über Eingangs- und Ausgangsknoten ist der „Weg“ 
+einer Komponente zum Teil bekannt. Man startet in einem Eingangsknoten und endet
+in einem Ausgangsknoten. Der Weg innerhalb der Komponente muss nun
+näher untersucht werden.
+Für jede Komponente in $G_c$ muss überprüft werden,
+ob für beide Elternteile $G_1$, $G_2$ ein Weg vom Eingangsknoten zum
+Ausgangsknoten führt. Der Weg muss zudem durch alle Knoten der
+Komponente führen. Nur dann ist die Partitionierung gültig. Wenn die
+Partitionierung ungültig ist, kann kein Kind erzeugt werden.
+Dieser Vorgang ist in \hyperref[fig:entry_exit]{Abbildung 2.5} an einem Beispiel demonstriert.
+
+Als letzter Schritt von GAPX muss für jede Komponente in $G_c$ berechnet werden,
+ob der Weg von $G_1$, der vom Eingangsknoten zum Ausgangsknoten führt,
+günstiger ist als der von $G_2$. Der kürzere Teilweg, beziehungsweise die
+Kanten, die diesen Weg repräsentieren, werden in den Graphen des
+Offsprings $G_o$ übernommen. 
+
+\begin{figure}
+  \label{fig:entry_exit}
+\centering
+\begin{tabular}{l|c|c}
+ & $G_1$ & $G_2$ \\
+\hline
+\rule{0pt}{15.5ex}
+$G_{c_1}$ &
+
+\resizebox{120pt}{80pt}{
+\begin{tikzpicture}[%
+>=stealth,
+node distance=1.9cm,
+on grid,
+auto
+]
+\node[state] (1){1};
+\node[state] (3) [above right of=1]{3};
+\node[state] (2) [below right of=1]{2};
+\node[state] (4) [right of=3]{4};
+\node[state] (5) [right of=2]{5};
+\node[state] (6) [above right of=5] {6};
+
+% solid: parent 1
+\path[->] (1) edge [blue, bend left=0] node  {} (3);
+\path[->] (3) edge [blue, bend left=0] node  {} (2);
+\path[->] (2) edge [blue, bend left=0] node  {} (5);
+\path[->] (5) edge [blue, bend left=0] node  {} (4);
+\path[->] (4) edge [blue, bend left=0] node  {} (6);
+
+\end{tikzpicture}
+}
+
+  &
+\resizebox{120pt}{80pt}{
+\begin{tikzpicture}[%
+>=stealth,
+node distance=1.9cm,
+on grid,
+auto
+]
+\node[state] (1){1};
+\node[state] (3) [above right of=1]{3};
+\node[state] (2) [below right of=1]{2};
+\node[state] (4) [right of=3]{4};
+\node[state] (5) [right of=2]{5};
+\node[state] (6) [above right of=5] {6};
+
+% solid: parent 1
+\path[->] (1) edge [red, dashed, bend left=0] node  {} (2);
+\path[->] (2) edge [red, dashed, bend left=0] node  {} (3);
+\path[->] (3) edge [red, dashed, bend left=0] node  {} (4);
+\path[->] (4) edge [red, dashed, bend left=0] node  {} (5);
+\path[->] (5) edge [red, dashed, bend left=0] node  {} (6);
+\end{tikzpicture}
+}
+\\
+\hline
+\rule{0pt}{15.5ex}
+  $G_{c_2}$ &
+\resizebox{120pt}{80pt}{
+\begin{tikzpicture}[%
+>=stealth,
+node distance=1.9cm,
+on grid,
+auto
+]
+\node[state] (11){11};
+\node[state] (10) [above right of=11]{10};
+\node[state] (9) [below right of=11]{9};
+\node[state] (7) [right of=10]{7};
+\node[state] (8) [right of=9]{8};
+\node[state] (6') [above right of=8] {6'};
+
+% solid: parent 1
+\path[->] (6') edge [blue, bend left=0] node  {} (8);
+\path[->] (8) edge [blue, bend left=0] node  {} (7);
+\path[->] (7) edge [blue, bend left=0] node  {} (10);
+\path[->] (10) edge [blue, bend left=0] node  {} (9);
+\path[->] (9) edge [blue, bend left=0] node  {} (11);
+\end{tikzpicture}
+}
+  &
+\resizebox{120pt}{80pt}{
+\begin{tikzpicture}[%
+>=stealth,
+node distance=1.9cm,
+on grid,
+auto
+]
+\node[state] (11){11};
+\node[state] (10) [above right of=11]{10};
+\node[state] (9) [below right of=11]{9};
+\node[state] (7) [right of=10]{7};
+\node[state] (8) [right of=9]{8};
+\node[state] (6') [above right of=8] {6'};
+
+% solid: parent 1
+\path[->] (6') edge [red, dashed] node {}
+         (7);
+\path[->] ([xshift=0.7ex] 7.south) edge [red, dashed] node {}
+         ([xshift=0.7ex] 8.north);
+\path[->] (8) edge [red, dashed] node {}
+         (9);
+\path[->] ([xshift=0.7ex] 9.north) edge [red, dashed] node {}
+         ([xshift=0.7ex] 10.south);
+\path[->] (10) edge [red, dashed] node {}
+         (11);
+\end{tikzpicture}
+}
+\end{tabular}
+  \caption[Überprüfung auf eine gültige Partitionierung von
+  $G_u'$]{In jeder Partition wird überprüft, ob in beiden
+  Rundreisen $G_1$ und $G_2$ ein Weg vom Eingangsknoten („1“ bzw. „6'“) 
+  zum Ausgangsknoten („6“ bzw. „11“) existiert.}
+\end{figure}
+\newpage
+\begin{algorithm}
+\caption{Ermittlung kürzerer Teilweg in einer Komponente $G_{c_k}$} \label{alg:comp_out}
+\begin{algorithmic}[1]
+  \Procedure{$get\_shorter\_subpath$}{$G_{c_k}, G_1, G_2, E_c$}
+    \State $V \gets vertices(G_{c_k})$
+    \State $in \gets comp_{in}(G_{c_k}, E_c)$ \Comment{siehe Algorithmus 2} 
+    \State $out \gets comp_{out}(G_{c_k}, E_c)$\Comment{siehe Algorithmus 3}
+    \State $subpath_{G_1} \gets get\_path(G_1, in, out)$\Comment{von Eingang nach Ausgang}
+    \State $subpath_{G_2} \gets get\_path(G_2, in, out)$ 
+    \Foreach{$v \in V$}
+      \If {$(v \notin subpath_{G_1}) \lor (v \notin subpath_{G_2})$}
+        \State \textbf{return} $invalid\_partition$
+      \EndIf
+    \EndForeach
+    \If{$sum\_weights(subpath_{G_1}) < sum\_weights(subpath_{G_2})$}
+      \State \textbf{return} $subpath_{G_1}$
+    \Else
+      \State \textbf{return} $subpath_{G_2}$
+    \EndIf
+  \EndProcedure
+\end{algorithmic}
+\end{algorithm}
+\noindent
+Die kürzesten Teilwege von alle Komponenten (entweder von $G_1$ oder von
+$G_2$ stammend fügen wir dem Offspring $G_o$ hinzu. Ein möglicher
+Offspring könnte nun beispielsweise wie in
+\hyperref[fig:offspring_final]{Abbildung 2.6} aussehen.
+\begin{figure}[bh]
+  \label{fig:offspring_final}
+  \centering
+\resizebox{100pt}{140pt}{
+\begin{tikzpicture}[%
+>=stealth,
+node distance=1.9cm,
+on grid,
+auto
+]
+\node[state] (1){1};
+\node[state] (3) [above right of=1]{3};
+\node[state] (2) [below right of=1]{2};
+\node[state] (4) [right of=3]{4};
+\node[state] (5) [right of=2]{5};
+\node[state] (6) [above right of=5] {6};
+\node[state] (7) [below of=5] {7};
+\node[state] (6') [below right of=7] {6'};
+\node[state] (10) [left of=7] {10};
+\node[state] (11) [below left of=10] {11};
+\node[state] (9) [below right of=11] {9};
+\node[state] (8) [right of=9] {8};
+
+% solid: parent 1
+\path[->] (11) edge [dashed, bend left=0] node  {} (1);
+\path[->] (6) edge [dashed, bend left=0] node  {} (6');
+
+\path[->] (6') edge [] node {}
+         (7);
+\path[->] ([xshift=0.7ex] 7.south) edge [] node {}
+         ([xshift=0.7ex] 8.north);
+\path[->] (8) edge [] node {}
+         (9);
+\path[->] ([xshift=0.7ex] 9.north) edge [] node {}
+         ([xshift=0.7ex] 10.south);
+\path[->] (10) edge [] node {}
+         (11);
+\path[->] (1) edge [bend left=0] node  {} (3);
+\path[->] (3) edge [bend left=0] node  {} (2);
+\path[->] (2) edge [bend left=0] node  {} (5);
+\path[->] (5) edge [bend left=0] node  {} (4);
+\path[->] (4) edge [bend left=0] node  {} (6);
+\end{tikzpicture}
+}
+  \caption[Finaler Offspring $G_o$ erzeugt aus $G_1$ und $G_2$]{Der
+  finale Zustand des Kindes $G_o$ nach Einfügen der Kantenmenge $E_c$
+  und der kürzesten Teilwege der Komponenten. Gestrichelte Linien: Menge
+  $E_c$, normale Linien: kürzeste Teilwege}
+\end{figure}
+%%\parbox[b][3cm][t]{4cm}{
+%  \begin{tabular}{l r}
+%    Komponente: & ${G_{c_1}}$ \\
+%    Eingangsknoten: & $\{1\}$ \\
+%    Ausgangsknoten: & $\{6\}$ \\
+%  \end{tabular}
+%}

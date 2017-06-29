@@ -322,3 +322,7 @@ TSWLatexianTemp*
 # pdfcomment
 .upa
 .upb
+/doc/main.pdf
+/doc/tex/auto
+research/**/*.pdf
+research/scores/*-*-*-*

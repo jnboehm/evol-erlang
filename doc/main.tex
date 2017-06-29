@@ -1,0 +1,64 @@
+\documentclass[12pt,a4paper,ngerman]{report}
+\usepackage{graphicx}
+\usepackage{ifpdf}
+\ifpdf
+   % put here packages only for the PDF:
+   \DeclareGraphicsExtensions{.pdf,.png,.jpg,.mps}
+   \usepackage{hyperref}
+\else
+   % put here packages only for the DVI:
+\fi
+
+% put all the other packages here:
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{algorithm}
+\usepackage{varwidth}
+\usepackage[noend]{algpseudocode}
+\usepackage{tikz}
+
+\usetikzlibrary{shapes,shapes.geometric,arrows,fit,calc,positioning,automata,chains,snakes}
+
+\newtheorem{theorem}{Satz}
+\newtheorem{bem}{Bemerkung}
+\floatname{algorithm}{Algorithmus}
+
+\usepackage{style}
+\algblockdefx[Foreach]{Foreach}{EndForeach}[1]{\textbf{foreach} #1 \textbf{do}}{\textbf{end foreach}}
+\begin{document}
+\renewcommand*{\listalgorithmname}{Algorithmenverzeichnis}
+
+\newcommand{\gtwght}{\texttt{get\_weight/3}}
+
+\input{./tex/title.tex}
+
+\maketitle
+
+%\input{./tex/vorwort.tex}
+
+% if we want to shorten the toc
+% \setcounter{tocdepth}{0}
+\tableofcontents
+\listoffigures
+\listofalgorithms
+
+\input{./tex/intro.tex}
+\input{./tex/einleitung.tex}
+\input{./tex/gapx.tex}
+\input{./tex/ls3opt.tex}
+\input{./tex/evol.tex}
+% \input{./tex/conclusions.tex}
+\input{tex/erlang.tex}
+\input{tex/parallel.tex}
+\input{tex/benchmarks.tex}
+
+\appendix
+\input{./tex/appendix.tex}
+
+
+% Bibliography:
+\clearpage
+\addcontentsline{toc}{chapter}{Literatur}
+\input{./tex/bibliography.tex}
+
+\end{document}
